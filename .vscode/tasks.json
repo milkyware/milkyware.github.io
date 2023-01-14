@@ -25,9 +25,7 @@
             "args": [
                 "exec", 
                 "jekyll", 
-                "serve", 
-                "--incremental",
-                "--watch"
+                "serve"
             ],
             "isBackground": true,
             "runOptions": {

@@ -21,9 +21,7 @@
 title: Cloud Adventures
 description: >- # this means to ignore newlines until "baseurl:"
   My problems and solutions to cloud integration, containerisation and devops
-author: Cameron Cowen
 url: https://milkyware.github.io
-minimal_mistakes_skin: default
 
 # Social Profile
 github_username:  milkyware
@@ -31,6 +29,7 @@ github_username:  milkyware
 # Build settings
 # theme: jekyll-theme-clean-blog
 remote_theme: "mmistakes/minimal-mistakes@4.24.0"
+minimal_mistakes_skin: default
 paginate: 5
 paginate_path: "/page:num/"
 permalink: /:categories/:title/
@@ -46,13 +45,20 @@ plugins:
   - jekyll-include-cache
 
 author:
-  name: "Cameron Cowen"
+  name: Cameron Cowen
+  location: UK
+  links:
+    - label: GitHub
+      icon: fab fa-fw fa-github
+      url: https://github.com/milkyware
 
 footer:
   links:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/milkyware"
+    - label: "Cloud icons created by Vectorslab - Flaticon"
+      url: "https://www.flaticon.com/free-icons/cloud"
 
 defaults:
   # _posts

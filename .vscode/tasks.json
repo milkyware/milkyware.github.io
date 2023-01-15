@@ -25,7 +25,8 @@
             "args": [
                 "exec", 
                 "jekyll", 
-                "serve"
+                "serve",
+                "--livereload"
             ],
             "isBackground": true,
             "runOptions": {

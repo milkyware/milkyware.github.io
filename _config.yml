@@ -61,6 +61,11 @@ footer:
     - label: "Cloud icons created by Vectorslab - Flaticon"
       url: "https://www.flaticon.com/free-icons/cloud"
 
+compress_html:
+  clippings: all
+  ignore:
+    envs: development
+
 defaults:
   # _posts
   - scope:

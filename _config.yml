@@ -46,6 +46,7 @@ plugins:
 
 author:
   name: Cameron Cowen
+  avatar: "/assets/images/bio-photo.jpg"
   location: UK
   links:
     - label: GitHub

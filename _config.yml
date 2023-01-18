@@ -36,6 +36,7 @@ breadcrumbs: true
 paginate: 5
 paginate_path: "/page:num/"
 permalink: /:categories/:title/
+search: true
 timezone: Europe/London
 include:
   - _pages

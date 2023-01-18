@@ -26,7 +26,8 @@
                 "exec", 
                 "jekyll", 
                 "serve",
-                "--livereload"
+                "--livereload",
+                "--drafts"
             ],
             "isBackground": true,
             "runOptions": {

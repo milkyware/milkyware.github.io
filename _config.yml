@@ -52,7 +52,9 @@ plugins:
 author:
   name: Cameron Cowen
   avatar: "/assets/images/bio-photo.jpg"
+  description: An integration developer focused on DevOps, APIs and containerisation in the cloud.
   location: UK
+  
   links:
     - label: GitHub
       icon: fab fa-fw fa-github

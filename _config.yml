@@ -52,13 +52,16 @@ plugins:
 author:
   name: Cameron Cowen
   avatar: "/images/bio-photo.jpg"
-  description: An integration developer focused on DevOps, APIs and containerisation in the cloud.
+  bio: An integration developer focused on DevOps, APIs and containerisation in the cloud.
   location: UK
 
   links:
     - label: GitHub
       icon: fab fa-fw fa-github
       url: https://github.com/milkyware
+    - label: Website
+      icon: fas fa-link
+      url: https://milkyware.github.io
 
 footer:
   links:

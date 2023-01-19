@@ -274,6 +274,7 @@ DEPENDENCIES
   jekyll-gist
   jekyll-include-cache
   jekyll-paginate
+  jekyll-seo-tag
   jekyll-sitemap
   jekyll-theme-clean-blog (~> 4.0.12)
   jemoji

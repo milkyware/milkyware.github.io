@@ -33,11 +33,7 @@ github_username:  milkyware
 remote_theme: "mmistakes/minimal-mistakes@4.24.0"
 minimal_mistakes_skin: dark
 breadcrumbs: true
-paginate: 5
-paginate_path: "/page:num/"
-permalink: /:categories/:title/
 search: true
-timezone: Europe/London
 include:
   - _pages
 plugins:
@@ -63,6 +59,7 @@ author:
       icon: fas fa-link
       url: https://milkyware.github.io
 
+# Site Footer
 footer:
   links:
     - label: "GitHub"
@@ -70,6 +67,12 @@ footer:
       url: "https://github.com/milkyware"
     - label: "Cloud icons created by Vectorslab - Flaticon"
       url: "https://www.flaticon.com/free-icons/cloud"
+
+# Outputting
+permalink: /:categories/:title/
+paginate: 5 # amount of posts to show
+paginate_path: /page:num/
+timezone: Europe/London
 
 # Defaults
 defaults:

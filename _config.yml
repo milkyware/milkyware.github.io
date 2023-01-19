@@ -37,12 +37,14 @@ search: true
 include:
   - _pages
 plugins:
-  - jekyll-paginate
-  - jekyll-sitemap
-  - jekyll-gist
   - jekyll-feed
-  - jemoji
+  - jekyll-gist
   - jekyll-include-cache
+  - jekyll-paginate
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jemoji
+
 
 # Site Author
 author:

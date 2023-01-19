@@ -5,8 +5,8 @@ categories:
   - DevOps
 tags:
   - Azure
-  - Function
-  - Pipelines
+  - Azure Function
+  - Azure Pipelines
   - DevOps
   - APIM
   - API Management
@@ -16,15 +16,15 @@ tags:
 
 I've recently started to work more with Azure API Management to create a one-stop shop for my APIs. In the last couple of years, Microsoft has added the **[Microsoft.Azure.WebJobs.Extensions.OpenApi](https://github.com/azure/azure-functions-openapi-extension)** package which takes care of documenting your HTTP Trigger operations and exposing a Swagger endpoint as well as a Swagger UI. This is great for testing locally, however Azure API Management has its own Developer Portal for displaying API definitions.  Azure API Management offers the option to import an API using a Swagger/OpenAPI definition so the challenge is to automate this process in an Azure Pipeline.
 
-![2023-01-14-generate-swagger-from-azure-function-in-azure-pipeline-1](/images/2023-01-14-generate-swagger-from-azure-function-in-azure-pipeline-1.png)
+![2023-01-19-generate-swagger-from-azure-function-in-azure-pipeline-1](/images/2023-01-19-generate-swagger-from-azure-function-in-azure-pipeline-1.png)
 
 Through this post I'm going to go through not only how to extract the Swagger and import into APIM, but also provide a sample Azure Pipeline template to streamline publishing Azure Functions to APIM. Before getting into the detail, I'd like to acknowledge the massive help of a post from **[Justin Yoo](https://devkimchi.com/2022/02/23/generating-openapi-document-from-azure-functions-within-cicd-pipeline/)** which is the basis of this discussion.
 
-## Azure Pipeline
+## Azure Pipeline Template
 
 ### Complete Example
 
-For those wanting to jump straight to the pipeline template, it can be found below followed by an example of using it. The remainder of this article will go through what the pipeline does and why.
+For those wanting to jump straight to the pipeline template, it can be found below. The remainder of this article will go through what the pipeline does and why.
 
 ``` yaml
 parameters:
@@ -152,46 +152,7 @@ stages:
               publishLocation: Container
 ```
 
-### Usage
-
-Below is a cut down version of an Azure Pipeline which uses the above template. The template downloads the Swagger and adds an artifact to the pipeline as well as creating 2 output variables. In the usage example below, the **SwaggerEscaped** output variable is passed to a Bicep template which creates an APIM API from the JSON string representation of the Swagger definition as a parameter.
-
-``` yaml
-name: $(Date:yy.MM.dd)$(Rev:.rr)
-
-resources:
-  repositories:
-    - repository: AzurePipelines
-      type: git
-      name: Azure.Pipelines
-
-stages:
-  - template: templates/DownloadAzFuncSwagger.azure-pipelines.yml@AzurePipelines
-    parameters:
-      projectPath: src/AzureFunctionProj
-
-  - stage: Deploy
-    dependsOn:
-      - Swagger
-    variables:
-      swaggerEscaped: $[ stageDependencies.Swagger.Job.outputs['DownloadSwagger.SwaggerEscaped'] ]
-    jobs:
-      - task: AzureCLI@2
-        displayName: Deploy Template
-        inputs:
-          azureSubscription: azureSubscription
-          scriptType: pscore
-          scriptLocation: inlineScript
-          inlineScript: |
-            az deployment group create `
-              --resource-group rg-apim-dev-001 `
-              --template-file deploy/template.bicep
-              --parameters swagger=$(swaggerEscaped)
-```
-
-## Deep Dive
-
-### Tools
+### Installing the Tools
 
 To run an Azure Function the **[Azure Functions Core Tools](https://learn.microsoft.com/en-gb/azure/azure-functions/functions-run-local?WT.mc_id=dotnet-58527-juyoo&tabs=v4%2Cwindows%2Ccsharp%2Cportal%2Cbash)** are required. These are not natively available as part of Azure Pipelines and therefore need installing. This is handled by the **Install Azure Function Tools** step.
 
@@ -318,3 +279,78 @@ return $compressed
 ```
 
 ## Publishing to API Management
+
+### Bicep Template
+
+Now that the Swagger is an artifact in the pipeline, it can be deployed in later stages. For consistency, I publish an API to API Management using Bicep. Below is a basic sample of deploying an API **resource** with the swagger definition being passed in as a string parameter.
+
+``` terraform
+param swaggerDefinition string
+
+resource apim 'Microsoft.ApiManagement/service@2021-08-01' existing = {
+    name: 'apim'
+
+    resource api 'apis' = {
+        name: 'azurefunction'
+        properties: {
+            displayName: 'Azure Function'
+            path: 'azurefunction'
+            format: 'openapi'
+            subscriptionRequired: true
+            value: swaggerDefinition
+        }
+    }
+}
+```
+
+The format specified is **openapi** and the swaggerDefinition parameter is the **entire Swagger definition, not the link to the Swagger endpoint**. When using the link format (e.g. `openapi-link`), the server deploying the Bicep template needs to be able to reach the Swagger endpoint. If the Azure Function uses VNet integration and the deploying server isn't IP whitelisted, this method will fail. When using Azure-Hosted Pipelines, the public IPs of these are effectively shared amongst all DevOps users and so whitelisting these could be a security risk which is one of the key reason
+
+### Deploying the Bicep
+
+Below is a cut down version of an Azure Pipeline which uses the pipeline template as well as passes the Swagger to the above Bicep to deploy it. In the example below, the **SwaggerEscaped** output variable passes the **entire Swagger definition** to the Bicep template to publish the API to API Management.
+
+``` yaml
+name: $(Date:yy.MM.dd)$(Rev:.rr)
+
+resources:
+  repositories:
+    - repository: AzurePipelines
+      type: git
+      name: Azure.Pipelines
+
+stages:
+  - template: templates/DownloadAzFuncSwagger.azure-pipelines.yml@AzurePipelines
+    parameters:
+      projectPath: src/AzureFunctionProj
+
+  - stage: Deploy
+    dependsOn:
+      - Swagger
+    variables:
+      swaggerEscaped: $[ stageDependencies.Swagger.Job.outputs['DownloadSwagger.SwaggerEscaped'] ]
+    jobs:
+      - task: AzureCLI@2
+        displayName: Deploy Template
+        inputs:
+          azureSubscription: azureSubscription
+          scriptType: pscore
+          scriptLocation: inlineScript
+          inlineScript: |
+            az deployment group create `
+              --resource-group rg-apim `
+              --template-file deploy/template.bicep
+              --parameters swaggerDefinition=$(swaggerEscaped)
+```
+
+## Summary
+
+Through this post we've stepped through the following:
+
+1. How to run an Azure Function in a pipeline to extract the Swagger definition
+2. Wrapping the above step in an Azure Pipeline template for reuse
+3. Using Bicep to deploy the downloaded Swagger definition to avoid security holes
+4. An example pipeline bringing together downloading the Swagger as well as deploying it
+
+By doing the above we can keep track of what is being published through pipeline artifact as well reducing the overhead of deploying and publishing Azure Function APIs.
+
+This is my first post, I hope you've enjoyed my take on this and been of use.

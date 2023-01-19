@@ -1,7 +1,6 @@
 ---
 title: Generate Swagger from Azure Functions in Azure Pipelines
-categories:
-  - DevOps
+category: DevOps
 tags:
   - Azure
   - Azure Function

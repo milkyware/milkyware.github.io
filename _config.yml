@@ -45,6 +45,11 @@ plugins:
   - jekyll-sitemap
   - jemoji
 
+# Analytics
+analytics:
+  provider: "google-gtag"
+  google:
+    tracking_id: "G-PG8RL37BBN"
 
 # Site Author
 author:

@@ -1,7 +1,7 @@
 ---
 title: Build Multi-Platform Docker Images
 header:
-  image: '/images/2023-01-19-build-multi-platform-docker-image-1.png'
+  image: '/images/build-multi-platform-docker-image/header.png'
 category: DevOps
 tags:
   - Docker

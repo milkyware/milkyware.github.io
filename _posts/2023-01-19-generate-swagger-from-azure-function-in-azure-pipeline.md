@@ -1,7 +1,7 @@
 ---
 title: Generate Swagger from Azure Functions in Azure Pipelines
 header:
-  image: 'images/2023-01-19-generate-swagger-from-azure-function-in-azure-pipeline-header.png'
+  image: 'images/generate-swagger-from-azure-function-in-azure-pipeline/header.png'
 category: DevOps
 tags:
   - Azure
@@ -16,7 +16,7 @@ tags:
 
 I've recently started to work more with Azure API Management to create a one-stop shop for my APIs. In the last couple of years, Microsoft has added the **[Microsoft.Azure.WebJobs.Extensions.OpenApi](https://github.com/azure/azure-functions-openapi-extension)** package which takes care of documenting your HTTP Trigger operations and exposing a Swagger endpoint as well as a Swagger UI. This is great for testing locally, however Azure API Management has its own Developer Portal for displaying API definitions.  Azure API Management offers the option to import an API using a Swagger/OpenAPI definition so the challenge is to automate this process in an Azure Pipeline.
 
-![2023-01-19-generate-swagger-from-azure-function-in-azure-pipeline-1](/images/2023-01-19-generate-swagger-from-azure-function-in-azure-pipeline-1.png)
+![image1](/images/generate-swagger-from-azure-function-in-azure-pipeline/image1.png)
 
 Through this post I'm going to go through not only how to extract the Swagger and import into APIM, but also provide a sample Azure Pipeline template to streamline publishing Azure Functions to APIM. Before getting into the detail, I'd like to acknowledge the massive help of a post from **[Justin Yoo](https://devkimchi.com/2022/02/23/generating-openapi-document-from-azure-functions-within-cicd-pipeline/)** which is the basis of this discussion.
 
@@ -341,6 +341,10 @@ stages:
               --template-file deploy/template.bicep
               --parameters swaggerDefinition=$(swaggerEscaped)
 ```
+
+The resulting pipeline flow will look similar to below with a **Swagger** publishing an artifact being the dependency for the **Deploy** stage.
+
+![image2](/images//generate-swagger-from-azure-function-in-azure-pipeline/image2.png)
 
 ## Summary
 

@@ -11,7 +11,7 @@ tags:
 
 ## Building multi-platform Docker images
 
-Over the last couple of years I've been using [Docker](https://docs.docker.com/) more for running my homelab to learn about containerisation by both deploying community images as well as packaging my own apps as images. I've also used this as an oppourtunity to get more familiar with [GitHub Actions](https://github.com/features/actions) as the [marketplace](https://github.com/marketplace) has been growing incredibly quickly.
+Over the last couple of years I've been using [Docker](https://docs.docker.com/) more for running my home-lab to learn about containerisation by both deploying community images as well as packaging my own apps as images. I've also used this as an opportunity to get more familiar with [GitHub Actions](https://github.com/features/actions) as the [marketplace](https://github.com/marketplace) has been growing incredibly quickly.
 
 In this post, I'm going to detail a collection of actions I've used to build and publish multi-platform images to multiple container registries.
 
@@ -142,7 +142,7 @@ The main setup needed is installing and enabling [Docker Buildx and QEMU](https:
 
 ### Building the image tags
 
-The next setp is an action I recently discovered called [Docker Metadata](https://github.com/marketplace/actions/docker-metadata-action). For this you can pass in a number of base images (e.g. docker.io/username/image) and configure a series of tags to apply to each of those images. This ensures consistency in tagging across multiple container registries. This action also supports extracting reading metadata when triggered by releases. In the example, tags are created for **major**, **major.minor** and **version** to allow users to pick a level of their containers auto-updating.
+The next setup is an action I recently discovered called [Docker Metadata](https://github.com/marketplace/actions/docker-metadata-action). For this you can pass in a number of base images (e.g. docker.io/username/image) and configure a series of tags to apply to each of those images. This ensures consistency in tagging across multiple container registries. This action also supports extracting reading metadata when triggered by releases. In the example, tags are created for **major**, **major.minor** and **version** to allow users to pick a level of their containers auto-updating.
 
 <!-- {% raw %} -->
 ``` yaml
@@ -201,6 +201,45 @@ The step brings all the previous steps together. For this we pass in the Docker 
 ```
 <!-- {% endraw %} -->
 
-Two key properties are **platforms** and **push**. By default Docker will only build an image for the architecture of the workflow runner i.e. if the runner is x64, only x64 will be built. Also, the resulting images are not pushed by default. This may be intentional for running CI builds or running tests but will be required for deploying the image to container hosts.
+Two key properties are **platforms** and **push**. By default Docker will only build an image for the architecture of the workflow runner i.e. if the runner is x64, only x64 will be built. Also, the resulting images are not pushed by default. This may be intentional for running CI builds or running tests but will be required for deploying the image to container hosts. **IMPORTANT** Do keep in mind that the different platforms need to be supported by the:
+
+- The base image(s) in the Dockerfile
+- The packages and tools (if any) used in your code
+- Your code
+
+Once the image is published to the container registry, a particular tag will look similar to below. Below are screenshots from **Docker Hub** and **Quay**.
+
+![image1](/images/build-multi-platform-docker-image/image1.png)
+
+![image2](/images/build-multi-platform-docker-image/image2.png)
+
+Above we can see the supported platforms of:
+
+- linux/amd64
+- linux/arm/v7
+- linux/arm64
+
+What this allows is for a single tag, such as *username/image:v1.6.1*, to be deployed on different platform architectures and then Docker will automatically resolve and pull the correct image.
 
 ### Bonus: Publishing the README
+
+Most code repos contain Markdown documentation for getting started with the code as well as deploying it. Putting this documentation as close as possible to the published package really helps users and devs get started. Enter the final step the **[peter-evans/dockerhub-description](https://github.com/marketplace/actions/docker-hub-description)** GitHub Action which can take a Markdown file and publishes it to Docker Hub.
+
+<!-- {% raw %} -->
+``` yaml
+- name: Docker Hub Description
+  id: docker-description
+  uses: peter-evans/dockerhub-description@v3
+  with:
+    username: ${{secrets.DOCKERHUB_USERNAME}}
+    password: ${{secrets.DOCKERHUB_PASSWORD}}
+    repository: ${{secrets.DOCKERHUB_USERNAME}}/${{env.IMAGE_NAME}}
+    readme-filepath: ./README.md
+```
+<!-- {% endraw %} -->
+
+Although in the above example I've used the README.md file, a seperate file could be provided which is more tailored to configuring and running the Docker image leaving the code documentation in the README.
+
+## Summary
+
+In this post we've stepped through how to automate publishing Docker images that are available to a wide audience, both those preferring different container registries as well as hosting the containers on different architectures. I've tried to keep the  GitHub workflow generic and concise so that it can be reused in other repos and only require a few parameters/variables to be updated. Hope this is of use and thanks for reading.

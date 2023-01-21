@@ -66,6 +66,13 @@ author:
       icon: fab fa-fw fa-github
       url: https://github.com/milkyware
 
+# Comments
+comments:
+  provider: utterances
+  utterances:
+    theme: github-dark
+    issue_term: "pathname"
+
 # Site Footer
 footer:
   links:

@@ -34,7 +34,8 @@
 				"VisualStudioExptTeam.vscodeintellicode",
 				"yzhang.markdown-all-in-one",
 				"DavidAnson.vscode-markdownlint",
-				"DotJoshJohnson.xml"
+				"DotJoshJohnson.xml",
+				"streetsidesoftware.code-spell-checker"
 			],
 			"settings": {
 				"terminal.integrated.defaultProfile.linux": "pwsh"

@@ -238,7 +238,7 @@ Most code repos contain Markdown documentation for getting started with the code
 ```
 <!-- {% endraw %} -->
 
-Although in the above example I've used the README.md file, a seperate file could be provided which is more tailored to configuring and running the Docker image leaving the code documentation in the README.
+Although in the above example I've used the README.md file, a separate file could be provided which is more tailored to configuring and running the Docker image leaving the code documentation in the README.
 
 ## Summary
 

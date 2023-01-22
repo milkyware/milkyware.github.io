@@ -40,6 +40,32 @@
                 "clear": true,
                 "close": true
             }
+        },
+        {
+            "label": "Jekyll: Serve Production",
+            "group": "build",
+            "type": "shell",
+            "command": "bundle",
+            "args": [
+                "exec", 
+                "jekyll", 
+                "serve",
+                "--livereload",
+                "--drafts"
+            ],
+            "options": {
+                "env": {
+                    "JEKYLL_ENV": "production"
+                }
+            },
+            "isBackground": true,
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "revealProblems": "onProblem",
+                "clear": true,
+                "close": true
+            }
         }
     ]
 }

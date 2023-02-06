@@ -52,7 +52,7 @@ After struggling to use the kernel-based Wireguard, I stumbled across some artic
 
 Tailscale is installed as a client on each of the devices you want to be part of the **mesh** e.g. laptops, iPads, iPhones, Androids etc. Each of these clients is known as **nodes** which negotiates a **public/private keypair** with the **Tailscale Coordination Server** to allow every other node to find and communicate securely with it.
 
-![image2](/images/securing-your-home-lab-using-vpn-and-tailscale/image1.svg)
+![image2](/images/securing-your-home-lab-using-vpn-and-tailscale/image2.svg)
 
 This forms a hybrid mesh/hub-spoke network design which is both confusing and very clever! Tailscale's **[how it works](https://tailscale.com/blog/how-tailscale-works/)** blog does a great job of explaining this concept.
 

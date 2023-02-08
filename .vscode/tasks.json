@@ -27,6 +27,7 @@
                 "jekyll", 
                 "serve",
                 "--livereload",
+                "--force_polling",
                 "--drafts"
             ],
             "isBackground": true,
@@ -51,6 +52,7 @@
                 "jekyll", 
                 "serve",
                 "--livereload",
+                "--force_polling",
                 "--drafts"
             ],
             "options": {

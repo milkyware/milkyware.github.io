@@ -27,6 +27,7 @@
                 "jekyll", 
                 "serve",
                 "--livereload",
+                "--incremental",
                 "--force_polling",
                 "--drafts"
             ],

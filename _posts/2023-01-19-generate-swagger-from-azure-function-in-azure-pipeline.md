@@ -26,6 +26,7 @@ Through this post I'm going to go through not only how to extract the Swagger an
 
 For those wanting to jump straight to the pipeline template, it can be found below. The remainder of this article will go through what the pipeline does and why.
 
+<!-- {% raw %} -->
 ``` yaml
 parameters:
   - name: projectPath
@@ -151,6 +152,7 @@ stages:
               ArtifactName: ${{parameters.artifactName}}
               publishLocation: Container
 ```
+<!-- {% endraw %} -->
 
 ### Installing the Tools
 
@@ -180,6 +182,7 @@ An additional tool I've installed as part of the pipeline is **[Azurite](https:/
 
 The first thing to note is that the pipeline step sets the **workingDirectory** to the Azure Function project directory as the tools below lack the capability to specify a context path.
 
+<!-- {% raw %} -->
 ``` yaml
 - task: PowerShell@2
   name: DownloadSwagger
@@ -189,6 +192,7 @@ The first thing to note is that the pipeline step sets the **workingDirectory** 
     workingDirectory: ${{parameters.projectPath}}
     targetType: inline
 ```
+<!-- {% endraw %} -->
 
 The first part of the script deals with **local.settings.json**. Typically I try to avoid committing this and often specify it in gitignore to avoid committing passwords and other sensitive config. However, this file is needed by the Azure Function tools to set the function runtime so the script firstly checks if it exists locally, if not it creates a basic copy.
 
@@ -309,6 +313,7 @@ The format specified is **openapi** and the swaggerDefinition parameter is the *
 
 Below is a cut down version of an Azure Pipeline which uses the pipeline template as well as passes the Swagger to the above Bicep to deploy it. In the example below, the **SwaggerEscaped** output variable passes the **entire Swagger definition** to the Bicep template to publish the API to API Management.
 
+<!-- {% raw %} -->
 ``` yaml
 name: $(Date:yy.MM.dd)$(Rev:.rr)
 
@@ -341,6 +346,7 @@ stages:
               --template-file deploy/template.bicep
               --parameters swaggerDefinition=$(swaggerEscaped)
 ```
+<!-- {% endraw %} -->
 
 The resulting pipeline flow will look similar to below with a **Swagger** publishing an artifact being the dependency for the **Deploy** stage.
 

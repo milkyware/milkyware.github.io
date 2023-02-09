@@ -21,6 +21,7 @@ I have been developing build and release pipelines since **Team Foundation Serve
 
 In recent years there has been a shift to defining pipelines using **YAML** to allow these pipelines to be included in source control to benefit from tracking changes in the definition as well as using your existing **Pull Request (PR)** process. Below is the YAML definition for the above pipeline summary.
 
+<!-- {% raw %} -->
 ``` yaml
 name: $(Date:yy.MM.dd)$(Rev:.rr)
 
@@ -32,10 +33,10 @@ stages:
           - bash: echo 'Bulding'
 
           - task: Bash@3
-              displayName: Print environment variables
-              inputs:
-                script: env | sort
-                targetType: inline
+            displayName: Print environment variables
+            inputs:
+              script: env | sort
+              targetType: inline
 
   - stage: DeployCodeDev
     jobs:
@@ -62,6 +63,7 @@ stages:
         steps:
           - bash: echo 'DeployNetworkInt'
 ```
+<!-- {% endraw %} -->
 
 Some key features of pipelines are:
 
@@ -70,11 +72,76 @@ Some key features of pipelines are:
 - **[Deployment Jobs](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/deployment-jobs?view=azure-devops)** - This is a special type of **Job** specifically intended for deploying code
 - **[Steps/Tasks](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/tasks?view=azure-devops)** - Defines an action in your pipeline
 
-Together, these features can create blocks of logically grouped functionality to handle building, testing and deploying code. Often, however, many pipelines end up using the same steps resulting in duplication. To help with we can make use of **Azure Pipeline Templates**.
-
-Test
+Together, these features can create blocks of logically grouped functionality to handle building, testing and deploying code. Often, however, many pipelines end up using the same steps resulting in duplication. To avoid this we can make use of **Azure Pipeline Templates**.
 
 ## Creating Pipeline Templates
+
+Any pipeline can be called as a template. When creating pipeline templates locally in a repository, I create them alongside the pipelines utilising them to keep the code together. An sample folder structure is below.
+
+![image2](/images/sharing-azure-pipeline-templates/image2.png)
+
+The template **[TemplateWithoutParams.azure-pipelines.yml](https://github.com/milkyware/blog-sharing-azure-pipeline-templates/blob/52946497ccf23460f97e72ae9649f47bf011e412/.azure-pipelines/templates/TemplateWithoutParams.azure-pipelines.yml)** can be called from a pipeline like below:
+
+``` yaml
+stages:
+  - template: templates/TemplateWithoutParams.azure-pipelines.yml
+```
+
+Inside the template looks like below:
+
+``` yaml
+stages:
+  - stage:
+    jobs:
+      - job: 
+        steps:
+          - task: Bash@3
+            displayName: Print environment variables
+            inputs:
+              script: env | sort
+              targetType: inline
+```
+
+In the example we have a templated **stage**, the same can be done using **jobs** and **tasks**.
+
+### Adding parameters to templates
+
+Templates can also make use of **[parameters](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/templates?view=azure-devops#parameters)** to further improve their reusability and flexibility. The below sample echos the values of **testParam** and **defaultParam**.
+
+<!-- {% raw %} -->
+``` yaml
+parameters:
+  - name: testParam
+    type: string
+  - name: defaultParam
+    type: string
+    default: 'World'
+
+stages:
+  - stage:
+    jobs:
+      - job: 
+        steps:
+          - task: Bash@3
+            displayName: Print environment variables
+            inputs:
+              script: env | sort
+              targetType: inline
+
+          - bash: echo '${{parameters.testParam}}'
+
+          - bash: echo '${{parameters.defaultParam}}'
+```
+<!-- {% endraw %} -->
+
+The above template can be called as below to demonstrate that **defaultParam** is optional. Using parameters with default values allows for lots of configuration within a pipeline template whilst keeping pipelines easy to use for basic usage. Common use cases I've had is for setting default filemasks for building and testing code e.g. `/src/**/*.csproj` to encourage consistent folder structures but allowing for alternate config to be provided.
+
+``` yaml
+stages:
+  - template: templates/TemplateWithoutParams.azure-pipelines.yml
+    parameters:
+      testParam: Hello
+```
 
 ## Sharing Templates Centrally
 

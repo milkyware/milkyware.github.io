@@ -196,6 +196,7 @@ The first thing to note is that the pipeline step sets the **workingDirectory** 
 
 The first part of the script deals with **local.settings.json**. Typically I try to avoid committing this and often specify it in gitignore to avoid committing passwords and other sensitive config. However, this file is needed by the Azure Function tools to set the function runtime so the script firstly checks if it exists locally, if not it creates a basic copy.
 
+<!-- {% raw %} -->
 ``` PowerShell
 $output = "$(build.artifactstagingdirectory)/swagger.json"
 $swaggerEndpoint = "${{parameters.swaggerEndpoint}}"
@@ -207,9 +208,11 @@ if (-not (Test-Path local.settings.json))
   Set-Content -Path local.settings.json -Value $json
 }
 ```
+<!-- {% endraw %} -->
 
 Next, Azurite and the Azure Function are started in PowerShell jobs. The reason behind this is I originally used `Start-Process -PassThru` to manage the lifetime of the processes, however this seemed to prevent the pipeline from exiting.
 
+<!-- {% raw %} -->
 ``` PowerShell
 Write-Host "Starting Azurite"
 $azuriteJob = Start-Job -ScriptBlock {azurite}
@@ -217,6 +220,7 @@ $azuriteJob = Start-Job -ScriptBlock {azurite}
 Write-Host "Starting function host"
 $job = Start-Job -ScriptBlock {func start --port 5000}
 ```
+<!-- {% endraw %} -->
 
 The next stage monitors the Azure Function process and waits for the Swagger endpoint to be available.
 

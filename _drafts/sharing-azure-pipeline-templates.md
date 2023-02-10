@@ -147,4 +147,15 @@ stages:
 
 ## Pipeline Template Versioning
 
+Now that we've seen how these pipeline templates can be stored in a central repository and referenced by pipelines in other repositories, one of the questions that arises is "how do we avoid breaking consumers of the templates as changes are made"?
+
+``` yaml
+resources:
+  repositories:
+    - repository: AzurePipelines
+	  type: git
+	  name: Azure.Pipelines
+	  ref: refs/tags/v1
+```
+
 ## Summary

@@ -5,6 +5,8 @@
         "Buildx",
         "dockerhub",
         "endraw",
+        "filemask",
+        "filemasks",
         "OIDC",
         "tailscale",
         "Tailscale's",

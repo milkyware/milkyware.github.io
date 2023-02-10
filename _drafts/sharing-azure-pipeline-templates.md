@@ -138,7 +138,7 @@ The above template can be called as below to demonstrate that **defaultParam** i
 
 ``` yaml
 stages:
-  - template: templates/TemplateWithoutParams.azure-pipelines.yml
+  - template: templates/TemplateWithParams.azure-pipelines.yml
     parameters:
       testParam: Hello
 ```

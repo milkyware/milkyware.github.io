@@ -13,6 +13,10 @@ tags:
 
 I have been developing build and release pipelines since **Team Foundation Server 2015** to deploy ASP.NET and BizTalk Server applications. Over the past couple of years, I've migrated to using **[Azure DevOps](https://learn.microsoft.com/en-us/azure/devops/user-guide/what-is-azure-devops?view=azure-devops)** source control and pipelines. As the number of pipelines has grown, I've started to develop **[Azure Pipeline Templates](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/templates?view=azure-devops)** to make reusable blocks of automation to simplify and improve the consistency across the pipelines. In this post, I'll give an introduction to **Azure Pipeline Templates** as well as how to share these between multiple repos.
 
+## Git Repo Sample
+
+For this post, I've created a small collection of pipelines and templates which I'll reference throughout. These can be found **[in this GitHub repo](https://github.com/milkyware/blog-sharing-azure-pipeline-templates)**.
+
 ## What are Azure Pipelines?
 
 **Azure Pipelines** automate the building, testing and delivery of code. Pipelines are typically used for **Continuous Integration (CI)** to run tests automatically when code is committed and pushed, and **Continuous Delivery (CD)** to deploy code through different environments to allow users to test delivered code quicker.

@@ -106,7 +106,7 @@ In the example we have a templated **stage**, the same can be done using **jobs*
 
 ### Adding parameters to templates
 
-Templates can also make use of **[parameters](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/templates?view=azure-devops#parameters)** to further improve their reusability and flexibility. The below sample echos the values of **testParam** and **defaultParam**.
+Templates can also make use of **[parameters](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/templates?view=azure-devops#parameters)** to further improve their reusability and flexibility. The below sample echoes the values of **testParam** and **defaultParam**.
 
 <!-- {% raw %} -->
 ``` yaml
@@ -134,7 +134,7 @@ stages:
 ```
 <!-- {% endraw %} -->
 
-The above template can be called as below to demonstrate that **defaultParam** is optional. Using parameters with default values allows for lots of configuration within a pipeline template whilst keeping pipelines easy to use for basic usage. Common use cases I've had is for setting default filemasks for building and testing code e.g. `/src/**/*.csproj` to encourage consistent folder structures but allowing for alternate config to be provided.
+The above template can be called as below to demonstrate that **defaultParam** is optional. Using parameters with default values allows for lots of configuration within a pipeline template whilst keeping pipelines easy to use for basic usage. Common use cases I've had is for setting default filemasks for building and testing code e.g. `/src/**/*.csproj` to encourage consistent folder structures whilst allowing for alternate config to be provided.
 
 ``` yaml
 stages:
@@ -143,19 +143,65 @@ stages:
       testParam: Hello
 ```
 
+These templates can then be used as blocks of automation and chained together to produce a flow. This style of pipeline will then vastly simplify repetitive tasks which involve multiple *stages* such as building, testing and deploying applications.
+
+``` yaml
+stages:
+  - template: templates/TemplateWithoutParams.azure-pipelines.yml
+
+  - template: templates/TemplateWithParams.azure-pipelines.yml
+    parameters:
+      testParam: Hello
+```
+
 ## Sharing Templates Centrally
 
-## Pipeline Template Versioning
+So for we've looked into how to create templates to call those from other pipelines, however, this is currently all within a single repository. Often, developers organise code logically into multiple separate repositories. How can **Azure Pipeline templates** be shared between multiple repositories? Azure Pipelines have support for **[referencing external repositories](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/resources?view=azure-devops&tabs=schema#define-a-repositories-resource)** to allow running templates from a central repository.
 
-Now that we've seen how these pipeline templates can be stored in a central repository and referenced by pipelines in other repositories, one of the questions that arises is "how do we avoid breaking consumers of the templates as changes are made"?
+``` yaml
+name: $(Date:yy.MM.dd)$(Rev:.rr)
+
+resources:
+  repositories:
+    - repository: PipelineTemplates
+      type: github
+      name: milkyware/blog-sharing-azure-pipeline-templates
+      endpoint: MilkyWare
+
+stages:
+  - template: .azure-pipelines/templates/TemplateWithoutParams.azure-pipelines.yml@PipelineTemplates
+
+  - template: .azure-pipelines/templates/TemplateWithParams.azure-pipelines.yml@PipelineTemplates
+    parameters:
+      testParam: Hello
+```
+
+The above example references it's own repository to *mock* referencing an external resource, however, the same code could be copied to a pipeline in another repo and still work. I'll highlight a few features:
+
+- **repository** - This is an arbitrary name given to the repository to use when specifying which template to use
+- **type** - Azure Pipelines support **[several Git repo types](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/resources?view=azure-devops&tabs=schema#type)**
+- **name** - The name of the repository within your source control platform
+- **endpoint** - The name of the **Azure DevOps service connection** to use to authenticate to the external repository
+- When calling the template, the path is suffixed with the **@*repository*** notation. Also, when specifying the path, it's in the context of the **root** of the remote repository.
+
+### Pipeline Template Versioning
+
+Now that we've seen how these pipeline templates can be stored in a central repository and referenced by pipelines in other repositories, one of the questions that arises is "how do we avoid breaking consumers of the templates as changes are made"? The example in **[sharing templates centrally](#sharing-azure-pipeline-templates)** can be extended to use the **ref** property.
 
 ``` yaml
 resources:
   repositories:
-    - repository: AzurePipelines
-	  type: git
-	  name: Azure.Pipelines
-	  ref: refs/tags/v1
+    - repository: PipelineTemplates
+      type: github
+      name: milkyware/blog-sharing-azure-pipeline-templates
+      ref: refs/tags/v1
+      endpoint: MilkyWare
 ```
+
+The **ref** property allows specifying a specific version/commit of the remote repository to reference. When the top-level pipeline is run, it will look like below. Notice that **2 sources are shown** due to 2 versions of the same repo now being referenced.
+
+![image3](/images/sharing-azure-pipeline-templates/image3.png)
+
+This allows the **pipeline template repository** to be used like a **package management service** where multiple pipelines can reference the same template, but different versions. This means that if any breaking changes are made to a template, it's existing consumers are protected.
 
 ## Summary

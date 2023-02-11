@@ -76,7 +76,7 @@ Together, these features can create blocks of logically grouped functionality to
 
 ## Creating Pipeline Templates
 
-Any pipeline can be called as a template. When creating pipeline templates locally in a repository, I create them alongside the pipelines utilising them to keep the code together. An sample folder structure is below.
+Any pipeline can be called as a template. When creating pipeline templates locally in a repository, I create them alongside the pipelines utilising them to keep the code together. A sample folder structure is below.
 
 ![image2](/images/sharing-azure-pipeline-templates/image2.png)
 
@@ -156,7 +156,7 @@ stages:
 
 ## Sharing Templates Centrally
 
-So for we've looked into how to create templates to call those from other pipelines, however, this is currently all within a single repository. Often, developers organise code logically into multiple separate repositories. How can **Azure Pipeline templates** be shared between multiple repositories? Azure Pipelines have support for **[referencing external repositories](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/resources?view=azure-devops&tabs=schema#define-a-repositories-resource)** to allow running templates from a central repository.
+So far we've looked into how to create templates to call those from other pipelines, however, this is currently all within a single repository. Often, developers organise code logically into multiple separate repositories. How can **Azure Pipeline templates** be shared between multiple repositories? Azure Pipelines have support for **[referencing external repositories](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/resources?view=azure-devops&tabs=schema#define-a-repositories-resource)** to allow running templates from a central repository.
 
 ``` yaml
 name: $(Date:yy.MM.dd)$(Rev:.rr)
@@ -176,7 +176,7 @@ stages:
       testParam: Hello
 ```
 
-The above example references it's own repository to *mock* referencing an external resource, however, the same code could be copied to a pipeline in another repo and still work. I'll highlight a few features:
+The above example references itself to *mock* referencing an external resource, however, the same code could be copied to a pipeline in another repo and still work. I'll highlight a few features:
 
 - **repository** - This is an arbitrary name given to the repository to use when specifying which template to use
 - **type** - Azure Pipelines support **[several Git repo types](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/resources?view=azure-devops&tabs=schema#type)**
@@ -186,7 +186,7 @@ The above example references it's own repository to *mock* referencing an extern
 
 ### Pipeline Template Versioning
 
-Now that we've seen how these pipeline templates can be stored in a central repository and referenced by pipelines in other repositories, one of the questions that arises is "how do we avoid breaking consumers of the templates as changes are made"? The example in **[sharing templates centrally](#sharing-azure-pipeline-templates)** can be extended to use the **ref** property.
+Now that we've seen how these pipeline templates can be stored in a central repository and referenced by pipelines in other repositories, one of the questions that arise is "how do we avoid breaking consumers of the templates as changes are made"? The example in **[sharing templates centrally](#sharing-azure-pipeline-templates)** can be extended to use the **ref** property.
 
 ``` yaml
 resources:
@@ -198,10 +198,10 @@ resources:
       endpoint: MilkyWare
 ```
 
-The **ref** property allows specifying a specific version/commit of the remote repository to reference. When the top-level pipeline is run, it will look like below. Notice that **2 sources are shown** due to 2 versions of the same repo now being referenced.
+The **ref** property allows specifying a specific version/commit of the remote repository to reference. When the top-level pipeline is run, it will look like the below. Notice that **2 sources are shown** due to 2 versions of the same repo now being referenced.
 
 ![image3](/images/sharing-azure-pipeline-templates/image3.png)
 
-This allows the **pipeline template repository** to be used like a **package management service** where multiple pipelines can reference the same template, but different versions. This means that if any breaking changes are made to a template, it's existing consumers are protected.
+This allows the **pipeline template repository** to be used like a **package management service** where multiple pipelines can reference the same template, but different versions. This means that if any breaking changes are made to a template, its existing consumers are protected.
 
 ## Summary

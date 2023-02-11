@@ -113,6 +113,7 @@ exclude:
   - /.vscode
   - LICENSE
   - README
+  - /images/diagrams.drawio
 
 # Archives
 category_archive:

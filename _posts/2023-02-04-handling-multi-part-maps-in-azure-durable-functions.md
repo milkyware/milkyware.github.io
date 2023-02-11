@@ -1,8 +1,8 @@
 ---
 title: Handling Multi-Part Maps in Azure Durable Functions
-category: Integration
 header:
   image: '/images/handling-multi-part-maps-in-azure-durable-functions/header.png'
+category: Integration
 tags:
     - Azure Function
     - Durable Function

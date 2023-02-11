@@ -1,7 +1,7 @@
 ---
 title: Securing your home lab using VPN and Tailscale
 header:
-    image: '/images/securing-your-home-lab-using-vpn-and-tailscale/header.jpg'
+  image: '/images/securing-your-home-lab-using-vpn-and-tailscale/header.jpg'
 category: Docker
 tags:
     - Home Lab

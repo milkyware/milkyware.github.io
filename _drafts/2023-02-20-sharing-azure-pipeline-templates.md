@@ -1,7 +1,7 @@
 ---
 title: Sharing Azure Pipeline Templates
 header:
-  image: 'images/sharing-azure-pipeline-templates/header.webp'
+  image: '/images/sharing-azure-pipeline-templates/header.webp'
 category: DevOps
 tags:
   - Azure
@@ -190,7 +190,7 @@ The above example references itself to *mock* referencing an external resource, 
 
 ### Pipeline Template Versioning
 
-Now that we've seen how these pipeline templates can be stored in a central repository and referenced by pipelines in other repositories, one of the questions that arise is "how do we avoid breaking consumers of the templates as changes are made"? The example in **[sharing templates centrally](#sharing-azure-pipeline-templates)** can be extended to use the **ref** property.
+Now that we've seen how these pipeline templates can be stored in a central repository and referenced by pipelines in other repositories, one of the questions that arise is "how do we avoid breaking users of the templates as changes are made"? The example in **[sharing templates centrally](#sharing-azure-pipeline-templates)** can be extended to use the **ref** property.
 
 ``` yaml
 resources:
@@ -206,6 +206,49 @@ The **ref** property allows specifying a specific version/commit of the remote r
 
 ![image3](/images/sharing-azure-pipeline-templates/image3.png)
 
-This allows the **pipeline template repository** to be used like a **package management service** where multiple pipelines can reference the same template, but different versions. This means that if any breaking changes are made to a template, its existing consumers are protected.
+This allows the **pipeline template repository** to be used like a **package management service** where different versions of the repository can be referenced by different pipelines. This means that if any breaking changes are made to a template, its existing consumers are protected.
+
+![image4](/images/sharing-azure-pipeline-templates/image4.png)
+
+### Tagging in GitHub
+
+In GitHub, the versioning can be handled by the existing **releases** functionality which creates a **Git tag** for each release. GitHub Actions such as **[GitHub Tag Bump](https://github.com/marketplace/actions/github-tag-bump)** can also be used to automate the creation and pushing of tags on events such as PRs completing.
+
+![image5](/images/sharing-azure-pipeline-templates/image5.png)
+
+### Tagging in Azure Repos
+
+As for Azure DevOps repositories, similar to GitHub, the tags can be created manually.
+
+![image6](/images/sharing-azure-pipeline-templates/image6.png)
+
+Tags can also be created automatically when pipelines complete. This out-of-the-box functionality can be configured with the below steps:
+
+1. Select your pipeline
+2. **Edit** the pipeline
+3. Expand the **...** menu and select **Triggers**
+4. On the **YAML** tab select **Get Sources**
+5. Configure the tag format and when to tag the sources
+
+![image6](/images/sharing-azure-pipeline-templates/image6.png)
+
+The limitation to this approach is that these tags are tied to the **[Azure Pipelines retention policy](https://learn.microsoft.com/en-us/azure/devops/pipelines/policies/retention?view=azure-devops&tabs=yaml#what-parts-of-the-run-get-deleted)** which will automatically delete tags created by pipelines. To resolve this, I created a **GitTag** pipeline template which uses **azure-devops extension for az cli**.
+
+``` yaml
+- task: PowerShell@2
+  displayName: Az DevOps Tag Repo
+  env:
+    AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
+  inputs:
+    pwsh: true
+    targetType: inline
+    script: |
+      $ref = git log -1 --format="%H"
+      az repos ref create --name "tags/${{parameters.tag}}" --object-id $ref --org $(System.CollectionUri) --project $(System.TeamProject) --repository $(Build.Repository.Name)
+```
+
+This task will stamp the repo of the calling pipeline with a permanent tag which is exempt from the pipeline retention policies.
 
 ## Summary
+
+During this post we've introduced **Azure Pipelines** as well as how to use these as **templates** as part of other pipelines. We've also looked at how multiple templates can be used together to simplify complex flows. Lastly, we looked at how to share these templates from a central repository as well as making use of tagging to version the templates and protect other pipelines.

@@ -116,6 +116,9 @@ exclude:
   - README
   - /images/diagrams.drawio
 
+# Conversion
+excerpt_separator: "\n\n"
+
 # Archives
 category_archive:
   type: liquid

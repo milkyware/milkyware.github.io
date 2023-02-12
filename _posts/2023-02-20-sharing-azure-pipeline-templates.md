@@ -6,6 +6,7 @@ category: DevOps
 tags:
   - Azure
   - Azure Pipelines
+  - Azure Repos
   - DevOps
 ---
 

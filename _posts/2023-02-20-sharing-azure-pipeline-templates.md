@@ -190,7 +190,7 @@ The above example references itself to *mock* referencing an external resource, 
 
 ### Pipeline Template Versioning
 
-Now that we've seen how these pipeline templates can be stored in a central repository and referenced by pipelines in other repositories, one of the questions that arise is "how do we avoid breaking users of the templates as changes are made"? The example in **[sharing templates centrally](#sharing-azure-pipeline-templates)** can be extended to use the **ref** property.
+Now that we've seen how these pipeline templates can be stored in a central repository and referenced by pipelines in other repositories, one of the questions that arise is "how do we avoid breaking users of the templates as changes are made"? The example in **[sharing templates centrally](#sharing-templates-centrally)** can be extended to use the **ref** property.
 
 ``` yaml
 resources:

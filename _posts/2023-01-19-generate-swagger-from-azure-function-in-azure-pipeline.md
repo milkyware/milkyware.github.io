@@ -1,5 +1,4 @@
 ---
-title: Generate Swagger from Azure Functions in Azure Pipelines
 header:
   image: '/images/generate-swagger-from-azure-function-in-azure-pipeline/header.png'
 category: DevOps
@@ -12,7 +11,7 @@ tags:
   - API Management
 ---
 
-## Generating Swagger from Azure Functions in Azure Pipelines
+# Generate Swagger from Azure Functions in Azure Pipelines
 
 I've recently started to work more with Azure API Management to create a one-stop shop for my APIs. In the last couple of years, Microsoft has added the **[Microsoft.Azure.WebJobs.Extensions.OpenApi](https://github.com/azure/azure-functions-openapi-extension)** package which takes care of documenting your HTTP Trigger operations and exposing a Swagger endpoint as well as a Swagger UI. This is great for testing locally, however Azure API Management has its own Developer Portal for displaying API definitions.  Azure API Management offers the option to import an API using a Swagger/OpenAPI definition so the challenge is to automate this process in an Azure Pipeline.
 

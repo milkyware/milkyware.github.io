@@ -1,5 +1,4 @@
 ---
-title: Sharing Azure Pipelines Templates
 header:
   image: '/images/sharing-azure-pipeline-templates/header.webp'
 category: DevOps
@@ -10,7 +9,7 @@ tags:
   - DevOps
 ---
 
-## Introduction
+# Sharing Azure Pipelines Templates
 
 I have been developing build and release pipelines since **Team Foundation Server 2015** to deploy ASP.NET and BizTalk Server applications. Over the past couple of years, I've migrated to using **[Azure DevOps](https://learn.microsoft.com/en-us/azure/devops/user-guide/what-is-azure-devops?view=azure-devops)** source control and pipelines. As the number of pipelines has grown, I've started to develop **[Azure Pipeline Templates](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/templates?view=azure-devops)** to make reusable blocks of automation to simplify and improve the consistency across the pipelines. In this post, I'll give an introduction to **Azure Pipeline Templates** as well as how to share these between multiple repos.
 

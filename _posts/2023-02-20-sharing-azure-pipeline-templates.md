@@ -252,4 +252,12 @@ This task will stamp the repo of the calling pipeline with a permanent tag which
 
 ## Summary
 
-During this post we've introduced **Azure Pipelines** as well as how to use these as **templates** as part of other pipelines. We've also looked at how multiple templates can be used together to simplify complex flows. Lastly, we looked at how to share these templates from a central repository as well as making use of tagging to version the templates and protect other pipelines.
+During this post we've:
+
+1. Introduced **Azure Pipelines**
+2. Shown how to use pipelines as **templates** in other pipelines
+3. Looked at how multiple templates can be used together to simplify complex flows
+4. How to share these templates from a central repository
+5. Lastly, we've looked at making use of tagging to version the templates and protect other pipelines
+
+In this post we've used simple code examples to demonstrate the concept, however these templates could contain multiple **steps, jobs and stages** with multiples of these templates strung together. Hope this has been useful. Please feel free to leave comments below.

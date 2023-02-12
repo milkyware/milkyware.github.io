@@ -29,7 +29,8 @@
                 "--livereload",
                 "--incremental",
                 "--force_polling",
-                "--drafts"
+                "--drafts",
+                "--future"
             ],
             "isBackground": true,
             "runOptions": {

@@ -116,3 +116,4 @@ To sum up, I've found Tailscale an incredibly useful and reliable tool over the 
 - [x] BONUS: Tailscale's clever NAT traversal means no firewall or public-port opening is required
 
 I've started to use some of Tailscale's other features, such as Magic DNS, which I'll dig into in a separate post. For now, thank you for your time and hope it's been useful.
+

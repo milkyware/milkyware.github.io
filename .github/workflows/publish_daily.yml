@@ -1,0 +1,22 @@
+name: Publish Daily
+
+on:
+  schedule:
+    - cron: '0 0 0 * *'
+
+  workflow_dispatch:
+
+jobs:
+  curl:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Queue Pages Build
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: https://api.github.com/repos/milkyware/milkyware.github.io/pages/builds
+          method: POST
+          customHeaders: |
+            {
+              "Accept": "application/vnd.github.ant-man-preview+json", 
+              "Authorization": "token ${{github.token}}"
+            }

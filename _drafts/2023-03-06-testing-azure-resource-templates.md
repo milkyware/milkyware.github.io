@@ -1,6 +1,4 @@
 ---
-header:
-  image: '/images/deploying-azure-resources-using-bicep/header.png'
 category: Azure
 tags:
     - Bicep

@@ -1,4 +1,5 @@
 ---
+title: Build Multi-Platform Docker Images
 header:
   image: '/images/build-multi-platform-docker-image/header.png'
 category: DevOps
@@ -7,8 +8,6 @@ tags:
   - Docker Buildx
   - GitHib Actions
 ---
-
-# Build Multi-Platform Docker Images
 
 Over the last couple of years I've been using [Docker](https://docs.docker.com/) more for running my home-lab to learn about containerisation by both deploying community images as well as packaging my own apps as images. I've also used this as an opportunity to get more familiar with [GitHub Actions](https://github.com/features/actions) as the [marketplace](https://github.com/marketplace) has been growing incredibly quickly.
 

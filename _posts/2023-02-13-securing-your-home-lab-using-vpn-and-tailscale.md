@@ -12,8 +12,6 @@ tags:
     - Docker
 ---
 
-## Introduction
-
 Over the last several years my home lab has grown from a single Raspberry Pi 4 to several in a **[Docker Swarm cluster](https://docs.docker.com/engine/swarm/)**. As the number of apps being hosted on that cluster has also grown I've wanted to start to access these remotely without having to open up ports on my router. The requirements I had for the VPN were
 
 - Can be deployed as a **[Docker Container](https://www.docker.com/resources/what-container/)**

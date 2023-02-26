@@ -6,6 +6,7 @@ category: Azure
 tags:
     - Bicep
     - ARM
+    - Azure
 ---
 
 Over the past couple of years, I've been primarily developing and deploying applications to Azure. Typically these deployments comprise 2 broad aspects:

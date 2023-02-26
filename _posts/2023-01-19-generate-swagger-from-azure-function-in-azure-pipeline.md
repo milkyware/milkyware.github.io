@@ -1,5 +1,5 @@
 ---
-title: Generate Swagger from Azure Functions in Azure Pipelines
+title: Generate Swagger from Azure Function in Azure Pipelines
 header:
   image: '/images/generate-swagger-from-azure-function-in-azure-pipeline/header.png'
 category: DevOps

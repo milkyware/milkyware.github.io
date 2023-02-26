@@ -14,11 +14,11 @@ Over the past couple of years I've been primarily developing and deploying appli
 1. Deploying code
 2. Deploying infrastructure
 
-For this post we're going to focus on the infrastructure side using **[Bicep](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview)** to deploy resources to Azure. To do this we'll firstly introduce what Bicep is and its benefits. We'll then look at how to create **modules** to both organise and reuse infrastructure. Lastly, we'll look at how to share those modules across your organisation.
+For this post we're going to focus on the infrastructure side using **[Bicep](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview)** to define our **Infrastructure as Code (IaC)** to deploy resources to Azure. To do this we'll firstly introduce what Bicep is and its benefits. We'll then look at a how to test our IaC and then how to deploy the tested template to an environment.
 
 ## What is Bicep?
 
-Bicep is a **[Domain-Specific Language (DSL)](https://www.martinfowler.com/dsl.html#:~:text=A%20Domain%2DSpecific%20Language%20(DSL,as%20computing%20has%20been%20done.)** with a declarative syntax which builds upon the foundation of the existing **[Azure Resource Manager (ARM) templates](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/overview)** which is used to develop and automate the deployment of Azure resources. Both Bicep and ARM templates help with creating consistent and repeatable deployments of resources across different environment as well as forming part of your documentation. However, there are a number of benefits of using Bicep over ARM.
+Bicep is a **[Domain-Specific Language (DSL)](https://www.martinfowler.com/dsl.html#:~:text=A%20Domain%2DSpecific%20Language%20(DSL,as%20computing%20has%20been%20done.))** with a declarative syntax which builds upon the foundation of the existing **[Azure Resource Manager (ARM) templates](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/overview)** which is used to develop and automate the deployment of Azure resources. Both Bicep and ARM templates help with creating consistent and repeatable deployments of resources across different environment as well as forming part of your documentation. However, there are a number of benefits of using Bicep over ARM.
 
 ### Benefits of Bicep
 
@@ -216,6 +216,95 @@ The resulting pipeline run and tests are below:
 
 Although this example focuses on using Azure Pipelines, Microsoft do make the **[GitHub Action Run ARM-TTK](https://github.com/marketplace/actions/run-arm-ttk-with-reviewdog)** available to achieve the same functionality as what's been demonstrated. If you are unable to use either the Azure DevOps extension or the GitHub action, the PowerShell module can be downloaded and imported as part of a custom pipeline/workflow to perform the tests.
 
-### Azure What-If Deployment
+### Pull-Request Environments
 
 ## Deploying Bicep
+
+Microsoft provide several methods to programmatically deploy Azure resources:
+
+- VS Code
+- Az Cli
+- Az Powershell module
+- Azure Cloud Shell
+
+To demonstrate deploying Bicep I'm going to use Az Cli. The process of deploying an Azure template, either Bicep or ARM, is relatively straight forward. Microsoft provide the `az deployment group create` command in Az Cli which can be used like below:
+
+``` powershell
+az deployment group create `
+  --name $deploymentName `
+  --resource-group rg-sample-group `
+  --template-file src/template.bicep
+```
+
+This will then create a deployment job in the specified resource group which contains the status of deploying each resource in the deployment template.
+
+![image4](/images/deploying-azure-resources-using-bicep/image4.png)
+
+This process can then be incorporated into a pipeline:
+
+``` yaml
+- task: AzureCLI@2
+    displayName: Deploy Template
+    inputs:
+      azureSubscription: azureSubscription
+      scriptType: pscore
+      scriptLocation: inlineScript
+      inlineScript: |
+        $templateName = [System.IO.FileInfo]::new("${{parameters.templatePath}}").BaseName.ToLower()
+        $deploymentName = "$templateName-$([datetime]::UtcNow.ToString("yyMMddhhmmssfff"))"
+        az deployment group create `
+          --name $deploymentName `
+          --resource-group rg-sample-group `
+          --template-file src/storageaccount.bicep
+```
+
+In this step, notice that it makes use of some PowerShell to generate the deployment name from the file name with a timestamp so that deployments are uniquely named so that subsequent deployments of the same template don't overwrite the same deployment job log. This step can be be reused in multiple stages to progress the deployment of the Bicep through different environments.
+
+### What-If Deployment
+
+Before running the actual deployment, I like to make use of a **[what-if](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/deploy-what-if)** deployment to firstly test all of the permissions are in place to deploy the template to the given environment as well as to summarise what changes the template will make. The command for this is `az deployment group what-if`.
+
+``` powershell
+az deployment group what-if `
+  --name $deploymentName `
+  --resource-group rg-sample-group `
+  --template-file src/template.bicep
+```
+
+![image5](/images/deploying-azure-resources-using-bicep/image5.png)
+
+Above is the pretty print version output of the command, however, it can also be formatted as **JSON objects** to be evaluated by a script for later use in a pipeline. To do this, add the `--no-pretty-print` argument to the command
+
+``` json
+{
+  "changes": [
+    {
+      "after": null,
+      "before": null,
+      "changeType": "Create",
+      "delta": null,
+      "resourceId": "/subscriptions/subscriptionId/resourceGroups/rg-test-group/providers/Microsoft.Storage/storageAccounts/sttestgroup",
+      "unsupportedReason": null
+    }
+  ],
+  "error": null,
+  "status": "Succeeded"
+}
+```
+
+As mentioned, this functionality can then be included as a step in a pipeline to highlight any issues or unexpected results before the actual deployment takes please. Evaluating the changes from the **what-if** could then be used to potentially fail a pipeline or raise an approval gate if the changes involve a delete action.
+
+``` yaml
+- task: AzureCLI@2
+  displayName: What If Template
+  inputs:
+    azureSubscription: azureSubscription
+    scriptType: pscore
+    scriptLocation: inlineScript
+    inlineScript: |
+      az deployment group what-if `
+        --resource-group rg-sample-group `
+        --template-file src/storageaccount.bicep
+```
+
+## Summary

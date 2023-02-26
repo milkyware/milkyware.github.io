@@ -1,7 +1,7 @@
 ---
 title: Build Multi-Platform Docker Images
 header:
-  image: '/images/build-multi-platform-docker-image/header.png'
+  image: '/images/build-multi-platform-docker-images/header.png'
 category: DevOps
 tags:
   - Docker
@@ -207,9 +207,9 @@ Two key properties are **platforms** and **push**. By default Docker will only b
 
 Once the image is published to the container registry, a particular tag will look similar to below. Below are screenshots from **Docker Hub** and **Quay**.
 
-![image1](/images/build-multi-platform-docker-image/image1.png)
+![image1](/images/build-multi-platform-docker-images/image1.png)
 
-![image2](/images/build-multi-platform-docker-image/image2.png)
+![image2](/images/build-multi-platform-docker-images/image2.png)
 
 Above we can see the supported platforms of:
 

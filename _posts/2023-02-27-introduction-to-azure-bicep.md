@@ -195,7 +195,7 @@ Microsoft provides several methods to programmatically deploy Azure resources:
 - Az Powershell module
 - Azure Cloud Shell
 
-To demonstrate deploying Bicep I'm going to use Az Cli. The process of deploying an Azure template, either Bicep or ARM, is relatively straightforward. Microsoft provide the `az deployment` commands in Az Cli which can be used like below:
+To demonstrate deploying Bicep I'm going to use Az Cli. The process of deploying an Azure template, either Bicep or ARM, is relatively straightforward. Microsoft provide the `az deployment` commands in Az Cli which can be used like below to create a resource scoped deployment:
 
 ``` powershell
 az deployment group create `

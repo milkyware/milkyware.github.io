@@ -6,6 +6,4 @@ tags:
     - Azure
 ---
 
-# Sharing Bicep Templates
-
 ## Summary

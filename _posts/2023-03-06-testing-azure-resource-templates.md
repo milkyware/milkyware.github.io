@@ -172,6 +172,27 @@ jobs:
 
 ### Pull-Request Environments
 
-In my research for this post I came across a few discussions of developers suggesting a throw away ***Pull-Request environment*** to perform a dry run of the new/changed template before being accepted into the **main branch**. Before going any further, I'd like to acknowledge a **[fantastic post](https://samlearnsazure.blog/2021/09/27/dynamic-pr-environments-in-github/)** 
+In my research for this post I came across a few discussions of developers suggesting a throw away ***pull request environment*** to perform a dry run of the new/changed template before being accepted into the **main branch**. Before going any further, I'd like to acknowledge a couple of fantastic posts on this:
+
+- **[GitHub Action](https://samlearnsazure.blog/2021/09/27/dynamic-pr-environments-in-github/)**
+d- **[Azure Pipelines](https://samlearnsazure.blog/2020/02/27/creating-a-dynamic-pull-request-environment-with-azure-pipelines/)**
+
+In GitHub actions, there is **[native support for pull request triggers](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request)** to allow for a workflow to be triggered on a PR being created as well be being closed to handle the creation and tear-down of the PR environment.
+
+Similar functionality can be achieved using Azure Pipelines, however it is more complex, particularly around the clean-up process. In the Azure Pipeline post it mentions using service hooks to subscribe to pull requests being completed to trigger some external functionality to clean-up. If the pull request resource groups are tagged appropriately, a scheduled pipeline could also be used to query for PR environments and delete them.
+
+``` powershell
+az group create --name rg-test `
+  --location uksouth `
+  --tags environment=PR
+
+az group list --query "[?tags.environment == 'PR']" | ConvertFrom-Json | Foreach-Object {
+   az group delete --name $_.name
+}
+```
+
+I think this is a great testing technique for IaC as there are some errors which only appear in actual deployments such as managed-identities using RBAC to access other resources. One thing to keep in mind is that non-consumption resources **will incur costs** and so it's important to ensure the resources are sized appropriately to avoid large bills.
 
 ## Summary
+
+During this post we've described a few techniques to test Azure resource templates as well as how to automate these. This testing helps to ensure good coding practises to avoid unexpected results as well as highlighting potential deployment issues beforehand and protecting your ALM environments. In the next post we'll look into how to share and reuse Bicep templates to create consistency as well as simplifying the definition of ***root templates***.

@@ -6,6 +6,7 @@ category: Azure
 tags:
     - Bicep
     - ARM
+    - ARM-TTK
     - Azure
     - Testing
 ---

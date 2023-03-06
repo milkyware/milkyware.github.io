@@ -102,7 +102,11 @@ module storageAccount 'storageAccountModule.bicep' = {
 }
 ```
 
-This allows each use of the storage account module to create a resource with a different name. Notice as well that **location, tags and environment** are also parameters with default values. This allows modules to be designed to adhere to conventions by default, but also gives flexibility for the developer to deviate from the defaults where necessary. In the example, **location** defaults to the location of the current resource group, **tags** use the tags of the current resource group and **environment** defaults to a cheaper sku but allows for a more expensive, resilient sku for live scenarios.
+This allows each use of the storage account module to create a resource with a different name. Notice as well that **location, tags and environment** are also parameters with default values. This allows modules to be designed to adhere to conventions by default, but also gives flexibility for developers to deviate from the defaults where necessary:
+
+- **location** defaults to the location of the current resource group
+- **tags** use the tags of the current resource group
+- **environment** defaults to a cheaper sku but allows for a more expensive, resilient sku for live scenarios
 
 ## Referencing module files
 

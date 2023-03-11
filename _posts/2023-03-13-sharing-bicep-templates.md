@@ -173,7 +173,7 @@ One of the main benefits of using a Bicep registry is that, when combined with t
 
 ![image4](/images/sharing-bicep-templates/image4.png)
 
-### Automating
+### Automating the publishing process
 
 So far, the approach for publishing these modules has been manual. However, these shared modules will form the foundation of deploying resources to Azure where an applications **IaC** template will stitch together multiple modules. Therefore, it's important to build automated processes into publishing these templates to ensure all additions and changes are reviewed and tested. How I've structured my Bicep modules is in a single repository with a protected **main branch**. This enforces a **pull request** process for changes to be reviewed by other developers.
 
@@ -184,7 +184,6 @@ In addition to the pull requests, I've also created a **CI pipeline** for the Bi
 name: $(Date:yy.MM.dd)$(Rev:.rr)
 
 trigger:
-  batch: true
   branches:
     exclude:
       - main
@@ -228,7 +227,7 @@ stages:
 ```
 <!-- {% endraw %} -->
 
-To publish a module once a pull request has been approved and the changes merged into main I'
+Once a pull request has been approved and the changes merged to main, the module can be published. To do this, I've put together an **parametrised Azure Pipeline template** which uses Az Cli to publish a given module.
 
 <!-- {% raw %} -->
 ``` yaml
@@ -290,12 +289,13 @@ stages:
 ```
 <!-- {% endraw %} -->
 
+The template publishes a version of the module using the Azure Pipeline variable **Build.BuildNumber** as well as a **latest** version. Latest is often a feature of **Docker images** and allows for a tag to always reference the latest version. I've found this technique useful to allow developers to get started with a module quickly before referencing a particular version for go live. This pipeline template is then used by a top-level pipeline **for each module** so that pipeline triggers can be scoped to a particular file so that only modules changed by a merge to main are published.
+
 <!-- {% raw %} -->
 ``` yaml
 name: $(Date:yy.MM.dd)$(Rev:.rr)
 
 trigger:
-  batch: true
   branches:
     include:
       - main
@@ -313,3 +313,18 @@ extends:
 <!-- {% endraw %} -->
 
 ## Summary
+
+Across this series of posts we've looked at 3 key areas of Bicep:
+
+- [Introducing and using Bicep](/azure/introduction-to-azure-bicep)
+- [Testing Bicep templates](/azure/testing-azure-resource-templates)
+- Sharing Bicep templates
+
+During this post we've looked at:
+
+- how to create and use a Bicep module
+- creating a Bicep registry
+- manually publishing modules to the registry
+- automating the testing and publishing of modules
+
+The result is that we have a central catalogue of reviewed, tested and versioned Bicep modules which can be reused in multiple deployments. This helps give greater confidence in deployments as well as improve consistency and reduce complexity in the **top-level** Bicep templates. I hope this and the previous 2 articles have been a useful introduction to Bicep as well as how to incorporate it into DevOps processes.

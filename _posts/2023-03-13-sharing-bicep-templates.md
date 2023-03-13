@@ -327,4 +327,4 @@ During this post we've looked at:
 - manually publishing modules to the registry
 - automating the testing and publishing of modules
 
-The result is that we have a central catalogue of reviewed, tested and versioned Bicep modules which can be reused in multiple deployments. This helps give greater confidence in deployments as well as improve consistency and reduce complexity in the **top-level** Bicep templates. I hope this and the previous 2 articles have been a useful introduction to Bicep as well as how to incorporate it into DevOps processes.
+The result is that we have a central catalogue of reviewed, tested and versioned Bicep modules which can be reused in multiple deployments. This helps give greater confidence in deployments as well as improve consistency and reduce complexity in the **top-level** Bicep templates. I hope this and the previous 2 articles have been a useful introduction to Bicep as well as how to incorporate it into your DevOps processes.

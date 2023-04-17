@@ -23,6 +23,7 @@ group :jekyll_plugins do
   gem "jekyll-seo-tag"
   gem "jekyll-sitemap"
   gem "jemoji"
+  # https://github.com/jekyll/jekyll/issues/8523
   gem "webrick"
 end
 

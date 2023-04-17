@@ -1,7 +1,7 @@
 ---
 title: Publishing Secrets to Key Vault
 header:
-  image: 'images/publishing-secrets-to-key-vault/header.png'
+  image: 'images/publishing-secrets-to-key-vault/header.svg'
 category: DevOps
 tags:
     - Azure

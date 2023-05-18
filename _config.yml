@@ -79,6 +79,10 @@ footer:
     - label: "Cloud icons created by Vectorslab - Flaticon"
       url: "https://www.flaticon.com/free-icons/cloud"
 
+after_footer_scripts:
+  - https://cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.js
+  - assets/js/mermaid.js
+
 # Outputting
 permalink: /:categories/:title/
 paginate: 5 # amount of posts to show

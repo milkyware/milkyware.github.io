@@ -58,4 +58,32 @@ after_footer_scripts:
   - https://cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.js
 ```
 
-This adds the CDN packaged version of Mermaid JS to the generated Jekyll site. Typically, Mermaid Diagrams are added to Markdown files using the codesyntax `\`\`\` mermaid`
+This adds the CDN packaged version of Mermaid JS to the generated Jekyll site. Typically, Mermaid Diagrams are added to Markdown files using the **[fenced code block](https://www.markdownguide.org/extended-syntax/#fenced-code-blocks)** syntax ` ``` mermaid` which, when rendered produces the below HTML:
+
+``` html
+<pre>
+  <code class="language-mermaid">
+    ...
+  </code>
+</pre>
+```
+
+This HTML is **[not the default format that Mermaid expects](https://mermaid.js.org/intro/n00b-gettingStarted.html#requirements-for-the-mermaid-api)** the diagram to be contained in. Therefore, an additional script has been added to customise where Mermaid looks for the diagram definition. A **[mermaid.js](/assets/js/mermaid.js)** script has been added which queries for tags with a class of **language-mermaid**
+
+``` js
+$(document).ready(function () {
+    mermaid.initialize({
+      startOnLoad:true,
+      theme: "default",
+    });
+    window.mermaid.init(undefined, document.querySelectorAll('.language-mermaid'));
+  });
+```
+
+To include this script in the static content, it is included **after** the Mermaid JS CDN package:
+
+``` yaml
+after_footer_scripts:
+  - https://cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.js
+  - assets/js/mermaid.js
+```

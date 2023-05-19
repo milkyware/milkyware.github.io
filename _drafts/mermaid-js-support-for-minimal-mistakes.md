@@ -24,7 +24,7 @@ An example sequence diagram could be defined using:
 
 ``` text
 sequenceDiagram
-autonumber
+autoNumber
   Alice->>John: Hello John, how are you?
   John-->>Alice: Great!
   Alice-)John: See you later!
@@ -34,7 +34,7 @@ This produces the below diagram:
 
 ``` mermaid
 sequenceDiagram
-autonumber
+autoNumber
   Alice->>John: Hello John, how are you?
   John-->>Alice: Great!
   Alice-)John: See you later!

@@ -58,7 +58,7 @@ after_footer_scripts:
   - https://cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.js
 ```
 
-This adds the CDN packaged version of Mermaid JS to the generated Jekyll site. Typically, Mermaid Diagrams are added to Markdown files using the **[fenced code block](https://www.markdownguide.org/extended-syntax/#fenced-code-blocks)** syntax ` ``` mermaid` which, when rendered produces the below HTML:
+This adds the CDN packaged version of Mermaid JS to the generated Jekyll site. Typically, Mermaid Diagrams are added to Markdown files using the **[fenced code block](https://www.markdownguide.org/extended-syntax/#fenced-code-blocks)** syntax ` ``` mermaid` which, when rendered, produces the below HTML:
 
 ``` html
 <pre>

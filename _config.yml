@@ -80,7 +80,7 @@ footer:
       url: "https://www.flaticon.com/free-icons/cloud"
 
 after_footer_scripts:
-  - https://cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.js
+  - https://cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.min.js
   - assets/js/mermaid.js
 
 # Outputting

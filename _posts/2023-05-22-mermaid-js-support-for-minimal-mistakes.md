@@ -10,7 +10,7 @@ tags:
   - Minimal Mistakes
 ---
 
-In th elast 6 months I've started to use **Mermaid JS** to draft integration designs as well as document implemented integration applications. There is a lot of support for this tool, however, it's not supported natively as part of **GitHub Pages**. In this post I'll introduce what Mermaid is, some of the benefits and how to add support for GitHub Pages, specifically the **Minimal Mistakes** theme.
+In the last 6 months I've started to use **Mermaid JS** to draft integration designs as well as document implemented integration applications. There is a lot of support for this tool, however, it's not supported natively as part of **GitHub Pages**. In this post I'll introduce what Mermaid is, some of the benefits and how to add support for GitHub Pages, specifically the **Minimal Mistakes** theme.
 
 ## What is Mermaid JS?
 
@@ -44,7 +44,7 @@ With being **test-based**, Mermaid diagrams benefit from being able to quickly a
 
 This tool has been widely accepted and embraced, so much so that the number of tools that has **[integrated Mermaid JS](https://mermaid.js.org/ecosystem/integrations.html)** either natively, or 3rd party extensions is very extensive.
 
-## Adding Support
+## Adding Mermaid Support
 
 There are 2 main aspects to adding support for Mermaid to Minimal Mistakes:
 
@@ -68,17 +68,35 @@ This adds the CDN packaged version of Mermaid JS to the generated Jekyll site. T
 </pre>
 ```
 
-This HTML is **[not the default format that Mermaid expects](https://mermaid.js.org/intro/n00b-gettingStarted.html#requirements-for-the-mermaid-api)** the diagram to be contained in. Therefore, an additional script has been added to customise where Mermaid looks for the diagram definition. A **[mermaid.js](/assets/js/mermaid.js)** script has been added which queries for tags with a class of **language-mermaid**
+This HTML is **[not the default format that Mermaid expects](https://mermaid.js.org/intro/n00b-gettingStarted.html#requirements-for-the-mermaid-api)** the diagram to be contained in. Therefore, an additional script has been added to customise where Mermaid looks for the diagram definition. A **[mermaid.js](/assets/js/mermaid.js)** script has been added to initialise Mermaid JS:
 
 ``` js
+---
+---
 $(document).ready(function () {
-    mermaid.initialize({
+    var skin = "{{ site.minimal_mistakes_skin }}"
+    var theme = {
+      "air": "default",
+      "aqua": "default",
+      "contrast": "default",
+      "dark": "dark",
+      "default": "default",
+      "dirt": "default",
+      "mint": "mint",
+      "neon": "dark",
+      "plum": "dark",
+      "sunrise": "default"
+    }[skin]
+    var config = {
       startOnLoad:true,
-      theme: "default",
-    });
-    window.mermaid.init(undefined, document.querySelectorAll('.language-mermaid'));
+      theme: theme,
+    }
+    mermaid.initialize(config)
+    window.mermaid.init(config, document.querySelectorAll('.language-mermaid'));
   });
 ```
+
+This scripts has a blank **front matter** to allow the Minimal Mistakes skin to be resolved. The skin is then mapped to a **Mermaid theme**.
 
 To include this script in the static content, it is included **after** the Mermaid JS CDN package:
 
@@ -87,3 +105,7 @@ after_footer_scripts:
   - https://cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.js
   - assets/js/mermaid.js
 ```
+
+## Summary
+
+Mermaid JS is an incredibly useful tool for planning and diagramming. In this post we've add support for Mermaid in Minimal Mistakes without the need for 3rd party extensions or plugins.

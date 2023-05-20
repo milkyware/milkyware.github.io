@@ -1,8 +1,8 @@
 ---
 ---
 $(document).ready(function () {
-    var skin = "{{ site.minimal_mistakes_skin }}"
-    var theme = {
+    var mmSkin = "{{ site.minimal_mistakes_skin }}"
+    var mjsTheme = {
       "air": "default",
       "aqua": "default",
       "contrast": "default",
@@ -13,11 +13,12 @@ $(document).ready(function () {
       "neon": "dark",
       "plum": "dark",
       "sunrise": "default"
-    }[skin]
-    var config = {
-      startOnLoad:true,
-      theme: theme,
-    }
-    mermaid.initialize(config)
-    window.mermaid.init(config, document.querySelectorAll('.language-mermaid'));
+    }[mmSkin]
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: mjsTheme
+    })
+    mermaid.init({
+      theme: mjsTheme
+    }, '.language-mermaid');
   });

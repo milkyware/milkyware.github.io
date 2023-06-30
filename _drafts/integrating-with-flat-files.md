@@ -23,7 +23,7 @@ I've also prepared a **[sample test project](https://github.com/milkyware/blog-i
 
 ![image2](/images/integrating-with-flat-files/image2.svg)
 
-**CsvHelper** is a very popular nuget package with over 150M downloads!. It's a very simple package which is a wrapper around **System.IO.TextReader/TextWriter** to parse the records and fields to a class as well as writing objects to a file. By **streaming** the flat file through thr library when using **IO backed** streams such as **FileStream**, the memory footprint is kept small. This is particularly important when working with large batch processes which may have millions of records.
+**CsvHelper** is a very popular [nuget package](https://www.nuget.org/packages/csvhelper/) with over 150M downloads!. It's a very simple package which is a wrapper around **System.IO.TextReader/TextWriter** to parse the records and fields to a class as well as writing objects to a file. By **streaming** the flat file through thr library when using **IO backed** streams such as **FileStream**, the memory footprint is kept small. This is particularly important when working with large batch processes which may have millions of records.
 
 ``` csharp
 ...
@@ -138,6 +138,88 @@ The configuration for this is the same as parsing a single type of record for a 
 
 ![image3](/images/integrating-with-flat-files/image3.png)
 
-### Multi Record Types
+**FileHelpers** is another popular [nuget package](https://www.nuget.org/packages/FileHelpers) which helps with processing flat files.
 
-## Summary
+### Similarities to CsvHelper
+
+Like **[CsvHelper](#csvhelper)**, it supports reading and writing **CSVs** using stream-based **TextReader/TextWriter**. Configuring **FileHelper** is also very similar, making heavy use of **[attributes](https://www.filehelpers.net/mustread/#attributes)** to map a class to a flat file.
+
+```csharp
+[DelimitedRecord(",")]
+[IgnoreFirst()]
+public class FHCustomer
+{
+    public int Index { get; set; }
+    public string? Id { get; set; }
+    public string? FirstName { get; set; }
+    ...
+}
+
+void Main()
+{
+    ...
+    using var engine = new FileHelperAsyncEngine<FHCustomer>();
+    using (engine.BeginReadStream(sr))
+    {
+        foreach (var c in engine)
+        {
+            _output.WriteLine($"Processing {c.FirstName} {c.Surname}");
+        }
+    }
+}
+```
+
+There is also a number of **[converters](https://www.filehelpers.net/mustread/)** provided which offers out-of-the-box conversion for more scenarios than **CsvHelper** such as parsing a **DateTime** using a given format. Processing multi record files is also supported using the **[MultiRecordEngine](https://www.filehelpers.net/example/Advanced/MultiRecordEngine/)**.
+
+### Fixed Width
+
+One feature that does differentiate **FileHelpers** from **CsvHelpers** is its ability to process **fixed width** files. Unlike CSVs, fixed width files, as the name describes, uses character positions instead of delimiters to define the different fields.
+
+``` text
+01010 Alfreds Futterkiste          13122005
+12399 Ana Trujillo Emparedados y   23012000
+00011 Antonio Moreno Taquería      21042001
+51677 Around the Horn              13051998
+99999 Berglunds snabbköp           02111999
+```
+
+In the example each record is defined as follows:
+
+- Positions 0-4 - Id
+- Positions 5-34 - Name
+- Position 35-42 - Added Date
+
+``` csharp
+[FixedLengthRecord]
+public class FHCustomerFixed
+{
+    [FieldFixedLength(5)]
+    public int Id;
+
+    [FieldFixedLength(30)]
+    [FieldTrim(TrimMode.Both)]
+    public string Name;
+
+    [FieldFixedLength(8)]
+    [FieldConverter(ConverterKind.Date, "ddMMyyyy")]
+    public DateTime AddedDate;
+}
+
+void Main()
+{
+    ...
+    var engine = new FixedFileEngine<FHCustomerFixed>();
+    foreach (var c in engine.ReadStream(sr))
+    {
+        _output.WriteLine(c.Name);
+    }
+}
+```
+
+Above is the code needed to read the fixed width file. This code could also be modified to use the `.Write...()` methods to build the fixed width file instead.
+
+## Final thoughts
+
+This post has been more about sharing how I've approached getting equivalent functionality for flat files whilst moving away from **BizTalk**. **[CsvHelper](#csvhelper)** if great for being more widely used, slightly easier to work with and a greater focus on making it performant for larger files. Whereas **[FileHelpers](#filehelpers)** has a much broader support for flat files in general and with the ability to process fixed width files which, has been invaluable on multiple occasions.
+
+Both are fantastic packages which, if you haven't come across these before, please do take a look and hope you find them useful.

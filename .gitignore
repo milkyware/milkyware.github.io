@@ -6,3 +6,4 @@ vendor
 
 # draw.io
 *.drawio.bkp
+*.drawio.dtmp

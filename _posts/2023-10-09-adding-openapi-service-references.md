@@ -1,7 +1,7 @@
 ---
 title: Adding OpenAPI Service References
 header:
-  image: '/images/integrating-with-flat-files/header.svg'
+  image: '/images/adding-openapi-service-references/header.svg'
 category: Integration
 ---
 

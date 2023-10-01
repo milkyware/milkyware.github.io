@@ -5,7 +5,7 @@ header:
 category: Integration
 ---
 
-As an integration developer, one of the most common requirements I deal with is **consuming APIs** to integrate with different systems. There is still a wide variety of API types from older **SOAP** services to modern **[GraphQL](https://graphql.org/) and [gRPC](https://grpc.io/)** services. The most common style of API is use currently is **RESTful HTTP** APIs documented using **Swagger/OpenAPI documents**.
+As an integration developer, one of the most common requirements I deal with is **consuming APIs** to integrate with different systems. There is still a wide variety of API types from older **SOAP** services to modern **[GraphQL](https://graphql.org/) and [gRPC](https://grpc.io/)** services. The most common style of API I use currently is **RESTful HTTP** APIs documented using **Swagger/OpenAPI documents**.
 
 ## Code Sample
 
@@ -31,7 +31,7 @@ This post is focused on consuming an API using the **service references** functi
 
 ![image1](/images/adding-openapi-service-references/image1.gif)
 
-**Service References** are a long-standing feature of Visual Studio. Depending on the type of project, the method of managing and adding service references varies, however the above steps generally work across most project types. To manage existing references, close the **add service reference** window.
+**Service References** are a long-standing feature of Visual Studio. Depending on the type of project, the method of managing and adding service references varies, however, the above steps generally work across most project types. To manage existing references, close the **add service reference** window.
 
 ![image2](/images/adding-openapi-service-references/image2.png)
 
@@ -49,7 +49,7 @@ paths:
     # OpenAPI doc continues
 ```
 
-The OpenAPI specification allows for defining **[API servers and base URLs](https://swagger.io/docs/specification/api-host-and-base-path/)** to allow an API doc to not only define the functionality but also where the API is hosted. If the service reference is added with a **servers** section, the generated client will include a **BaseUrl** property which defaults to the server property instead of the **base url of the HttpClient**. If the **servers** section is missing, the constructor of the client requires the baseurl to be provided. The `/UseBaseUrl:false` argument has been added so that the **BaseAddress of the HttpClient** is used instead which I prefer as it fits better with the **Microsoft.Extensions.Http** patterns.
+The OpenAPI specification allows for defining **[API servers and base URLs](https://swagger.io/docs/specification/api-host-and-base-path/)** to allow an API doc to not only define the functionality but also where the API is hosted. If the service reference is added with a **servers** section, the generated client will include a **BaseUrl** property which defaults to the server property instead of the **base URL of the HttpClient**. If the **servers** section is missing, the constructor of the client requires the base URL to be provided. The `/UseBaseUrl:false` argument has been added so that the **BaseAddress of the HttpClient** is used instead which I prefer as it fits better with the **Microsoft.Extensions.Http** patterns.
 
 ## Injecting the Proxy Client
 
@@ -68,7 +68,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
 ```
 
-With the API client now being generated, the next step is to register the client with **dependency injection** to start making use of the client. As mentioned in **[adding a service reference](#adding-a-service-reference)** I prefer to make use of **Microsoft.Extensions.Http** due to it being a well established pattern as well many other benefits including:
+With the API client now being generated, the next step is to register the client with **dependency injection** to start making use of the client. As mentioned in **[adding a service reference](#adding-a-service-reference)** I prefer to make use of **Microsoft.Extensions.Http** due to it being a well-established pattern as well as many other benefits including:
 
 - Centralising the definition and naming of HttpClients for different services/OpenAPI clients
 - Automatically handling the lifetime of the HttpClient including pooling
@@ -98,11 +98,11 @@ public class Worker : BackgroundService
 }
 ```
 
-The registered API client can then be injected into your own services like above. In the **sample solution** the `/GenerateClientInterfaces:true` argument has also been added so that an **interface** can be injected instead of a **concrete class** to improve unit testing by being able to mock the interface.
+The registered API client can then be injected into your services like above. In the **sample solution** the `/GenerateClientInterfaces:true` argument has also been added so that an **interface** can be injected instead of a **concrete class** to improve unit testing by being able to mock the interface.
 
 ## Sum up
 
-For this post we've walked through the steps of adding an OpenAPI service reference as well as how to consume and use that API. As mentioned, there are many other ways of consuming an API, however, this approach keeps the custom code to a minimum which also makes getting started quicker. The dependency injection of the HttpClient has also been kept standard to take full advantage of **Microsoft.Extensions.Http**. As always, I hope this has been useful.
+For this post, we've walked through the steps of adding an OpenAPI service reference as well as how to consume and use that API. As mentioned, there are many other ways of consuming an API, however, this approach keeps the custom code to a minimum which also makes getting started quicker. The dependency injection of the HttpClient has also been kept standard to take full advantage of **Microsoft.Extensions.Http**. As always, I hope this has been useful.
 
 ## References
 

@@ -36,7 +36,8 @@
 				"DavidAnson.vscode-markdownlint",
 				"DotJoshJohnson.xml",
 				"streetsidesoftware.code-spell-checker",
-				"bierner.markdown-mermaid"
+				"bierner.markdown-mermaid",
+				"github.vscode-github-actions"
 			],
 			"settings": {
 				"terminal.integrated.defaultProfile.linux": "pwsh"

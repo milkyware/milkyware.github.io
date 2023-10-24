@@ -9,7 +9,7 @@ tags:
   - Swagger
 ---
 
-This post is about an issue me and a colleague encountered recently whilst developing a series of **layered APIs**. The issue was that nullable properties weren't being documented correctly resulting in deserialization errors in the clients and I wanted to share how we fixed it as well as the resources used.
+This post is about an issue a colleague and I encountered recently whilst developing a series of **layered APIs**. The issue was that nullable properties weren't being documented correctly resulting in deserialization errors in the clients and I wanted to share how we fixed it as well as the resources used.
 
 ## The scenario
 
@@ -21,11 +21,11 @@ As a brief description of what layered APIs are, it's a methodology known as **[
 - Composing processes
 - Delivering user experiences
 
-In this scenario a number of ***system APIs*** were developed to wrap around backend databases and datasets with a ***process API*** orchestrating these to represent the business processes. All of these APIs are documented using **[Azure Function OpenAPI Extensions](https://github.com/Azure/azure-functions-openapi-extension)** which would then be fronted by an APIM instance and consumed as a client.
+In this scenario, several ***system APIs*** were developed to wrap around backend databases and datasets with a ***process API*** orchestrating these to represent the business processes. All of these APIs are documented using **[Azure Function OpenAPI Extensions](https://github.com/Azure/azure-functions-openapi-extension)** which would then be fronted by an APIM instance and consumed as a client.
 
 ## The issue with nullables
 
-By default, the Azure Function Open API extensions uses **[Swagger v2](https://github.com/Azure/azure-functions-openapi-extension/blob/ab184cbf3c8ff16378cfa00fa1cb23cb58ac1727/docs/openapi.md#configure-openapi-information)** which **[DOES NOT support null](https://dev.to/frolovdev/openapi-spec-swagger-v2-vs-v3-4o7c)**.
+By default, the Azure Function Open API extensions use **[Swagger v2](https://github.com/Azure/azure-functions-openapi-extension/blob/ab184cbf3c8ff16378cfa00fa1cb23cb58ac1727/docs/openapi.md#configure-openapi-information)** which **[DOES NOT support null](https://dev.to/frolovdev/openapi-spec-swagger-v2-vs-v3-4o7c)**.
 
 ``` cs
 public class Address
@@ -51,7 +51,7 @@ Some of the models in the **system APIs** contain **nullable properties** which 
 }
 ```
 
-After some research we came across the limitations of **Swagger v2** with nullables and the defaults of the OpenAPI extensions. The config for these extensions can be modified using environment variables, however, these are typically defined in **local.settings.json** which often are ignored in Git repos resulting in the config being reset when being cloned.
+After some research, we came across the limitations of **Swagger v2** with nullables and the defaults of the OpenAPI extensions. The config for these extensions can be modified using environment variables, however, these are typically defined in **local.settings.json** which often are ignored in Git repos resulting in the config being reset when being cloned.
 
 ``` cs
 public class Startup : FunctionsStartup
@@ -90,7 +90,7 @@ Above is the resulting OpenAPI model with **OpenAPI v3** enabled. For our **syst
 
 ## Summing up
 
-Although the actual config to fix this issue wasn't big, it was the result  of a number of factors including:
+Although the actual config to fix this issue wasn't big, it was the result  of several factors including:
 
 - OpenAPI extension defaults
 - Limitations of Swagger v2

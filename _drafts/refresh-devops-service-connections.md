@@ -30,7 +30,41 @@ For this post, I've prepared a sample **[GitHub repo](https://github.com/milkywa
 
 ## The automation
 
+For the automation I've used **[Az CLI](https://github.com/Azure/azure-cli)** and **[PowerShell (Core)](https://github.com/PowerShell/PowerShell)**.
+
+``` powershell
+$appRegs = az ad app list --all | ConvertFrom-Json
+```
+
+I tend to use Az CLI for interacting with Azure due to it being very terse in terms of usage and typically better supported for the services I use. I then use PowerShell for orchestrating the logic and `ConvertFrom-Json` to access the JSON responses from Az CLI.
+
+The automation is composed of 3 scripts:
+
+- GetExpiringAppRegs.ps1
+- DeployDevOpsConnections.ps1
+- RefreshDevOpsConnections.ps1 - This is a wrapper around the first 2 scripts
+
 ### Getting expired/expiring App Regs
+
+Although **GetExpiringAppRegs.ps1** is used as part of refreshing service connections, it is designed to be generic to report on **expired/expiring Azure App Registrations**.
+
+```
+PS C:\> .\GetExpiringAppRegs.ps1
+
+Name      : expiring-appreg1
+ObjectId  : objectId1
+AppId     : appId1
+Notes     : 
+ExpiresOn : 10/11/2023 00:00:00
+
+Name      : expiring-appreg2
+ObjectId  : objectId2
+AppId     : appId2
+Notes     : 
+ExpiresOn : 28/10/2023 23:00:00
+```
+
+This is effectively a wrapper around the `az ad app list --all` command which then processes the response based on some optional regex and a ***warning window*** on the expiration of secrets.
 
 ### Updating the credentials
 

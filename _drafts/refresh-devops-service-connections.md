@@ -48,7 +48,7 @@ The automation is composed of 3 scripts:
 
 Although **GetExpiringAppRegs.ps1** is used as part of refreshing service connections, it is designed to be generic to report on **expired/expiring Azure App Registrations**.
 
-```
+``` cmd
 PS C:\> .\GetExpiringAppRegs.ps1
 
 Name      : expiring-appreg1
@@ -67,5 +67,37 @@ ExpiresOn : 28/10/2023 23:00:00
 This is effectively a wrapper around the `az ad app list --all` command which then processes the response based on some optional regex and a ***warning window*** on the expiration of secrets.
 
 ### Updating the credentials
+
+Once the **RefreshDevOpsConnections.ps1** has a list of expiring app regs, these are looped through to evaluate and trigger the refresh process.
+
+``` powershell
+$existingServiceConnections = az devops service-endpoint list --organization $Organisation --project $Project | ConvertFrom-Json
+
+foreach ($ar in $appRegs)
+{
+    $serviceConnections = $existingServiceConnections | Where-Object {$_.authorization.parameters.serviceprincipalid -eq $ar.AppId}
+
+    if ($serviceConnections.Count -eq 0)
+    {
+        continue;
+    }
+    $subscriptions = $serviceConnections.data.subscriptionName
+
+    $deployDevOpsConnectionParams = @{
+        Organisation = $Organisation
+        Project = $Project
+        Token = $Token
+        AppReg = $($ar.Name)
+        Subscriptions = $subscriptions
+    }
+    ...
+}
+```
+
+Above is an abbreviated version of the sample script. For each app reg, the **appId** is compared against the list of existing DevOps service connections. Where service connections are found, the **DeployDevOpsConnections.ps1** is triggered.
+
+``` powershell
+
+```
 
 ## Sum Up

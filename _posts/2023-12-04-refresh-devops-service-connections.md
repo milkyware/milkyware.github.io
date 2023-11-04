@@ -109,7 +109,7 @@ Similar to the **[GetExpiringAppRegs.ps1](#getting-expiredexpiring-app-regs)** s
 
 ``` powershell
 Write-Debug "Checking for existing service connection for $AppRegName to $SubscriptionName"
-$serviceConnection = az devops service-endpoint list --organization $Organisation --project $Project | ConvertFrom-Json | Where-Object {$_.authorization.parameters.serviceprincipalid -match "$($ar.AppId)" -and $_.data.subscriptionName -eq $SubscriptionName}
+$serviceConnection = az devops service-endpoint list --organization $Organisation --project $Project | ConvertFrom-Json | Where-Object {$_.authorization.parameters.serviceprincipalid -match "$AppRegId" -and $_.data.subscriptionName -eq $SubscriptionName}
 if ($serviceConnection) 
 {
     $serviceConnectionFile = [System.IO.Path]::GetTempFileName()

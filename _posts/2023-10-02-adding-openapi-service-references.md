@@ -3,6 +3,8 @@ title: Adding OpenAPI Service References
 header:
   image: '/images/adding-openapi-service-references/header.svg'
 category: Integration
+tags:
+  - OpenAPI
 ---
 
 As an integration developer, one of the most common requirements I deal with is **consuming APIs** to integrate with different systems. There is still a wide variety of API types from older **SOAP** services to modern **[GraphQL](https://graphql.org/) and [gRPC](https://grpc.io/)** services. The most common style of API I use currently is **RESTful HTTP** APIs documented using **Swagger/OpenAPI documents**.

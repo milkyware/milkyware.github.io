@@ -12,9 +12,9 @@ tags:
   - .NET Core
 ---
 
-When Microsoft started codebase migration from .NET Framework to .NET Core (now simply .NET), a number of features were to remain on .NET Framework. One such feature was the **server-side** codebase of **WCF** preventing WCF from being hosted in a .NET Core app.
+When Microsoft started porting .NET Framework to .NET Core (now simply .NET), some features were to remain on .NET Framework. One such feature was the **server-side** codebase of **WCF** preventing WCF from being hosted in .NET Core apps.
 
-Although Microsoft have deprecated WCF, I have found quite of lot of legacy applications rely on WCF for integration. In an ideal world, the integration would be migrated to more modern **REST or GraphQL** endpoints and the consuming application updated. However, this is often not possible. Fortunately, the .NET community have revived WCF server-side through **Core WCF**.
+Although Microsoft has deprecated WCF, I have found many legacy applications rely on WCF for integration. In an ideal world, the integration would be migrated to more modern **REST or GraphQL** endpoints and the consuming application updated. However, this is often not possible. Fortunately, the .NET community have revived WCF server-side through **Core WCF**.
 
 ## What is [Core WCF](https://github.com/CoreWCF/CoreWCF)?
 
@@ -22,13 +22,13 @@ Core WCF **"is a port of the service side of Windows Communication Foundation (W
 
 ## Creating the WCF Endpoint
 
-The Core WCF project provides a **[comprehensive walkthrough](https://github.com/CoreWCF/CoreWCF/blob/main/Documentation/Walkthrough.md)** of creating a new WCF service and endpoint from scratch. There are also posts on migrating **[C# WCF definitions to CoreWCF](https://devblogs.microsoft.com/dotnet/upgrading-a-wcf-service-to-dotnet-6/)**.
+The Core WCF project provides a **[comprehensive walkthrough](https://github.com/CoreWCF/CoreWCF/blob/main/Documentation/Walkthrough.md)** of creating a new WCF service and endpoint from scratch. There are also posts on migrating C# WCF definitions to CoreWCF such as **[this post](https://devblogs.microsoft.com/dotnet/upgrading-a-wcf-service-to-dotnet-6/)**.
 
-However, some integration solutions don't have C# contract definitions that can be migrated, such as BizTalk WCF receive locations. This post will focus on the scenario of taking an **existing WSDL** to generate an equivalent WCF endpoint in Core WCF.
+However, some integration solutions don't have C# contract definitions that can be migrated, such as BizTalk WCF receive locations. This post will focus on the scenario of using an **existing WSDL** to generate an equivalent WCF endpoint in Core WCF.
 
 ### Generating the Service Contract from a WSDL
 
-To generate **WCF proxy clients**, Microsoft provide **[dotnet-svcutil](https://learn.microsoft.com/en-us/dotnet/core/additional-tools/dotnet-svcutil-guide?tabs=dotnetsvcutil2x)** which can generate the relevant C# objects from a WSDL file or endpoint. To install this tool run the below command:
+To generate **WCF proxy clients**, Microsoft provide **[dotnet-svcutil](https://learn.microsoft.com/en-us/dotnet/core/additional-tools/dotnet-svcutil-guide?tabs=dotnetsvcutil2x)** which can generate the relevant C# objects from a WSDL file or endpoint. To install this tool, run the command below:
 
 ``` powershell
 dotnet tool install dotnet-svcutil --global --version "2.2.0-preview1.23462.5"
@@ -80,7 +80,7 @@ Depending on what the WSDL contains, the generated interface may not follow the 
 
 #### Fix namespaces
 
-As the WCF **client-side code** is still in .NET, the **System.ServiceModel** namespace needs to be replaced with the namespace **CoreWCF**. Typically, the generated code uses fully qualified class names and attributes, therefore, **CoreWCF** can be added as a using statement and System.ServiceModel removed using find and replace.
+As the WCF **client-side code** is still in .NET, the **System.ServiceModel** namespace needs to be replaced with the namespace **CoreWCF**. Typically, the generated code uses fully qualified class names and attributes, therefore, **CoreWCF** can be added as a using statement and **System.ServiceModel** removed using find and replace.
 
 ``` cs
 using CoreWCF; 
@@ -144,8 +144,7 @@ public class WcfService : IWcfService
 
 To register the generated **ServiceContract** and implemented service, the simplest way is to follow the **[walkthrough provided by CoreWCF](#what-is-core-wcf)** and replace the sample ServiceContract and implementation.
 
-![image2](/images/
-from-wsdl/image2.png)
+![image2](/images/recreating-wcf-service-in-dotnet-core-from-wsdl/image2.png)
 
 One thing to note, in the above C# snippet, **ILogger** is injected as is typical of an ASPNET Core app. The sample project in the walkthrough **does demonstrate dependency injection**. To allow services to be injected, the implemented WCF service needs to be added to the **ServiceCollection**
 
@@ -174,3 +173,5 @@ app.Run();
 In the above code, the **WcfService** implementation is added as a transient service using `builder.Services.AddTransient<WcfService>();` so that its dependencies are injected when the service is constructed.
 
 ## Sum up
+
+In this post, we've looked at how to create an equivalent WCF service hosted in ASPNET Core using Core WCF by generating the contract from a WSDL. By maintaining the same WCF contract, the integration can be swapped out with minimal changes to the consuming application.

@@ -6,6 +6,7 @@ category: Integration
 tags:
   - WCF
   - DotNet Core
+  - .NET
   - .NET Core
 ---
 
@@ -65,8 +66,104 @@ namespace Namespace.To.Use
 }
 ```
 
-
-
 ### Cleaning up the code
+
+As mentioned, **dotnet-svcutil** is primarily used to create WCF proxy clients in **.NET**. However, with a few changes, the generated **Reference.cs** can be used to define the Core WCF service.
+
+#### Renaming the interface
+
+Depending on what the WSDL contains, the generated interface may not follow the typical convention of ***IServiceName***. Therefore I typically rename the interface to follow this convention.
+
+#### Fix namespaces
+
+As the WCF **client-side code** is still in .NET, the **System.ServiceModel** namespace needs to be replaced with the namespace **CoreWCF**. Typically, the generated code uses fully qualified class names and attributes, therefore, **CoreWCF** can be added as a using statement and System.ServiceModel removed using find and replace.
+
+``` cs
+using CoreWCF; 
+
+namespace Namespace.To.Use
+{
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.2.0-preview1.23462.5")]
+    [ServiceContractAttribute(Namespace="http://sample.xmlns.com", ConfigurationName="WcfService")]
+    public interface WcfService
+    {
+        ...
+    }
+
+    ...
+}
+```
+
+#### Fix attribute convention
+
+Another tidy-up step is to remove the **Attribute** suffix to follow C# convention. Once again, this can be done using **find and replace** e.g. ServiceContractAttribute becomes ServiceContract.
+
+#### Remove OperationContract ReplyAction
+
+The generated operations may include the attribute property **ReplyAction**.
+
+``` cs
+[OperationContract(Action="MyOperation", ReplyAction="*")]
+[XmlSerializerFormat(SupportFaults=true)]
+System.Threading.Tasks.Task<myOperationResponse> myOperationAsync(myOperationRequest request);
+```
+
+This can cause issues when consuming the WSDL of the CoreWCF service. After some research, **[a StackOverflow post](https://stackoverflow.com/questions/32760079/wcf-the-contract-x-in-client-configuration-does-not-match-the-name-in-service)** suggested removing these properties which has so far resolved the issue.
+
+![image1](/images/recreating-wcf-service-in-dotnet-core/image1.png)
+
+### Implementing the service
+
+With the WCF contract generated and tidied up, the service can now be implemented in a service class.
+
+``` cs
+public class WcfService : IWcfService
+  {
+      private readonly ILogger _logger;
+
+      public WcfService(ILogger<WcfService> logger)
+      {
+          _logger = logger;
+      }
+
+      public string GetData(int value)
+      {
+          throw new NotImplementedException();
+      }
+
+      public CompositeType GetDataUsingDataContract(CompositeType composite)
+      {
+          throw new NotImplementedException();
+      }
+  }
+```
+
+To register the generated **ServiceContract** and implemented service, the simplest way is to follow the **[walkthrough provided by CoreWCF](#what-is-core-wcf)** and replace the sample ServiceContract and implementation.
+
+![image2](/images/recreating-wcf-service-in-dotnet-core/image2.png)
+
+One thing to note, in the above C# snippet, **ILogger** is injected as is typical of an ASPNET Core app. The sample project in the walkthrough **does demonstrate dependency injection**. To allow services to be injected, the implemented WCF service needs to be added to the **ServiceCollection**
+
+``` cs
+var builder = WebApplication.CreateBuilder();
+
+builder.Services.AddServiceModelServices();
+builder.Services.AddServiceModelMetadata();
+builder.Services.AddSingleton<IServiceBehavior, UseRequestHeadersForMetadataAddressBehavior>();
+
+builder.Services.AddTransient<WcfService>();
+
+var app = builder.Build();
+
+app.UseServiceModel(serviceBuilder =>
+{
+    serviceBuilder.AddService<WcfService>();
+    serviceBuilder.AddServiceEndpoint<WcfService, IWcfService>(new BasicHttpBinding(BasicHttpSecurityMode.Transport), "/Service.svc");
+    var serviceMetadataBehavior = app.Services.GetRequiredService<ServiceMetadataBehavior>();
+    serviceMetadataBehavior.HttpsGetEnabled = true;
+});
+
+app.Run();
+```
 
 ## Sum up

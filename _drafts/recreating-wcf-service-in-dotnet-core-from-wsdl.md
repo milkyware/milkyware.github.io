@@ -10,21 +10,22 @@ tags:
   - DotNet Core
   - .NET
   - .NET Core
+  - CoreWCF
 ---
 
 When Microsoft started porting .NET Framework to .NET Core (now simply .NET), some features were to remain on .NET Framework. One such feature was the **server-side** codebase of **WCF** preventing WCF from being hosted in .NET Core apps.
 
-Although Microsoft has deprecated WCF, I have found many legacy applications rely on WCF for integration. In an ideal world, the integration would be migrated to more modern **REST or GraphQL** endpoints and the consuming application updated. However, this is often not possible. Fortunately, the .NET community have revived WCF server-side through **Core WCF**.
+Although Microsoft has deprecated WCF, I have found many legacy applications rely on WCF for integration. In an ideal world, the integration would be migrated to more modern **REST or GraphQL** endpoints and the consuming application updated. However, this is often not possible. Fortunately, the .NET community have revived WCF server-side through **CoreWCF**.
 
-## What is [Core WCF](https://github.com/CoreWCF/CoreWCF)?
+## What is [CoreWCF](https://github.com/CoreWCF/CoreWCF)?
 
-Core WCF **"is a port of the service side of Windows Communication Foundation (WCF) to .NET Core"**. This adds the capability of hosting a WCF endpoint in an **ASPNET Core** application along with its **[many benefits](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/choose-aspnet-framework?view=aspnetcore-8.0#aspnet-core)**.
+CoreWCF **"is a port of the service side of Windows Communication Foundation (WCF) to .NET Core"**. This adds the capability of hosting a WCF endpoint in an **ASPNET Core** application along with its **[many benefits](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/choose-aspnet-framework?view=aspnetcore-8.0#aspnet-core)**.
 
 ## Creating the WCF Endpoint
 
-The Core WCF project provides a **[comprehensive walkthrough](https://github.com/CoreWCF/CoreWCF/blob/main/Documentation/Walkthrough.md)** of creating a new WCF service and endpoint from scratch. There are also posts on migrating C# WCF definitions to CoreWCF such as **[this post](https://devblogs.microsoft.com/dotnet/upgrading-a-wcf-service-to-dotnet-6/)**.
+The CoreWCF project provides a **[comprehensive walkthrough](https://github.com/CoreWCF/CoreWCF/blob/main/Documentation/Walkthrough.md)** of creating a new WCF service and endpoint from scratch. There are also posts on migrating C# WCF definitions to CoreWCF such as **[this post](https://devblogs.microsoft.com/dotnet/upgrading-a-wcf-service-to-dotnet-6/)**.
 
-However, some integration solutions don't have C# contract definitions that can be migrated, such as BizTalk WCF receive locations. This post will focus on the scenario of using an **existing WSDL** to generate an equivalent WCF endpoint in Core WCF.
+However, some integration solutions don't have C# contract definitions that can be migrated, such as BizTalk WCF receive locations. This post will focus on the scenario of using an **existing WSDL** to generate an equivalent WCF endpoint in CoreWCF.
 
 ### Generating the Service Contract from a WSDL
 
@@ -72,7 +73,7 @@ namespace Namespace.To.Use
 
 ### Cleaning up the code
 
-As mentioned, **dotnet-svcutil** is primarily used to create WCF proxy clients in **.NET**. However, with a few changes, the generated **Reference.cs** can be used to define the Core WCF service.
+As mentioned, **dotnet-svcutil** is primarily used to create WCF proxy clients in **.NET**. However, with a few changes, the generated **Reference.cs** can be used to define the CoreWCF service.
 
 #### Renaming the interface
 
@@ -174,4 +175,4 @@ In the above code, the **WcfService** implementation is added as a transient ser
 
 ## Sum up
 
-In this post, we've looked at how to create an equivalent WCF service hosted in ASPNET Core using Core WCF by generating the contract from a WSDL. By maintaining the same WCF contract, the integration can be swapped out with minimal changes to the consuming application.
+In this post, we've looked at how to create an equivalent WCF service hosted in ASPNET Core using CoreWCF by generating the contract from a WSDL. By maintaining the same WCF contract, the integration can be swapped out with minimal changes to the consuming application.

@@ -115,10 +115,27 @@ defaults:
 
 # Reading Files
 exclude:
+  - .asset-cache
+  - .bundle
+  - .jekyll-assets-cache
+  - .sass-cache
   - /.vscode
-  - LICENSE
-  - README
   - /images/diagrams.drawio
+  - assets/js/_main.js
+  - assets/js/plugins
+  - assets/js/vendor
+  - Capfile
+  - CHANGELOG
+  - config
+  - LICENSE
+  - LICENSE
+  - log
+  - node_modules
+  - package.json
+  - README
+  - README.md
+  - tmp
+  - vendor
 
 # Conversion
 excerpt_separator: "\n\n"

@@ -1,5 +1,6 @@
 ---
 title: Mermaid JS Support for Minimal Mistakes
+last_modified_at: 2023-12-21
 header:
   image: '/images/mermaid-js-support-for-minimal-mistakes/header.webp'
 tags:
@@ -8,9 +9,15 @@ tags:
   - Mermaid JS
   - GitHub Pages
   - Minimal Mistakes
+  - Theme
+  - Skin
 ---
 
 In the last 6 months I've started to use **Mermaid JS** to draft integration designs as well as document implemented integration applications. There is a lot of support for this tool, however, it's not supported natively as part of **GitHub Pages**. In this post I'll introduce what Mermaid is, some of the benefits and how to add support for GitHub Pages, specifically the **Minimal Mistakes** theme.
+
+## UPDATE
+
+The sample **mermaid.js** script has been updated to make use of liquid templates to resolve the currently configured **Minimal Mistakes skin** so that if the skin is changed, the **MermaidJS theme** will change to a complementing schema.
 
 ## What is Mermaid JS?
 
@@ -74,8 +81,8 @@ This HTML is **[not the default format that Mermaid expects](https://mermaid.js.
 ---
 ---
 $(document).ready(function () {
-    var skin = "{{ site.minimal_mistakes_skin }}"
-    var theme = {
+    var mmSkin = "{{ site.minimal_mistakes_skin }}"
+    var mjsTheme = {
       "air": "default",
       "aqua": "default",
       "contrast": "default",
@@ -86,13 +93,14 @@ $(document).ready(function () {
       "neon": "dark",
       "plum": "dark",
       "sunrise": "default"
-    }[skin]
-    var config = {
-      startOnLoad:true,
-      theme: theme,
-    }
-    mermaid.initialize(config)
-    window.mermaid.init(config, document.querySelectorAll('.language-mermaid'));
+    }[mmSkin]
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: mjsTheme
+    })
+    mermaid.init({
+      theme: mjsTheme
+    }, '.language-mermaid');
   });
 ```
 

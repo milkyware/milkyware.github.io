@@ -15,10 +15,6 @@ tags:
 
 In the last 6 months I've started to use **Mermaid JS** to draft integration designs as well as document implemented integration applications. There is a lot of support for this tool, however, it's not supported natively as part of **GitHub Pages**. In this post I'll introduce what Mermaid is, some of the benefits and how to add support for GitHub Pages, specifically the **Minimal Mistakes** theme.
 
-## UPDATE
-
-The sample **mermaid.js** script has been updated to make use of liquid templates to resolve the currently configured **Minimal Mistakes skin** so that if the skin is changed, the **MermaidJS theme** will change to a complementing schema.
-
 ## What is Mermaid JS?
 
 **[Mermaid JS](https://mermaid.js.org)** is a **JavaScript based** tool for rendering a variety of diagrams styles using a **Markdown-style** syntax. Some of the supported diagrams include:
@@ -117,3 +113,7 @@ after_footer_scripts:
 ## Summary
 
 Mermaid JS is an incredibly useful tool for planning and diagramming. In this post we've add support for Mermaid in Minimal Mistakes without the need for 3rd party extensions or plugins.
+
+## Update
+
+The sample **mermaid.js** script has been updated to make use of liquid templates to resolve the currently configured **Minimal Mistakes skin** so that if the skin is changed, the **MermaidJS theme** will change to a complementing schema.

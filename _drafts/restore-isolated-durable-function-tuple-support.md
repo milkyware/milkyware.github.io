@@ -1,7 +1,5 @@
 ---
 title: Restore Isolated Durable Function Tuple Support
-header:
-  image: '/images/restore-isolated-durable-function-tuple-support/header.png'
 category: Integration
 tags:
   - Azure Function

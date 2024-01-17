@@ -1,7 +1,5 @@
 ---
 title: Recreating WCF Service in DotNet Core from WSDL
-header:
-  image: '/images/recreating-wcf-service-in-dotnet-core-from-wsdl/header.png'
 category: Integration
 tags:
   - BizTalk

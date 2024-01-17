@@ -20,7 +20,7 @@ Console.WriteLine($"{tuple.Item1} {tuple.Item2}");
 // "Hello World"
 ```
 
-In the above example, two strings of **"Hello" and "World"** are used to create a Tuple which is then printed. Tuples can also be created from multiple complex objects.
+In the above example, the two strings of **"Hello" and "World"** are used to create a Tuple which is then printed. Tuples can also be created from multiple complex objects.
 
 ## Sample Project
 
@@ -42,7 +42,7 @@ public async Task RunAsync([OrchestrationTrigger] TaskOrchestrationContext conte
 }
 ```
 
-As per **[Microsofts docs](https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-types-features-overview#activity-functions)**, Tuples can be used to pass multiple inputs to a durable function without having to create a wrapper complex object.
+As per **[Microsoft docs](https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-types-features-overview#activity-functions)**, Tuples can be used to pass multiple inputs to a durable function without having to create a wrapper complex object.
 
 ``` csharp
 [Function(nameof(ActivityMapper))]
@@ -53,7 +53,7 @@ public string RunAsync([ActivityTrigger] (Model1, Model2, Model3) input)
 }
 ```
 
-If the above examples are run in a new **DotNet isolated** project, the ***item* members** of the input tuple will all be **null**. After some research, one of the changes from the in-process to isolated model is that the JSON serializer has been swapped **[from Newtonsoft to System.Text.Json](https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-dotnet-isolated-overview#behavioral-changes)**. By default Newtonsoft serializes **[all public fields and properties](https://www.newtonsoft.com/json/help/html/serializationguide.htm)**, however, by default System.Text.Json **[doesn't include fields](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/fields)**. As shorthand Tuples (ValueTuples) such as in the example uses **fields** for the items, these aren't serialized when used as an input for a durable function.
+If the above examples are run in a new **DotNet isolated** project, the ***item* members** of the input tuple will all be **null**. After some research, one of the changes from the in-process to isolated model is that the JSON serializer has been swapped **[from Newtonsoft to System.Text.Json](https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-dotnet-isolated-overview#behavioral-changes)**. By default Newtonsoft serializes **[all public fields and properties](https://www.newtonsoft.com/json/help/html/serializationguide.htm)**, however, by default System.Text.Json **[doesn't include fields](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/fields)**. As shorthand Tuples (ValueTuples) such as in the example use **fields** for the items, these aren't serialized when used as an input for a durable function.
 
 ``` csharp
 var host = new HostBuilder()
@@ -69,4 +69,4 @@ var host = new HostBuilder()
 host.Run();
 ```
 
-To restore being able to use Tuples as inputs, the **JsonSerializerOptions** can be configured in the **Program.cs** to toggle to inclusion of fields in the System.Text.Json (de)serialization process. Although this is a simple fix, the impact of the serializer change isn't particularly mentioned in the docs and thought it would be useful to document the impact on using Tuples.
+To restore the ability to use Tuples as inputs, the **JsonSerializerOptions** can be configured in the **Program.cs** to toggle to inclusion of fields in the System.Text.Json (de)serialization process. Although this is a simple fix, the impact of the serializer change isn't particularly mentioned in the docs and thought it would be useful to document the impact on using Tuples.

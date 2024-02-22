@@ -8,7 +8,7 @@ tags:
   - Error Handling
 ---
 
-Polling is a common pattern integration pattern for extracting data from one system to integrate it into another. Azure Functions makes implementing the scheduling incredibly easy with the **TimerTrigger** binding.
+Polling is a common integration pattern for extracting data from one system to integrate it into another. Azure Functions makes implementing the scheduling incredibly easy with the **TimerTrigger** binding.
 
 ``` cs
 [Function(nameof(TimerFunction))]

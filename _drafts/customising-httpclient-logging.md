@@ -111,8 +111,6 @@ info: HttpClientLoggingDemo.SampleService[0]
 
 Above is a sample section of the logs produced by an ASP.NET Core Web API being called by hosted service (all in the same project).
 
-## Enabling the built-in logging
-
 ## Customising using DelegatingHandler
 
 ## Customising using IHttpClientLogger

@@ -4,6 +4,9 @@ category: Integration
 tags:
   - HttpClient
   - Logging
+  - ILogger
+  - DelegatingHandler
+  - Dotnet
   - Dotnet Core
 ---
 

@@ -109,8 +109,57 @@ info: HttpClientLoggingDemo.SampleService[0]
       Received PostRequestAsync response
 ```
 
-Above is a sample section of the logs produced by an ASP.NET Core Web API being called by hosted service (all in the same project).
+Above is a sample section of the logs produced by an ASP.NET Core Web API being called by hosted service (all in the same project). With the **System.Net.Http.HttpClient** category set to **Trace** notice the logs for the categories:
 
-## Customising using DelegatingHandler
+- System.Net.Http.HttpClient.SampleService.ClientHandler
+- System.Net.Http.HttpClient.SampleService.LogicalHandler
 
-## Customising using IHttpClientLogger
+The configured category log level uses a **[prefix match matching algorithm](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-8.0#how-filtering-rules-are-applied)** meaning the sample appSettings will include all trace logs for all HttpClient instances.
+
+``` cs
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddHttpClient<SampleService>();
+builder.Services.AddHttpClient("SampleHttpClient");
+```
+
+However, the category also includes the **name of the HttpClient**. This can be an arbitrary string or, with the generic builder method, this will be the name of the service the HttpClient is injected into, meaning that the logs can be further fine-tuned to specific HttpClient instances.
+
+## Customising the logs
+
+### How does the default logging work?
+
+From the sample logs above you'll notice that the HttpClient includes some information logs of the API resource being hit and the verb being used as well as some trace logs of the request and response headers. Let's have a look at how this is implemented.
+
+``` cs
+namespace Microsoft.Extensions.DependencyInjection
+{
+    public static class HttpClientFactoryServiceCollectionExtensions
+    {
+        public static IServiceCollection AddHttpClient(this IServiceCollection services)
+        {
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, LoggingHttpMessageHandlerBuilderFilter>());
+
+            // omitted for brevity
+        }
+
+        // omitted for brevity
+    }
+}
+```
+
+When adding a HttpClient using the **[dependency injection extensions](https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Http/src/DependencyInjection/HttpClientFactoryServiceCollectionExtensions.cs)**, a **[LoggingHttpMessageHandlerBuilderFilter](https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Http/src/Logging/LoggingHttpMessageHandlerBuilderFilter.cs)** service is registered.
+
+``` cs
+string loggerName = !string.IsNullOrEmpty(builder.Name) ? builder.Name : "Default";
+
+ILogger outerLogger = LoggerFactory.CreateLogger($"System.Net.Http.HttpClient.{loggerName}.LogicalHandler");
+ILogger innerLogger = LoggerFactory.CreateLogger($"System.Net.Http.HttpClient.{loggerName}.ClientHandler");
+
+builder.AdditionalHandlers.Insert(0, new LoggingScopeHttpMessageHandler(outerLogger, options));
+
+builder.AdditionalHandlers.Add(new LoggingHttpMessageHandler(innerLogger, options));
+```
+
+### Customising using DelegatingHandler
+
+### Customising using IHttpClientLogger

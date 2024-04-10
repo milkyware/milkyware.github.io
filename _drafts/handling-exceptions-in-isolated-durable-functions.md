@@ -13,7 +13,7 @@ Exception handling is common place to attempt some functionality and, should exc
 
 ## Understanding the TaskFailedException
 
-In in-process Durable Functions, any exceptions which occurs when executing an activity function or sub-orchestration are passed back to the parent orchestration wrapped in a `FunctionFailedException`. However, in isolated Durable Functions this has changed.
+In in-process Durable Functions, any exceptions which occur when executing an activity function or sub-orchestration are passed back to the parent orchestration wrapped in a `FunctionFailedException`. However, in isolated Durable Functions this has changed.
 
 ``` cs
 [Function(nameof(OrchSample))]
@@ -38,7 +38,7 @@ Due to issues with serializing, `FunctionFailedException` was replaced with [`Ta
 
 ## Handling Exceptions in Isolated Durable Functions
 
-In traditional exception handling, the catch block would be customised to catch types of exception e.g. `(catch InvalidOperationException ex) {}`
+In traditional exception handling, the catch block could be customised to catch different types of exception e.g. `(catch InvalidOperationException ex) {}`
 
 ``` cs
 try
@@ -55,7 +55,7 @@ catch (TaskFailedException ex) when (ex.FailureDetails.IsCausedBy<TimeoutExcepti
 }
 ```
 
-As `TaskFailedException` effectively represents all exceptions from activities or sub-orchestrations we need to handle the different possible causes different. The `.IsCausedBy<T>()` method is available on the `FailureDetails` property to replicate the functionality of handling different exceptions in different ways. When this is combined with **[exception filters](https://learn.microsoft.com/en-us/dotnet/standard/exceptions/using-user-filtered-exception-handlers)**, this results in rather succinct exception handling.
+As `TaskFailedException` effectively represents all exceptions from activities or sub-orchestrations we need to handle the exceptions differently. The `.IsCausedBy<T>()` method is available on the `FailureDetails` property to replicate the functionality of handling different exception types. When this is combined with **[exception filters](https://learn.microsoft.com/en-us/dotnet/standard/exceptions/using-user-filtered-exception-handlers)**, this results in exception handling which is similar to the traditional approach.
 
 **N.B.** `.IsCausedBy<T>()` should not be confused with `.IsCausedByException<T>()` on the TaskFailedException itself as this method is now deprecated.
 

@@ -13,7 +13,7 @@ Exception handling is common place to attempt some functionality and, should exc
 
 ## Understanding the TaskFailedException
 
-In in-process Durable Functions, any exceptions which occurred in activity functions are passed back to the parent orchestration wrapped in a `FunctionFailedException`. However, in isolated Durable Functions this has changed.
+In in-process Durable Functions, any exceptions which occurs when executing an activity function or sub-orchestration are passed back to the parent orchestration wrapped in a `FunctionFailedException`. However, in isolated Durable Functions this has changed.
 
 ``` cs
 [Function(nameof(OrchSample))]
@@ -49,15 +49,72 @@ catch (TaskFailedException ex) when (ex.FailureDetails.IsCausedBy<InvalidOperati
 {
     // Handle invalid operation
 }
+catch (TaskFailedException ex) when (ex.FailureDetails.IsCausedBy<TimeoutException>())
+{
+    // Handle timeout
+}
 ```
 
-In traditional exception handling, the catch block would be customised to catch certain exception types. As `TaskFailedException` doesn't contain the inner exception, the `.IsCausedBy<T>()` method is available on the `FailureDetails` property.
+As `TaskFailedException` effectively represents all exceptions from activities or sub-orchestrations we need to handle the different possible causes different. The `.IsCausedBy<T>()` method is available on the `FailureDetails` property to replicate the functionality of handling different exceptions in different ways. When this is combined with **[exception filters](https://learn.microsoft.com/en-us/dotnet/standard/exceptions/using-user-filtered-exception-handlers)**, this results in rather succinct exception handling.
 
-**N.B.** `.IsCausedBy<T>()` should not be confused with `.IsCausedByException<T>()` on TaskFailedException as this method is not deprecated.
+**N.B.** `.IsCausedBy<T>()` should not be confused with `.IsCausedByException<T>()` on the TaskFailedException itself as this method is now deprecated.
 
 ### FailureDetails formatting issues
 
-Whilst working with the `TaskFailedException`, one issue I've noticed is that `FailureDetails.ErrorMessage`
+Whilst working with the `TaskFailedException`, one issue I've noticed is that `FailureDetails.ErrorMessage` only contains the first line of an exception message.
+
+``` cs
+[Function(nameof(RunOrch))]
+public async Task RunOrch([OrchestrationTrigger] TaskOrchestrationContext context)
+{
+    try
+    {
+        await context.CallActivityAsync(nameof(RunActivity));
+    }
+    catch (TaskFailedException ex)
+    {
+        _logger.LogInformation("ErrorMessage: {message}", ex.FailureDetails.ErrorMessage);
+    }
+}
+
+[Function(nameof(RunActivity))]
+public void RunActivity([ActivityTrigger] TaskActivityContext context)
+{
+    throw new InvalidOperationException($"A really bad error{Environment.NewLine}More detail you can't see");
+}
+```
+
+For example, given the example above where an exception is thrown with 2 lines in the message, the log will look like below:
+
+``` cmd
+[2024-04-10T21:57:50.215Z] ErrorMessage: A really bad error
+```
+
+From my troubleshooting, this seems to be related to how isolated Azure Functions **[throw exceptions](https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide?tabs=windows#logging)** and may wrap them in an `RpcException`.
+
+``` cs
+var host = new HostBuilder()
+    .ConfigureFunctionsWebApplication()
+    .ConfigureServices(services =>
+    {
+        services.Configure<WorkerOptions>(configure =>
+        {
+            configure.EnableUserCodeException = true;
+        });
+    })
+    .Build();
+```
+
+To remove the additional wrapping of exceptions, you can enable the **EnableUserCodeException**. The example uses the **IOptions .Configure() extension method** as this works for both the default isolated Azure Functions as well as the ASP.NET Core integrated.
+
+``` cmd
+[2024-04-10T22:21:36.256Z] ErrorMessage: A really bad error
+[2024-04-10T22:21:36.258Z] More detail you can't see
+```
+
+With this setting enabled, rerunning the sample orchestration will produce logs similar to above.
+
+**WARNING:** Enabling user code exceptions, although fixing multi-line exceptions messages, does seem to have the side-effect of causing `FailureDetails.ErrorType` to always return **(unknown)** which does cause the `IsCausedBy<T>()` functionality to break.
 
 ## BONUS: Workaround to include properties from custom exceptions
 

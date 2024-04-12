@@ -61,7 +61,7 @@ As `TaskFailedException` effectively represents all exceptions from activities o
 
 ### FailureDetails formatting issues
 
-Whilst working with the `TaskFailedException`, one issue I've noticed is that `FailureDetails.ErrorMessage` only contains the first line of an exception message.
+Whilst working with the `TaskFailedException`, one issue I've noticed is that `FailureDetails.ErrorMessage` only contains the first line of an exception message. At the time of writing, this is with thr current version of **Microsoft.Azure.Functions.Worker.Extensions.DurableTask v1.1.2**.
 
 ``` cs
 [Function(nameof(RunOrch))]
@@ -136,20 +136,28 @@ public class CustomException : Exception
             var sb = new StringBuilder();
 
             if (!string.IsNullOrWhiteSpace(base.Message))
-                sb.AppendLine(base.Message);
+                sb.Append($"{base.Message} ");
 
             if (!string.IsNullOrWhiteSpace(CustomString))
-                sb.AppendLine($"{nameof(CustomString)}={CustomString}");
+                sb.Append($"{nameof(CustomString)}={CustomString} ");
 
             if (CustomInt is not null)
-                sb.AppendLine($"{nameof(CustomInt)}={CustomInt}");
+                sb.Append($"{nameof(CustomInt)}={CustomInt} ");
 
-            return sb.ToString();
+            return sb.ToString().Trim();
         }
     }
 }
 ```
 
-As only the message is retained, my workaround to retain the properties was to override the `Message` property of the exception and reformat it to include the extra values. Overriding the message instead of `.ToString()` retains the native formatting of exceptions which is what's used to build the FailureDetails of TaskFailedException.
+As only the message is retained, my workaround to retain the properties was to override the `Message` property of the exception and reformat it to include the extra values. Overriding the message instead of `.ToString()` retains the default formatting of exceptions which `FailureDetails` depends on to be built properly.
+
+## Further Reading
+
+- **[GitHub Issue: `:` is a special character](https://github.com/Azure/azure-functions-durable-extension/issues/2711)**
+- **[GitHub Issue: Isolated Durable Function Inner exception being lost](https://github.com/Azure/azure-functions-durable-extension/issues/2697)**
 
 ## Wrapping Up
+
+I wanted to share this post to note down some of my findings from developing isolated Durable Functions.
+In this post, I wanted to share some of my notes and findings whilst developing exception handling in isolated Durable Functions. we've looked at how home exception handling has changed in isolated Durable Functions along with some practical examples of how to handle a `TaskFailedException`. We've also looked at a limitation of the current version in handling exception messages.

@@ -152,3 +152,4 @@ jobs:
 
 ### Using the template
 
+## Wrapping up

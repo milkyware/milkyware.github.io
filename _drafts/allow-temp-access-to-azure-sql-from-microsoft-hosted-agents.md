@@ -28,9 +28,40 @@ From a security standpoint, using **self-hosted or [VM scale-set](https://learn.
 
 ## Allowing Access from Microsoft-Hosted Agents
 
-The networking for Microsoft-hosted agents is changeable in that the **[public IP addresses vary over time](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#networking)**. There is also an added complication that the public IPs are shared with **all Microsoft-hosted agent users** and therefore any access given to an agent should be as limited as possible.
+The networking for Microsoft-hosted agents is changeable in that the **[public IP addresses vary over time](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#networking)**. There is also an added complication that the public IPs are shared with **all Microsoft-hosted agent users** and therefore any access given to an agent should be for as limited duration as possible.
 
-The solution I'd reached was to automate resolving the **public IP** of the agent running the pipeline and wrapping the ***SQL tasks*** in script to add and remove the resolved public IP.
+### Granting the temp access
+
+To automate allowing temporary public access from the agent, I developed the below Az Cli task.
+
+``` yaml
+- task: AzureCLI@2
+  name: AllowPipelineIP
+  displayName: Allow Pipeline IP
+  inputs:
+    azureSubscription: ${{parameters.azureSubscription}}
+    scriptType: pscore
+    scriptLocation: inlineScript
+    inlineScript: |
+      $sqlServer = az sql server show -g "${{parameters.resourceGroupName}}" -n "${{parameters.sqlServerName}}" | ConvertFrom-Json
+      $tempPublicAccess = $sqlServer.publicNetworkAccess -ieq "Disabled"
+      Write-Host "##vso[task.setvariable variable=TempPublicAccess]$tempPublicAccess"
+
+      if ($tempPublicAccess)
+      {
+        az sql server update -g "${{parameters.resourceGroupName}}" -n "${{parameters.sqlServerName}}" --set publicNetworkAccess="Enabled" | Out-Null
+      }
+
+      $ip = Invoke-RestMethod -Uri "https://ifconfig.me"
+      Write-Host "##vso[task.setvariable variable=IP]$ip"
+
+      az sql server firewall-rule create -g "${{parameters.resourceGroupName}}" -s "${{parameters.sqlServerName}}" -n $ip --start-ip-address $ip --end-ip-address $ip | Out-Null
+```
+
+The script firstly assesses whether **public access** has already been enabled for the Azure SQL Server instance. If not already enabled, it is enabled and a **pipeline variable** used to persist this flag for later use. **ifconfig.me** is then used to resolve the public IP of the agent and creates a firewall ruling to allow the agent access.
+
+### Removing the temp access
+
 
 ### An Azure Pipeline Template to Automate Access
 
@@ -38,11 +69,11 @@ Below is an Azure Pipeline template I've prepared which:
 
 - Resolves the public IP of the agent
 - Check if public access is already enabled
-  - Enables public access if not already
+  - Enables temp public access if not already
 - Adds temp firewall rule for the public IP
 - Runs a parametrised set of **steps/tasks**
 - Removes temp firewall rule
-- Disables public access if enabled by this pipeline
+- Disables temp public access if enabled by this pipeline
 
 ``` yaml
 parameters:
@@ -97,7 +128,7 @@ jobs:
                   }
 
                   Write-Debug "Checking SQL public access"
-                  $sqlServer = az sql server show -g ${{parameters.resourceGroupName}} -n ${{parameters.sqlServerName}} | ConvertFrom-Json
+                  $sqlServer = az sql server show -g "${{parameters.resourceGroupName}}" -n "${{parameters.sqlServerName}}" | ConvertFrom-Json
                   $tempPublicAccess = $sqlServer.publicNetworkAccess -ieq "Disabled"
                   Write-Verbose "tempPublicAccess=$tempPublicAccess"
                   Write-Host "##vso[task.setvariable variable=TempPublicAccess]$tempPublicAccess"
@@ -105,7 +136,7 @@ jobs:
                   if ($tempPublicAccess)
                   {
                     Write-Information "Temp enable public access"
-                    az sql server update -g ${{parameters.resourceGroupName}} -n ${{parameters.sqlServerName}} --set publicNetworkAccess="Enabled" | Out-Null
+                    az sql server update -g "${{parameters.resourceGroupName}}" -n "${{parameters.sqlServerName}}" --set publicNetworkAccess="Enabled" | Out-Null
                   }
 
                   Write-Debug "Getting public IP"
@@ -114,7 +145,7 @@ jobs:
                   Write-Host "##vso[task.setvariable variable=IP]$ip"
 
                   Write-Information "Adding firewall rule for $ip"
-                  az sql server firewall-rule create -g ${{parameters.resourceGroupName}} -s ${{parameters.sqlServerName}} -n $ip --start-ip-address $ip --end-ip-address $ip | Out-Null
+                  az sql server firewall-rule create -g "${{parameters.resourceGroupName}}" -s "${{parameters.sqlServerName}}" -n $ip --start-ip-address $ip --end-ip-address $ip | Out-Null
             
             - ${{parameters.steps}}
 
@@ -138,18 +169,16 @@ jobs:
                   Write-Verbose "ip=$ip"
 
                   Write-Information "Removing firewall rule for $ip"
-                  az sql server firewall-rule delete -g ${{parameters.resourceGroupName}} -s ${{parameters.sqlServerName}} -n $ip
+                  az sql server firewall-rule delete -g "${{parameters.resourceGroupName}}" -s "${{parameters.sqlServerName}}" -n $ip
 
                   $tempPublicAccess = "$(TempPublicAccess)"
                   Write-Verbose "tempPublicAccess=$tempPublicAccess"
                   if ($tempPublicAccess -eq $True)
                   {
                     Write-Information "Disabling temp public access"
-                    az sql server update -g ${{parameters.resourceGroupName}} -n ${{parameters.sqlServerName}} --set publicNetworkAccess="Disabled" | Out-Null
+                    az sql server update -g "${{parameters.resourceGroupName}}" -n "${{parameters.sqlServerName}}" --set publicNetworkAccess="Disabled" | Out-Null
                   }
 
 ```
-
-### Using the template
 
 ## Wrapping up

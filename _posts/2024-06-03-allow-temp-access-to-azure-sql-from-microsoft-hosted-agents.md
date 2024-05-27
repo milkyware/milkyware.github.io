@@ -2,12 +2,12 @@
 title: Allow Temp Access to Azure SQL from Microsoft-Hosted Agents
 category: DevOps
 tags:
-  - Azure
-  - Azure DevOps
-  - Azure Pipelines
-  - Azure SQL
-  - Microsoft-Hosted Agents
-  - Pipeline Template
+  - Azure
+  - Azure DevOps
+  - Azure Pipelines
+  - Azure SQL
+  - Microsoft-Hosted Agents
+  - Pipeline Template
 ---
 
 Currently, I use Microsoft-hosted pipeline agents to handle my deployments due to their simplicity and minimal maintenance overhead. I've recently needed to start running SQL scripts against Azure SQL instances from these pipelines. However, the connection from the pipeline agent was timing out and failing. So what is the problem?

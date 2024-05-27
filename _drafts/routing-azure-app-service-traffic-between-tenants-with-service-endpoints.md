@@ -4,7 +4,9 @@ category: Azure
 tags:
   - Azure
   - Bicep
-  - Private EndPoint
+  - App Service
+  - External App Service
+  - Private Endpoint
   - Private DNS
 ---
 

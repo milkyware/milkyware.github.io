@@ -3,6 +3,9 @@ title: Routing Azure App Service Traffic Between Tenants With Service Endpoints 
 category: Azure
 tags:
   - Azure
+  - Bicep
+  - Private EndPoint
+  - Private DNS
 ---
 
 ![image1](/images/routing-azure-app-service-traffic-between-tenants-with-service-endpoints/image1.png)
@@ -222,3 +225,5 @@ module peDummy './privateendpoint.bicep' = {
 ```
 
 Above is an example of using the template to create a **pe-test-dummy** and associated NIC. The targeted resource is an App Services and the relevant private DNS resource is in **rg-dns** is updated with DNS records.
+
+## Wrapping Up

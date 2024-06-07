@@ -61,7 +61,7 @@ As `TaskFailedException` effectively represents all exceptions from activities o
 
 ### FailureDetails formatting issues
 
-Whilst working with the `TaskFailedException`, one issue I've noticed is that `FailureDetails.ErrorMessage` only contains the first line of an exception message. At the time of writing, this is with thr current version of **Microsoft.Azure.Functions.Worker.Extensions.DurableTask v1.1.2**.
+Whilst working with the `TaskFailedException`, one issue I've noticed is that `FailureDetails.ErrorMessage` only contains the first line of an exception message. At the time of writing, this is with the current version of **Microsoft.Azure.Functions.Worker.Extensions.DurableTask v1.1.2**.
 
 ``` cs
 [Function(nameof(RunOrch))]

@@ -21,7 +21,10 @@
 	"postStartCommand": "sh .devcontainer/post-start.sh",
 	"features": {
 		"ghcr.io/devcontainers-contrib/features/bash-command:1": {},
-		"ghcr.io/devcontainers/features/powershell": {}
+		"ghcr.io/devcontainers/features/powershell": {},
+		"ghcr.io/devcontainers-contrib/features/npm-package": {
+			"package": "git-removed-branches"
+		}
 	},
 	"customizations": {
 		"vscode": {

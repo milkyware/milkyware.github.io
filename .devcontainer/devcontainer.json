@@ -18,6 +18,7 @@
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "sh .devcontainer/post-create.sh",
+	"postStartCommand": "sh .devcontainer/post-start.sh",
 	"features": {
 		"ghcr.io/devcontainers-contrib/features/bash-command:1": {},
 		"ghcr.io/devcontainers/features/powershell": {}

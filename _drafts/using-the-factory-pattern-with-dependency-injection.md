@@ -58,24 +58,76 @@ public class ProductFactory
 
 In the code above, each **concrete product class** implements `IProduct`. The `ProductFactory` then offers a `CreateProduct()` which constructs and returns an instance of `IProduct` using a parameter to control which implementation is returned.
 
-## Using the Factory Pattern with Dependency Injection
+## Brief overview of Dependency Injection
 
-Typically, the factory handles the creation of objects, however, with modern .NET we have **dependency injection** available to us to handle that. So how can the factory pattern be combined with dependency injection?
+Typically, the factory handles the creation of objects, however, with modern .NET we have **dependency injection** available to us to handle that. So let's have a brief overview of dependency injection.
 
 ``` cs
-var host = new HostBuilder()
-    .ConfigureServices(services => 
-    {
-        services.AddTransient<ServiceA>();
-        services.AddTransient<ServiceB>()
-    }).Build();
+var sp = new ServiceCollection()
+    .AddTransient<ServiceA>()
+    .AddTransient<IServiceB, ServiceB>()
+    .BuildServiceProvider();
+var service = sp.GetService<ServiceA>();
+service.Run();
 
-public class ServiceA(ServiceB serviceb)
+public class ServiceA(IServiceB serviceb)
 {
-    // Methods using dependency
+    public void Run()
+    {
+        // Use dependency
+    }
+}
+
+public interface IServiceB
+{
+    // Service contract
+}
+
+public class ServiceB : IServiceB
+{
+    // Service implementation
 }
 ```
 
-The most common use of dependency injection is to **[register services](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#service-registration-methods)**, as in the example above, and define a **constructor** which has parameters for any dependencies.
+The most common use of dependency injection is to **[register services](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#service-registration-methods)**, as in the example above, and define a **constructor** which has parameters for any dependencies. When a service is retrieved using dependency injection, such as from the `ServiceProvider` directly, the dependencies are resolved and ***injected***.
+
+``` cs
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddTransient<ServiceA>()
+    .AddTransient<IServiceB, ServiceB>()
+var app = builder.Build();
+
+app.MapGet("/test", (ServiceA service) =>
+{
+    service.Run();
+});
+
+await app.RunAsync();
+```
+
+In a .NET Core hosted app, such as Web API or Worker Service, the setup is similar to previously where services are registered in the `IServiceCollection` in the application builder. In the example above, when the minimal API endpoint is hit, `ServiceA` is constructed and injected.
+
+## Using the Factory Pattern with Dependency Injection
+
+Dependency injection is a fantastic tool for centrally building up an application with its dependencies as well as managing the lifecycle of those. So let's now look at how we can apply this to the factory pattern.
+
+``` cs
+public class ProductFactory(IEnumerable<IProduct> products)
+{
+    public static IProduct CreateProduct(string type)
+    {
+        switch(type)
+        {
+            case "A": return products.OfType<ProductA>()
+                .First();
+            case "B": return products.OfType<ProductB>()
+                .First();
+            default: throw new ArgumentException("Invalid type");
+        }
+    }
+}
+```
+
+Dependency injection also allows for multiple dependency implementations to be injected into a service using `IEnumerable<T>`. The `ProductFactory` can then be refactored to look like above to avoid the need to directly construct the products along with any dependencies they have.
 
 ## Wrapping Up

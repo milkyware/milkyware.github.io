@@ -2,11 +2,12 @@
 title: Using the Factory Pattern with Dependency Injection
 category: Azure
 tags:
-  - .NET
-  - Dotnet
-  - Design Patterns
-  - Factory Pattern
-  - Dependency Injection
+ - .NET
+ - Dotnet
+ - Design Patterns
+ - Factory Pattern
+ - Dependency Injection
+ - Durable Functions
 ---
 
 The **Factory Pattern** is a coding design pattern for creating objects by replacing the need to directly **construct** an object using the `new` operator. Instead, a ***creator*** method is used to handle the creation of instances.
@@ -15,9 +16,9 @@ The purpose of this post is to share how I used the factory pattern in a recent 
 
 ## Why use the Factory Pattern?
 
-The factory pattern is incredibly useful in scenarios where the **type of an object** is determined at runtime and offers the benefits of:
+The factory pattern is instrumental in scenarios where the **type of an object** is determined at runtime and offers the benefits of:
 
-- Encapsulating the creation logic so that users of the factory don't need to know the logic behind creation
+- Encapsulating the creation logic so that users of the factory don't need to know the logic behind the creation
 - Improving flexibility to add new types to the factory
 - Simplifying and centralising the creation logic
 
@@ -26,19 +27,19 @@ For more detail on the factory pattern, **[Refactoring Guru](https://refactoring
 ``` cs
 public interface IProduct
 {
-    string GetName();
+    string GetName();
 }
 
 // Concrete Product A
 public class ProductA : IProduct
 {
-    public string GetName() => "Product A";
+    public string GetName() => "Product A";
 }
 
 // Concrete Product B
 public class ProductB : IProduct
 {
-    public string GetName() => "Product B";
+    public string GetName() => "Product B";
 }
 
 // Factory Class
@@ -64,15 +65,15 @@ Typically, the factory handles the creation of objects, however, with modern .NE
 
 ``` cs
 var sp = new ServiceCollection()
-    .AddTransient<ServiceA>()
-    .AddTransient<IServiceB, ServiceB>()
-    .BuildServiceProvider();
+ .AddTransient<ServiceA>()
+ .AddTransient<IServiceB, ServiceB>()
+ .BuildServiceProvider();
 var service = sp.GetService<ServiceA>();
 service.Run();
 
 public class ServiceA(IServiceB serviceb)
 {
-    public void Run()
+    public void Run()
     {
         // Use dependency
     }
@@ -85,7 +86,7 @@ public interface IServiceB
 
 public class ServiceB : IServiceB
 {
-    // Service implementation
+    // Service Implementation
 }
 ```
 
@@ -99,7 +100,7 @@ var app = builder.Build();
 
 app.MapGet("/test", (ServiceA service) =>
 {
-    service.Run();
+    service.Run();
 });
 
 await app.RunAsync();
@@ -114,20 +115,144 @@ Dependency injection is a fantastic tool for centrally building up an applicatio
 ``` cs
 public class ProductFactory(IEnumerable<IProduct> products)
 {
-    public static IProduct CreateProduct(string type)
+    public static IProduct CreateProduct(string type)
     {
-        switch(type)
+        switch(type)
         {
-            case "A": return products.OfType<ProductA>()
+            case "A": return products.OfType<ProductA>()
                 .First();
-            case "B": return products.OfType<ProductB>()
+            case "B": return products.OfType<ProductB>()
                 .First();
-            default: throw new ArgumentException("Invalid type");
+            default: throw new ArgumentException("Invalid type");
         }
     }
 }
 ```
 
-Dependency injection also allows for multiple dependency implementations to be injected into a service using `IEnumerable<T>`. The `ProductFactory` can then be refactored to look like above to avoid the need to directly construct the products along with any dependencies they have.
+Dependency injection also allows multiple dependency implementations to be injected into a service using `IEnumerable<T>`. The `ProductFactory` can then be refactored to look like the above to avoid the need to construct the products along with any dependencies they have directly.
+
+``` cs
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddTransient<IProduct, ProductA>()
+ .AddSingleton<IProduct, ProductB>()
+ .AddTransient<ProductFactory>();
+var app = builder.Build();
+app.MapGet("/test", (ProductFactory factory) =>
+{
+    factory.CreateProduct("A")
+});
+await app.RunAsync();
+
+public class ProductFactory(IEnumerable<IProduct> products)
+{
+    public static IProduct CreateProduct(string type)
+    {
+        switch(type)
+        {
+            case "A": return products.OfType<ProductA>()
+                .First();
+            case "B": return products.OfType<ProductB>()
+                .First();
+            default: throw new ArgumentException("Invalid type");
+        }
+    }
+}
+```
+
+Above is a more complete sample of the factory being used in a Web API. There are a few features here so let's break those down:
+
+- Three different `IProduct` implementations are registered with the app, `ProductA` and `ProductB`
+- The `ProductFactory` has a constructor parameter of `IEnumerable<IProduct>`. As the products are registered as **implementations** of **service**, when the factory is constructed both of the product implementations are injected
+- The `ProductFactory` is registered as a **Transient** service. Typically, factories are regarded as **singletons**. However, as DI is managing the lifetime of the products to be ***created*** we want the factory to pick up whatever products are available at the time
+  - **N.B.** Notice `ProductB` is a singleton, the factory would receive the same instance each time, but new instances for `ProductA`. If the factory was a singleton **both products would always be the same**.
+
+### Using the Factory Pattern with DI in the real world
+
+The driver behind this post was a recent project where I opted to use the factory pattern in a **[Durable Function](https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-overview?tabs=in-process%2Cnodejs-v3%2Cv1-model&pivots=csharp)**. The primary requirement was to develop an integration solution from a CRM system, to multiple external partners, each with their own API.
+
+``` cs
+public enum Partner
+{
+    PartnerX,
+    PartnerY
+}
+
+public interface IPartnerService
+{
+    public Partner Partner { get; }
+    // Partner operation contract
+}
+
+public class PartnerXService(PartnerXSoapApiClient client) : IPartnerService
+{ 
+    public Partner Partner => Partner.PartnerX;
+
+    // Implementation
+}
+
+public class PartnerYService(PartnerYRestApiClient client) : IPartnerService
+{ 
+    public Partner Partner => Partner.PartnerY;
+
+    // Implementation
+}
+```
+
+Each partner needed to support certain processes which I represented with the `IPartnerService`. Each partner would then get their own implementation using whatever authentication and operations are needed to fulfil that process. To help distinguish the different implementations, I added a `Partner` **enum**.
+
+``` cs
+public class PartnerFactory(IEnumerable<IPartnerService> partnerServices)
+{
+    public IPartnerService GetPartner(Partner partner)
+    {
+        var service = partnerServices.FirstOrDefault(ps => ps.Partner == partner);
+        if (service is null)
+            throw new InvalidOperationException();
+
+        return service;
+    }
+}
+```
+
+The `PartnerFactory` then has all the available implementations injected with `GetPartner` returning the relevant implementation for the specified partner.
+
+``` cs
+public class Functions(PartnerFactory factory)
+{
+    private readonly PartnerFactory _factory = factory;
+
+    [Function("HttpCreate")]
+    public async Task<IActionResult> RunHttpAsync([HttpTrigger(AuthorizationLevel.Function, "post", Route = "create")] HttpRequest request, [DurableClient] DurableTaskClient durableTaskClient)
+    {
+        // Deserialize model
+        var instanceId = await durableTaskClient.ScheduleNewOrchestrationInstanceAsync("OrchCreate", model);
+        return new AcceptedResult();
+    }
+
+    [Function("OrchCreate")]
+    public async Task RunOrchAsync([OrchestrationTrigger] TaskOrchestrationContext context)
+    {
+        var model = context.GetInput<CRMCreateRequest>();
+        try 
+        {
+            await context.CallActivityAsync("ActivityCreate", model);
+        }
+        catch (Exception ex)
+        {
+            // Handle exception from activity
+        }
+    }
+
+    [Function("ActivityCreate")]
+    public async Task RunActivityAsync([ActivityTrigger] CRMCreateRequest model)
+    {
+        var partnerService = _partnerFactory.GetPartner(model.Partner)
+    // Call method on partnerService
+    }
+}
+```
+
+Above is an abbreviated sample of the factory being used in **Durable Functions**. By using the factory pattern I was able to abstract the overarching business processes from the specific implementations for each partner. It has also given great flexibility to onboard new partner implementations, without needing to change the business logic.
 
 ## Wrapping Up
+

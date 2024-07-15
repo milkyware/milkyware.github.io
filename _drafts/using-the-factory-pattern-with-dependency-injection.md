@@ -252,7 +252,8 @@ public class Functions(PartnerFactory factory)
 }
 ```
 
-Above is an abbreviated sample of the factory being used in **Durable Functions**. By using the factory pattern I was able to abstract the overarching business processes from the specific implementations for each partner. It has also given great flexibility to onboard new partner implementations, without needing to change the business logic.
+Above is an abbreviated sample of the factory being used in **Durable Functions**. By using the factory pattern I was able to abstract the business logic of the **orchestrations and activities** from the specific implementations for each partner. It has also given great flexibility to onboard new partner implementations, without needing to change the business logic.
 
 ## Wrapping Up
 
+In this post we've introduced the concepts of the factory pattern as well as some of the benefits. We then had a brief overview of dependency injection and how it can be used with the factory pattern. Using DI can simplify our factory and maintain consistency with the general .NET approach to dependency handling. Lastly, I've shared a few highlights from a recent experience with the factory pattern. I hope this has been of benefit and happy coding!

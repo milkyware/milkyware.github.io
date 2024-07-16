@@ -168,7 +168,7 @@ Above is a more complete sample of the factory being used in a Web API. There ar
 
 ### Using the Factory Pattern with DI in the real world
 
-The driver behind this post was a recent project where I opted to use the factory pattern in a **[Durable Function](https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-overview?tabs=in-process%2Cnodejs-v3%2Cv1-model&pivots=csharp)**. The primary requirement was to develop an integration solution from a CRM system, to multiple external partners, each with their own API.
+The driver behind this post was a recent project where I opted to use the factory pattern in **[Durable Functions](https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-overview?tabs=in-process%2Cnodejs-v3%2Cv1-model&pivots=csharp)**. The primary requirement was to develop an integration solution from one system, to multiple external partners, each with their own API.
 
 ``` cs
 public enum Partner
@@ -232,7 +232,7 @@ public class Functions(PartnerFactory factory)
     [Function("OrchCreate")]
     public async Task RunOrchAsync([OrchestrationTrigger] TaskOrchestrationContext context)
     {
-        var model = context.GetInput<CRMCreateRequest>();
+        var model = context.GetInput<CreateModel>();
         try 
         {
             await context.CallActivityAsync("ActivityCreate", model);
@@ -244,10 +244,10 @@ public class Functions(PartnerFactory factory)
     }
 
     [Function("ActivityCreate")]
-    public async Task RunActivityAsync([ActivityTrigger] CRMCreateRequest model)
+    public async Task RunActivityAsync([ActivityTrigger] CreateModel model)
     {
         var partnerService = _partnerFactory.GetPartner(model.Partner)
-    // Call method on partnerService
+        // Call method on partnerService
     }
 }
 ```

@@ -59,12 +59,12 @@ author:
   location: UK
 
   links:
-    - label: Website
-      icon: fas fa-globe-europe
-      url: https://milkyware.github.io
     - label: GitHub
       icon: fab fa-fw fa-github
       url: https://github.com/milkyware
+    - label: Website
+      icon: fas fa-globe-europe
+      url: https://milkyware.github.io
 
 # Comments
 comments:
@@ -76,6 +76,12 @@ comments:
 # Site Footer
 footer:
   links:
+    - label: GitHub
+      icon: fab fa-fw fa-github
+      url: https://github.com/milkyware
+    - label: Website
+      icon: fas fa-globe-europe
+      url: https://milkyware.github.io
     - label: "Cloud icons created by Vectorslab - Flaticon"
       url: "https://www.flaticon.com/free-icons/cloud"
 

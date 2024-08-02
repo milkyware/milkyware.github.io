@@ -34,6 +34,7 @@ remote_theme: "mmistakes/minimal-mistakes"
 minimal_mistakes_skin: dark
 breadcrumbs: true
 search: true
+enable_copy_code_button: true
 include:
   - _pages
 plugins:

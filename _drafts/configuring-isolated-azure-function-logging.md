@@ -95,7 +95,7 @@ Running the function will produce a console output similar to the above. Notice 
 }
 ```
 
-The nature of Isolated Azure Functions is that the **[host and worker are separate](https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide?tabs=windows#managing-log-levels)**. Azure Functions use **[special categories](https://learn.microsoft.com/en-us/azure/azure-functions/configure-monitoring?tabs=v2#configure-categories)** which are based on **where the logs come from** instead of generic class names. Therefore, we first we need to configure the minimum log level for logs coming from **function definitions**. This is done by setting the **Function** level in **host.json** like above.
+The nature of Isolated Azure Functions is that the **[host and worker are separate](https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide?tabs=windows#managing-log-levels)**. Azure Functions use **[special categories](https://learn.microsoft.com/en-us/azure/azure-functions/configure-monitoring?tabs=v2#configure-categories)** which are based on **where the logs come from** instead of generic class names. Therefore, we first need to configure the minimum log level for logs coming from **function definitions**. This is done by setting the **Function** level in **host.json** like above.
 
 ``` cs
 .ConfigureLogging((context, logging) =>

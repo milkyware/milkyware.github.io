@@ -1,6 +1,6 @@
 ---
 title: Using the Factory Pattern with Dependency Injection
-category: Azure
+category: .NET
 tags:
  - .NET
  - Dotnet

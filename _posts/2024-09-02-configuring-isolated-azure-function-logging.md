@@ -81,7 +81,7 @@ For detailed output, run func with --verbose flag.
 [2024-08-12T09:31:43.977Z] Executed 'Functions.TimerFunction' (Succeeded, Id=15cf5011-978a-4d8c-ab41-0679249326fc, Duration=1115ms)
 ```
 
-Running the function will produce a console output similar to the above. Notice that only the information log is displayed. By default, the minimum logging level in Azure Functions is information, so how do we control displaying the debug and trace logs?
+Running the function will produce a console output similar to the above. Notice that only the information log is displayed. By default, the minimum logging level in Azure Functions is information, so how do we control displaying debug and trace logs?
 
 ``` json
 {
@@ -95,7 +95,7 @@ Running the function will produce a console output similar to the above. Notice 
 }
 ```
 
-The nature of Isolated Azure Functions is that the **[host and worker are separate](https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide?tabs=windows#managing-log-levels)**. Azure Functions use **[special categories](https://learn.microsoft.com/en-us/azure/azure-functions/configure-monitoring?tabs=v2#configure-categories)** which are based on **where the logs come from** instead of generic class names. Therefore, we first need to configure the minimum log level for logs coming from **function definitions**. This is done by setting the **Function** level in **host.json** like above.
+The nature of Isolated Azure Functions is that the **[host and worker are separate](https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide?tabs=windows#managing-log-levels)**. Azure Functions use **[special categories](https://learn.microsoft.com/en-us/azure/azure-functions/configure-monitoring?tabs=v2#configure-categories)** which are based on **where the logs come from** instead of generic class names. Therefore, we must first configure the minimum log level for logs coming from **function definitions**. This is done by setting the **Function** level in **host.json** like above.
 
 ``` cs
 .ConfigureLogging((context, logging) =>
@@ -107,6 +107,8 @@ The nature of Isolated Azure Functions is that the **[host and worker are separa
 ```
 
 With the host log level configured, we can now configure the logging of the worker. The above configures logs with the category **ConfigureAzFuncLogging** to have a minimum log level of **Trace**.
+
+**N.B.** One key thing to keep in mind is that the **Function log level** acts as a ***minimum* log level** for services it calls and their associated categories. This means that if the function is configured to log at a level **higher** than a particular category, any logged events at a level lower than the function will not be displayed.
 
 ``` bash
 [2024-08-12T10:23:34.141Z] Worker process started and initialized.
@@ -170,3 +172,13 @@ In `.ConfigureLogging()` we can replace explicitly adding a filter with `.AddCon
 ```
 
 The **local.settings.json** can in turn be updated to look like the above. These environment variables can then be configured in various places such as **Bicep templates, Azure Pipelines etc** to set the logging levels in different environments e.g. trace/debug in dev or info/warn in prod.
+
+## Sample Code
+
+To help demonstrate what we've discussed in this post, I've put together the sample repo below:
+
+[![milkyware/blog-configuring-azure-function-logging - GitHub](https://gh-card.dev/repos/milkyware/blog-configuring-azure-function-logging.svg?fullname=)](https://github.com/milkyware/blog-configuring-azure-function-logging)
+
+## Wrapping Up
+
+Due to how critical logging is, especially when things are going wrong, it's vital to not only include logging in the code but also to be able to quickly and easily control the level of logging displayed. In this post, we've looked at how logging in isolated Azure Functions requires some extra setup and how this can be pulled from configuration for deployment to different environments.

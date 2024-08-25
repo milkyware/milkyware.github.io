@@ -147,8 +147,6 @@ GEM
     jekyll-optional-front-matter (0.3.2)
       jekyll (>= 3.0, < 5.0)
     jekyll-paginate (1.1.0)
-    jekyll-paginate-v2 (3.0.0)
-      jekyll (>= 3.0, < 5.0)
     jekyll-readme-index (0.3.0)
       jekyll (>= 3.0, < 5.0)
     jekyll-redirect-from (0.16.0)
@@ -282,7 +280,7 @@ DEPENDENCIES
   jekyll-feed
   jekyll-gist
   jekyll-include-cache
-  jekyll-paginate-v2
+  jekyll-paginate
   jekyll-seo-tag
   jekyll-sitemap
   jekyll-theme-clean-blog (~> 4.0.12)

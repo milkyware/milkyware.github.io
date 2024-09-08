@@ -48,11 +48,95 @@ With being an open source library, this offers great flexibility in how the rule
 
 ## Using the Rules Engine
 
-The rules engine has **[many great features](#what-is-the-microsoft-rules-engine)**, however, I'm going to focus on a few key area
+The rules engine revolves around the definition of **workflows** to represent business rules and logic. The rules engine and workflows offer **[many great features and extensibility](#what-is-the-microsoft-rules-engine)**, however, I'm going to focus on a few key aspects:
+
+- Writing Expressions
+- Defining Workflows
+- Creating Rule Stores
+- Creating Custom Actions
 
 ### Writing Expressions
 
-### Writing Workflow Definitions
+Before getting into defining workflows, we need to understand the expressions. Expressions are the foundation of the Microsoft Rules Engine for evaluating both rules and outputs. The core of the rules engine is the `RuleExpressionParser`.
+
+``` csharp
+var output = new RuleExpressionParser()
+    .Evaluate<string>("3 + input1", new RuleParameter[]
+    {
+        new RuleParameter("input1", 5)
+    }); // output equals 8
+```
+
+The `RuleExpressionParser` allows us to evaluate expressions **outside of the rules engine**. In the example above, the expression performs a simple addition with one value provided using a `RuleParameter`.
+
+The syntax used by the expressions is **[Dynamic LINQ expressions](https://dynamic-linq.net/expression-language)** which supports many of the same concepts and features of C# as it's designed to be familiar to C# users.
+
+``` csharp
+[Fact]
+public void SimpleParameterExpressionTest()
+{
+    // Act
+    var actual = new RuleExpressionParser()
+        .Evaluate<string>("\"Hello \" + input1",
+        [
+            new RuleParameter("input1", "World")
+        ]);
+
+    //Assert
+    actual.Should()
+        .Be("Hello World");
+}
+```
+
+One use case I find the standalone `RuleExpressionParser` useful for is in unit testing expressions, particularly complex expressions, to help document expressions and highlight issues.
+
+Now that we've looked at expressions, lets look at how they've used in workflows.
+
+### Defining Workflows
+
+A workflow is a **collection of rules** which are executed against 1 or more inputs.
+
+``` json
+{
+    "WorkflowName": "SampleWorkflow",
+    "Rules": [
+        {
+            "RuleName": "GeneralGrevious",
+            "RuleExpressionType": "LambdaExpression",
+            "Expression": "input1 == \"Hello there\"",
+            "SuccessEvent": "General Kenobi"
+        },
+        {
+            "RuleName": "Droids",
+            "RuleExpressionType": "LambdaExpression",
+            "Expression": "input1 != \"Hello there\"",
+            "SuccessEvent": "These aren't the droids you're looking for"
+        }
+    ]
+}
+```
+
+The above workflow compares the ***input1*** with a specified string in an expression. If the expression returns true, the associated `SuccessEvent` is raised. Notice that the string literals are escaped using **\"**
+
+``` cs
+var workflowJson = // workflow definition
+var rulesEngine = new RulesEngine.RulesEngine([workflowJson]);
+
+var results = await rulesEngine.ExecuteAllRulesAsync("SampleWorkflow", "Hello there");
+
+var output = string.Empty;
+results.OnSuccess(eventName => output = eventName); // Sets output to "General Kenobi"
+```
+
+The previous workflow can now be passed into the constructor of `RulesEngine` as an array to load the workflow(s). Under the hood, the json definition(s) are deserialized using `Workflow` instance(s). The rules engine is then executed with the name of the workflow specified and any inputs provided in a **`params` array**. The results are then evaluated and the `.OnSuccess()` delegate used to extract the **SuccessEvent**.
+
+#### Using the JSON Schema
+
+One really useful feature of the rules engine is that the `Workflow` class also has an associated **JSON schema**.
+
+![image2](/images/replacing-biztalk-business-rules-engine/image2.png)
+
+In the above example of defining the **SampleWorkflow**, the `$schema` element is specified at the top of the file. In many code editors, including VS Code, this causes the editor to prompt with intellisense of the members expected/available in the schema definition to help take the guesswork out of defining workflows.
 
 ### Creating Rule Stores
 

@@ -48,10 +48,18 @@ With being an open source library, this offers great flexibility in how the rule
 
 ## Using the Rules Engine
 
+The rules engine has **[many great features](#what-is-the-microsoft-rules-engine)**, however, I'm going to focus on a few key area
+
+### Writing Expressions
+
 ### Writing Workflow Definitions
 
 ### Creating Rule Stores
 
 ### Creating Custom Actions
+
+## Sample Project
+
+[![milkyware/blog-rules-engine - GitHub](https://gh-card.dev/repos/milkyware/blog-rules-engine.svg?fullname=)](https://github.com/milkyware/blog-rules-engine)
 
 ## Wrapping Up

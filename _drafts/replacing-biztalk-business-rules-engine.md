@@ -19,7 +19,7 @@ Having developed on **BizTalk Server** for a number of years, I've used the **[B
 
 The BRE offers fantastic flexibility in being able to **configure** basic business logic instead of having to redeploy the whole application. The configuration could then be quickly and easily deployed and/or rolled back.
 
-However, with migrating away from BizTalk, I've needed to look at replacing the BRE. I opted for the **[Microsoft Rules Engine](https://github.com/microsoft/rulesengine)** and for this post I want to share my experience with it.
+However, with migrating away from BizTalk, I've needed to look at replacing the BRE. I opted for the **[Microsoft Rules Engine](https://github.com/microsoft/rulesengine)** and for this post I want to share my experience with it. For disclosure, Microsoft do offer some great documentation in both their **[wiki](https://github.com/microsoft/RulesEngine/wiki) and [GitHub Pages site](https://microsoft.github.io/RulesEngine/)**.
 
 **N.B.** Microsoft have made a direct port of the BRE to the **[Azure Logic Apps Rules Engine](https://learn.microsoft.com/en-us/azure/logic-apps/rules-engine/rules-engine-overview)**. Although this is more of a direct migration path, it's tightly-coupled to Logic Apps, retains the need for XML and is still in preview and so I opted against this option.
 

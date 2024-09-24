@@ -188,8 +188,8 @@ jobs:
           script: |
             if ($env:SYSTEM_DEBUG)
             {
-                $DebugPreference = 'Continue'
-                $VerbosePreference = 'Continue'
+              $DebugPreference = 'Continue'
+              $VerbosePreference = 'Continue'
             }
 
             Write-Debug "Building command"

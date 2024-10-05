@@ -41,7 +41,8 @@
 				"DotJoshJohnson.xml",
 				"streetsidesoftware.code-spell-checker",
 				"bierner.markdown-mermaid",
-				"github.vscode-github-actions"
+				"github.vscode-github-actions",
+				"Shopify.ruby-lsp"
 			],
 			"settings": {
 				"terminal.integrated.defaultProfile.linux": "pwsh"

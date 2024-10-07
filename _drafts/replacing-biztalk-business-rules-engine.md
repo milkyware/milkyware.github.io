@@ -136,9 +136,15 @@ One really useful feature of the rules engine is that the `Workflow` class also 
 
 ![image2](/images/replacing-biztalk-business-rules-engine/image2.png)
 
-In the above example of defining the **SampleWorkflow**, the `$schema` element is specified at the top of the file. In many code editors, including VS Code, this causes the editor to prompt with intellisense of the members expected/available in the schema definition to help take the guesswork out of defining workflows.
+In the above example of defining the **SampleWorkflow**, the `$schema` element is specified at the top of the file. In many code editors, including VS Code, this causes the editor to prompt with intellisense of the members available/expected in the schema definition to help take the guesswork out of defining workflows.
 
 ### Creating Rule Stores
+
+In the examples so far, the workflow definitions have been passed directly into the `RulesEngine` constructor to then be executes. However, in a real-world scenario, these workflow definitions need to be persisted somewhere outside of the application.
+
+![image3](/images/replacing-biztalk-business-rules-engine/image3.png)
+
+Microsoft provide the above diagram to represent the recommended setup for using the **RulesEngine**. In essence, Microsoft provide the **RulesEngine** library, but we need to develop our own ***wrapper*** around the library as well as integration to the necessary ***rule stores***.
 
 ### Creating Custom Actions
 

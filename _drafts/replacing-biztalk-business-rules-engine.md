@@ -116,7 +116,7 @@ A workflow is a **collection of rules** which are executed against 1 or more inp
 }
 ```
 
-The above workflow compares the ***input1*** with a specified string in an expression. If the expression returns true, the associated `SuccessEvent` is raised. Notice that the string literals are escaped using **\"**
+The above workflow compares the ***input1*** with a specified string in an expression. If the expression returns true, the associated `SuccessEvent` is raised. Notice that the string literals are escaped using `\\"`
 
 ``` cs
 var workflowJson = // workflow definition

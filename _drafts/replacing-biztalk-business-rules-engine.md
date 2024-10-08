@@ -265,16 +265,11 @@ public class SampleAction : ActionBase
 Defining a custom action is as simple as creating a new class and implementing the abstract class `ActionBase`. The above action looks for a value in the context called `Name` and uses it to format a string. Notice as well that `ILogger` is used in the constructor as, like with the rule stores, we can combine this with dependency injection.
 
 ``` cs
-// Register the custom action along with any other necessary dependencies
 builder.Services.AddTransient<SampleAction>();
 
-// Register a tuple of the name for the action and a delegate to retrieve it 
 builder.Services.AddSingleton<Tuple<string, Func<ActionBase>>>(sp => new("SampleAction", () => sp.GetRequiredService<T>()));
 
-// Register the rules engine
 builder.Services.AddTransient<IRulesEngine, RulesEngine>(sp => {
-
-    // Retrieve a collection of the registered tuples and map to a dictionary to configure CustomActions
     var customActions = sp.GetServices<Tuple<string, Func<ActionBase>>>();
     var settings = new ReSettings()
     {
@@ -288,7 +283,7 @@ builder.Services.AddTransient<IRulesEngine, RulesEngine>(sp => {
 
 To integrate the custom actions with dependency injection there is a little bit more involved, so lets break down what the above is doing:
 
-1. Register the custom action along with any other necessary dependencies
+1. Register the custom action with the service collection (along with any other necessary dependencies)
 2. Register **reference tuple** of the name of the action (referenced in workflow definitions) and a delegate to retrieve an action instance from DI
 3. As part of registering the rules engine with DI, retrieve the collection of tuples and map to a dictionary to configure `CustomActions` with the engine
 

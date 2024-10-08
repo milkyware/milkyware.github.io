@@ -13,38 +13,38 @@ tags:
   - Rules
 ---
 
-Having developed on **BizTalk Server** for a number of years, I've used the **[Business Rules Engine (BRE)](https://learn.microsoft.com/en-us/biztalk/core/business-rules-engine)** in numerous solutions via both **orchestration shapes** and the **[BREPipelineFramework](https://github.com/mbrimble/brepipelineframework)**.
+Having developed on **BizTalk Server** for many years, I've used the **[Business Rules Engine (BRE)](https://learn.microsoft.com/en-us/biztalk/core/business-rules-engine)** in numerous solutions via both **orchestration shapes** and the **[BREPipelineFramework](https://github.com/mbrimble/brepipelineframework)**.
 
 ![image1](/images/replacing-biztalk-business-rules-engine/image1.png)
 
-The BRE offers fantastic flexibility in being able to **configure** basic business logic instead of having to redeploy the whole application. The configuration could then be quickly and easily deployed and/or rolled back.
+The BRE offers fantastic flexibility in configuring basic business logic instead of redeploying the whole application. The configuration can then be quickly and easily deployed and/or rolled back.
 
-However, with migrating away from BizTalk, I've needed to look at replacing the BRE. I opted for the **[Microsoft Rules Engine](https://github.com/microsoft/rulesengine)** and for this post I want to share my experience with it. For disclosure, Microsoft do offer some great documentation in both their **[wiki](https://github.com/microsoft/RulesEngine/wiki) and [GitHub Pages site](https://microsoft.github.io/RulesEngine/)**.
+However, with migrating away from BizTalk, I've needed to look at replacing the BRE. I opted for the **[Microsoft Rules Engine](https://github.com/microsoft/rulesengine)**, and for this post, I want to share my experience with it. For disclosure, Microsoft offers some great documentation in both their **[wiki](https://github.com/microsoft/RulesEngine/wiki) and [GitHub Pages site](https://microsoft.github.io/RulesEngine/)**.
 
-**N.B.** Microsoft have made a direct port of the BRE to the **[Azure Logic Apps Rules Engine](https://learn.microsoft.com/en-us/azure/logic-apps/rules-engine/rules-engine-overview)**. Although this is more of a direct migration path, it's tightly-coupled to Logic Apps, retains the need for XML and is still in preview and so I opted against this option.
+**N.B.** Microsoft has made a direct port of the BRE to the **[Azure Logic Apps Rules Engine](https://learn.microsoft.com/en-us/azure/logic-apps/rules-engine/rules-engine-overview)**. Although this is more of a direct migration path, it's tightly coupled to Logic Apps, retains the need for XML and is still in preview so I opted against this option.
 
 ## What is the Microsoft Rules Engine?
 
 The Microsoft Rules Engine is an **open-source library [nuget package](https://www.nuget.org/packages/RulesEngine/)** for abstracting business rules and logic in a similar way to what is available in the **BizTalk BRE**. The key features of the library are:
 
-- JSON based rules definition
+- JSON-based rules definition
 - Multiple input support
 - Dynamic object input support
 - C# Expression support
 - Extending expression via custom class/type injection
 - Scoped parameters
-- Post rule execution actions
+- Post-rule execution actions
 - Standalone expression evaluator
 
 ### Installing
 
-With being a nuget package, the installation is as simple as adding a package to you application/project like below:
+With being a Nuget package, the installation is as simple as adding a package to your application/project like below:
 
 ``` bash
 dotnet add package RulesEngine
 ```
 
-With being an open source library, this offers great flexibility in how the rules engine can be used and hosted i.e. it can be used in any .NET app which supports .NET Standard 2.0
+Being an open-source library, this offers great flexibility in how the rules engine can be used and hosted i.e. it can be used in any .NET app which supports .NET Standard 2.0
 
 ## Using the Rules Engine
 
@@ -57,7 +57,7 @@ The rules engine revolves around the definition of **workflows** to represent bu
 
 ### Writing Expressions
 
-Before getting into defining workflows, we need to understand the expressions. Expressions are the foundation of the Microsoft Rules Engine for evaluating both rules and outputs. The core of the rules engine is the `RuleExpressionParser`.
+Before getting into defining workflows, we need to understand the expressions. Expressions are the foundation of the Microsoft Rules Engine to evaluate both rules and outputs. The core of the rules engine is the `RuleExpressionParser`.
 
 ``` csharp
 var output = new RuleExpressionParser()
@@ -90,7 +90,7 @@ public void SimpleParameterExpressionTest()
 
 One use case I find the standalone `RuleExpressionParser` useful for is in unit testing expressions, particularly complex expressions, to help document expressions and highlight issues.
 
-Now that we've looked at expressions, lets look at how they've used in workflows.
+Now that we've looked at expressions, let's look at how they've been used in workflows.
 
 ### Defining Workflows
 
@@ -128,7 +128,7 @@ var output = string.Empty;
 results.OnSuccess(eventName => output = eventName); // Sets output to "General Kenobi"
 ```
 
-The previous workflow can now be passed into the constructor of `RulesEngine` as an array to load the workflow(s). Under the hood, the json definition(s) are deserialized using `Workflow` instance(s). The rules engine is then executed with the name of the workflow specified and any inputs provided in a **`params` array**. The results are then evaluated and the `.OnSuccess()` delegate used to extract the **SuccessEvent**.
+The previous workflow can now be passed into the constructor of `RulesEngine` as an array to load the workflow(s). Under the hood, the JSON definition(s) is deserialized using `Workflow` instance(s). The rules engine is then executed with the name of the workflow specified and any inputs provided in a **`params` array**. The results are then evaluated and the `.OnSuccess()` delegate is used to extract the **SuccessEvent**.
 
 ### Defining Post-Rule Actions
 
@@ -164,15 +164,15 @@ One really useful feature of the rules engine is that the `Workflow` class also 
 
 ![image2](/images/replacing-biztalk-business-rules-engine/image2.png)
 
-In the above example of defining the **SampleWorkflow**, the `$schema` element is specified at the top of the file. In many code editors, including VS Code, this causes the editor to prompt with intellisense of the members available/expected in the schema definition to help take the guesswork out of defining workflows.
+In the above example of defining the **SampleWorkflow**, the `$schema` element is specified at the top of the file. In many code editors, including VS Code, this causes the editor to prompt with the intellisense of the members available/expected in the schema definition to help take the guesswork out of defining workflows.
 
 ### Creating Rule Stores
 
-In the examples so far, the workflow definitions have been passed directly into the `RulesEngine` constructor to then be executes. However, in a real-world scenario, these workflow definitions need to be persisted somewhere outside of the application.
+In the examples so far, the workflow definitions have been passed directly to the `RulesEngine` constructor and are in turn executed. However, in a real-world scenario, these workflow definitions need to be persisted somewhere outside of the application.
 
 ![image3](/images/replacing-biztalk-business-rules-engine/image3.png)
 
-Microsoft provide the above diagram to represent the recommended setup for using the **RulesEngine**. In essence, Microsoft provide the **RulesEngine** library, but we need to develop our own ***wrapper*** around the library as well as integration to the necessary ***rule stores***.
+Microsoft provides the above diagram to represent the recommended setup for using the **RulesEngine**. In essence, Microsoft provides the **RulesEngine** library, but we need to develop our own ***wrapper*** around the library as well as integration to the necessary ***rule stores***.
 
 ``` cs
 public interface IRuleStore
@@ -262,7 +262,7 @@ public class SampleAction : ActionBase
 }
 ```
 
-Defining a custom action is as simple as creating a new class and implementing the abstract class `ActionBase`. The above action looks for a value in the context called `Name` and uses it to format a string. Notice as well that `ILogger` is used in the constructor as, like with the rule stores, we can combine this with dependency injection.
+Defining a custom action is as simple as creating a new class and implementing the abstract class `ActionBase`. The above action looks for a value in the context called `Name` and uses it to format a string. Multiple context properties can be configured to act as arguments in more complex actions. Also, notice that `ILogger` is provided to the constructor, like with the rule stores, as we can combine this with dependency injection.
 
 ``` cs
 builder.Services.AddTransient<SampleAction>();
@@ -281,11 +281,11 @@ builder.Services.AddTransient<IRulesEngine, RulesEngine>(sp => {
 })
 ```
 
-To integrate the custom actions with dependency injection there is a little bit more involved, so lets break down what the above is doing:
+To integrate the custom actions with dependency injection there is a little bit more involved, so let's break down what the above is doing:
 
-1. Register the custom action with the service collection (along with any other necessary dependencies)
-2. Register **reference tuple** of the name of the action (referenced in workflow definitions) and a delegate to retrieve an action instance from DI
-3. As part of registering the rules engine with DI, retrieve the collection of tuples and map to a dictionary to configure `CustomActions` with the engine
+1. Register the custom action type with the service collection (along with any other necessary dependencies)
+2. Register a **reference tuple** of the name of the action (referenced in workflow definitions) and a delegate to retrieve an action instance from DI
+3. As part of registering the rules engine with DI, retrieve the collection of tuples and map to a dictionary to configure `ReSettings.CustomActions` in the engine
 
 ``` json
 {
@@ -309,10 +309,12 @@ To integrate the custom actions with dependency injection there is a little bit 
 }
 ```
 
-In the previous
+The custom action can then be referenced like above, notice that `$.Rules[0].Actions.OnSuccess.Name` element is set to **SampleAction**, the same as what is configured in the DI in the previous sample.
 
 ## Sample Project
 
 [![milkyware/blog-rules-engine - GitHub](https://gh-card.dev/repos/milkyware/blog-rules-engine.svg?fullname=)](https://github.com/milkyware/blog-rules-engine)
 
 ## Wrapping Up
+
+This has been a bit of a longer 

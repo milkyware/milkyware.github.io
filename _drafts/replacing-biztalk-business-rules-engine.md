@@ -130,6 +130,34 @@ results.OnSuccess(eventName => output = eventName); // Sets output to "General K
 
 The previous workflow can now be passed into the constructor of `RulesEngine` as an array to load the workflow(s). Under the hood, the json definition(s) are deserialized using `Workflow` instance(s). The rules engine is then executed with the name of the workflow specified and any inputs provided in a **`params` array**. The results are then evaluated and the `.OnSuccess()` delegate used to extract the **SuccessEvent**.
 
+### Defining Post-Rule Actions
+
+In the **[previous workflow example](#defining-workflows)** we looked at defining a basic workflow with a **success event** which we can then access using the `.OnSuccess()` extension (the inverse be achieved with the `.OnFail()` extension).
+
+``` json
+{
+    "WorkflowName": "SampleWorkflow",
+    "Rules": [
+        {
+            "RuleName": "GeneralGrevious",
+            "RuleExpressionType": "LambdaExpression",
+            "Expression": "input1 == \"Hello there\"",
+            "Actions": {
+                "OnSuccess": {
+                    "Name": "OutputExpression",
+                    "Context": {
+                        "Expression": "input1 + \" General Kenobi\""
+                    }
+                },
+            }
+        }
+        // Additional rule definitions
+    ]
+}
+```
+
+However, the success/fail delegate extensions require the delegate to be defined in code. A more flexible alternative is to define **actions** for **OnSuccess/OnFailure** where we can use the inbuilt **OutputExpression** to define a LINQ expression, with access to the same inputs and C# tooling used in the defining rules, to execute on either success or failure. In the above example, if the input is **Hello there** the workflow returns a concatenated string.
+
 #### Using the JSON Schema
 
 One really useful feature of the rules engine is that the `Workflow` class also has an associated **JSON schema**.

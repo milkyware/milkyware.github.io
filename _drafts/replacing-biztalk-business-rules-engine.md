@@ -130,6 +130,34 @@ results.OnSuccess(eventName => output = eventName); // Sets output to "General K
 
 The previous workflow can now be passed into the constructor of `RulesEngine` as an array to load the workflow(s). Under the hood, the json definition(s) are deserialized using `Workflow` instance(s). The rules engine is then executed with the name of the workflow specified and any inputs provided in a **`params` array**. The results are then evaluated and the `.OnSuccess()` delegate used to extract the **SuccessEvent**.
 
+### Defining Post-Rule Actions
+
+In the **[previous workflow example](#defining-workflows)** we looked at defining a basic workflow with a **success event** which we can then access using the `.OnSuccess()` extension (the inverse be achieved with the `.OnFail()` extension).
+
+``` json
+{
+    "WorkflowName": "SampleWorkflow",
+    "Rules": [
+        {
+            "RuleName": "GeneralGrevious",
+            "RuleExpressionType": "LambdaExpression",
+            "Expression": "input1 == \"Hello there\"",
+            "Actions": {
+                "OnSuccess": {
+                    "Name": "OutputExpression",
+                    "Context": {
+                        "Expression": "input1 + \" General Kenobi\""
+                    }
+                },
+            }
+        }
+        // Additional rule definitions
+    ]
+}
+```
+
+However, the success/fail delegate extensions require the delegate to be defined in code. A more flexible alternative is to define **actions** for **OnSuccess/OnFailure** where we can use the inbuilt **OutputExpression** to define a LINQ expression, with access to the same inputs and C# tooling used in the defining rules, to execute on either success or failure. In the above example, if the input is **Hello there** the workflow returns a concatenated string.
+
 #### Using the JSON Schema
 
 One really useful feature of the rules engine is that the `Workflow` class also has an associated **JSON schema**.
@@ -191,6 +219,102 @@ public class RulesEngineWrapper
 A collection of rule store implementations can then be injected (whether it be 1 or several), like in the sample ***wrapper service*** above, to allow greater flexibility in storing workflow definitions.
 
 ### Creating Custom Actions
+
+Another powerful feature of the Rules Engine is the ability to extend the workflows with **[custom actions](https://microsoft.github.io/RulesEngine/#custom-actions)**.
+
+``` cs
+public class OutputExpressionAction : ActionBase
+{
+    private readonly RuleExpressionParser _ruleExpressionParser;
+
+    public OutputExpressionAction(RuleExpressionParser ruleExpressionParser)
+    {
+        _ruleExpressionParser = ruleExpressionParser;
+    }
+
+    public override ValueTask<object> Run(ActionContext context, RuleParameter[] ruleParameters)
+    {
+        var expression = context.GetContext<string>("expression");
+        return new ValueTask<object>(_ruleExpressionParser.Evaluate<object>(expression, ruleParameters));
+    }
+}
+```
+
+The **[OutputExpression](https://github.com/microsoft/RulesEngine/blob/4ca3cc2b0a5d7af209404ab8767718d0df7ea960/src/RulesEngine/Actions/ExpressionOutputAction.cs)** we used **[earlier](#defining-post-rule-actions)** is actually an inbuilt example of a custom action.
+
+``` cs
+public class SampleAction : ActionBase
+{
+    private const string ContextKeyName = "Name";
+    private readonly ILogger<SampleAction> _logger;
+
+    public SampleAction(ILogger<SampleAction> logger)
+    {
+        _logger = logger;
+    }
+
+    public override ValueTask<object> Run(ActionContext context, RuleParameter[] ruleParameters)
+    {
+        _logger.LogInformation("Executing sample action");
+        var name = context.GetContext<string>(ContextKeyName);
+        return new ValueTask<object>($"Hello {name}");
+    }
+}
+```
+
+Defining a custom action is as simple as creating a new class and implementing the abstract class `ActionBase`. The above action looks for a value in the context called `Name` and uses it to format a string. Notice as well that `ILogger` is used in the constructor as, like with the rule stores, we can combine this with dependency injection.
+
+``` cs
+// Register the custom action along with any other necessary dependencies
+builder.Services.AddTransient<SampleAction>();
+
+// Register a tuple of the name for the action and a delegate to retrieve it 
+builder.Services.AddSingleton<Tuple<string, Func<ActionBase>>>(sp => new("SampleAction", () => sp.GetRequiredService<T>()));
+
+// Register the rules engine
+builder.Services.AddTransient<IRulesEngine, RulesEngine>(sp => {
+
+    // Retrieve a collection of the registered tuples and map to a dictionary to configure CustomActions
+    var customActions = sp.GetServices<Tuple<string, Func<ActionBase>>>();
+    var settings = new ReSettings()
+    {
+        CustomActions = customActions.ToDictionary(ca => ca.Item1, ca => ca.Item2)
+    };
+
+    var rulesEngine = new RulesEngine.RulesEngine(settings);
+    return rulesEngine;
+})
+```
+
+To integrate the custom actions with dependency injection there is a little bit more involved, so lets break down what the above is doing:
+
+1. Register the custom action along with any other necessary dependencies
+2. Register **reference tuple** of the name of the action (referenced in workflow definitions) and a delegate to retrieve an action instance from DI
+3. As part of registering the rules engine with DI, retrieve the collection of tuples and map to a dictionary to configure `CustomActions` with the engine
+
+``` json
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/RulesEngine/main/schema/workflow-schema.json",
+    "WorkflowName": "SampleActionWorkflow",
+    "Rules": [
+        {
+            "RuleName": "Sample",
+            "RuleExpressionType": "LambdaExpression",
+            "Expression": "true",
+            "Actions": {
+                "OnSuccess": {
+                    "Name": "SampleAction",
+                    "Context": {
+                        "Name": "Fred"
+                    }
+                }
+            }
+        }
+    ]
+}
+```
+
+In the previous
 
 ## Sample Project
 

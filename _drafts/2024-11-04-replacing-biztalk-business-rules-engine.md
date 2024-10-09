@@ -313,8 +313,16 @@ The custom action can then be referenced like above, notice that `$.Rules[0].Act
 
 ## Sample Project
 
+I've put together the below sample project to demonstrate the concepts and features we've discussed through this post.
+
 [![milkyware/blog-rules-engine - GitHub](https://gh-card.dev/repos/milkyware/blog-rules-engine.svg?fullname=)](https://github.com/milkyware/blog-rules-engine)
+
+The sample exposes the rules engine through a generic swagger documented WebAPI endpoint to make it easier to interact with.
+
+**N.B.** Due to the generic ***post object body*** of the WebAPI endpoint, the request body is handled as a `JsonNode` which results in the expressions in the workflow using functions such as `string()` to handle typing correctly or indexers to access child members on a JSON object.
+
+In addition, I've also added a basic **[builder pattern](https://refactoring.guru/design-patterns/builder)** to improve the setup of the rules engine as well as some unit tests to demonstrate automating the testing of more complex expressions.
 
 ## Wrapping Up
 
-This has been a bit of a longer 
+This has been a bit of a longer post and one I've been meaning to do for a while as, having used the BizTalk rules engine, having a configurable rules engine is an incredibly powerful tool to have at your disposal. In this post we've introduced some of the key features of the JSON-based Microsoft Rules Engine as well as how we can extend the library through rule stores and custom actions. I hope you find this article useful and thanks for reading.

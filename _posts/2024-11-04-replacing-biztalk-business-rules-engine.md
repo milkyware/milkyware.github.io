@@ -325,4 +325,4 @@ In addition, I've also added a basic **[builder pattern](https://refactoring.gur
 
 ## Wrapping Up
 
-This has been a bit of a longer post and one I've been meaning to do for a while as, having used the BizTalk rules engine, having a configurable rules engine is an incredibly powerful tool to have at your disposal. In this post we've introduced some of the key features of the JSON-based Microsoft Rules Engine as well as how we can extend the library through rule stores and custom actions. I hope you find this article useful and thanks for reading.
+This has been a bit of a longer post and one I've been meaning to do for a while as, having used the BizTalk rules engine, having a configurable rules engine is an incredibly powerful tool to have at your disposal. In this post we've introduced some of the key features of the JSON-based Microsoft Rules Engine as well as how we can extend the library through rule stores and custom actions to create a solution comparable to the BizTalk Business Rules Engine. I hope you find this article useful and thanks for reading.

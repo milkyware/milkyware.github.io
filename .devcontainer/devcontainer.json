@@ -42,7 +42,7 @@
 				"streetsidesoftware.code-spell-checker",
 				"bierner.markdown-mermaid",
 				"github.vscode-github-actions",
-				"shopify.ruby-lsp"
+				"Shopify.ruby-lsp"
 			],
 			"settings": {
 				"terminal.integrated.defaultProfile.linux": "pwsh"

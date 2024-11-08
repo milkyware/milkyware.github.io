@@ -17,22 +17,22 @@ public class SampleService
 {
     private readonly ILogger _logger:
 
-    public SampleService(ILogger<SampleService> logger)
- {
+    public SampleService(ILogger<SampleService> logger)
+    {
         _logger = logger;
- }
+    }
 
     public void Run()
- {
+    {
         logger.LogInformation("Starting run method")
 
- // Method logic
+        // Method logic
 
         logger.LogDebug("Debug logging")
         logger.LogTrace("Trace logging")
 
         logger.LogInformation("Finishing run method successfully")
- }
+    }
 }
 ```
 
@@ -50,17 +50,17 @@ public class TimerFunction
     private readonly ILogger<TimerFunction> _logger;
 
     public TimerFunction(ILogger<TimerFunction> logger)
- {
+    {
         _logger = logger;
- }
+    }
 
  [Function(nameof(TimerFunction))]
     public async Task Run([TimerTrigger("0 0 * * *", RunOnStartup = true)] TimerInfo timerInfo)
- {
+    {
         _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
         _logger.LogDebug("Func debug message");
         _logger.LogTrace("Func trace message");
- }
+    }
 }
 ```
 

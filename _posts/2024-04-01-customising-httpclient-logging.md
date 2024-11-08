@@ -6,8 +6,8 @@ tags:
   - Logging
   - ILogger
   - DelegatingHandler
-  - Dotnet
-  - Dotnet Core
+  - DotNet
+  - DotNet Core
 ---
 
 In Integration development, having sufficient logs is key to being able to debug issues. .NET has the well-established **[ILogger](https://learn.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line)** pattern which is available by default in several application types including **ASP.NET Core and Worker Services**.

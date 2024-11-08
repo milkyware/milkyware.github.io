@@ -3,7 +3,7 @@ title: Using the Factory Pattern with Dependency Injection
 category: .NET
 tags:
  - .NET
- - Dotnet
+ - DotNet
  - Design Patterns
  - Factory Pattern
  - Dependency Injection

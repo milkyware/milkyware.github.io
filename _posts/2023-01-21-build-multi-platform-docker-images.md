@@ -6,7 +6,7 @@ category: DevOps
 tags:
   - Docker
   - Docker Buildx
-  - GitHib Actions
+  - GitHub Actions
 ---
 
 Over the last couple of years I've been using [Docker](https://docs.docker.com/) more for running my home-lab to learn about containerisation by both deploying community images as well as packaging my own apps as images. I've also used this as an opportunity to get more familiar with [GitHub Actions](https://github.com/features/actions) as the [marketplace](https://github.com/marketplace) has been growing incredibly quickly.

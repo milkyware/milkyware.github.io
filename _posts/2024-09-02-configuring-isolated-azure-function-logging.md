@@ -3,7 +3,7 @@ title: Configuring Isolated Azure Function Logging
 category: Azure
 tags:
  - .NET
- - Dotnet
+ - DotNet
  - Azure Function
  - Azure Functions Isolated
  - Logging

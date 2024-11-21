@@ -129,7 +129,15 @@ A typical ASP.NET Core application will often have a section in the **appsetting
 
 ### Structured Logging
 
-Another feature of the default implementation of `ILogger` is **structured logging**. In the code example you may have noticed logs such as `_logger.LogTrace("Data received from third-party library: {Data}", data);`. Notice that rather than building a string or using **[string interpolation](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/tokens/interpolated)**, a formatted string is provided as the message with a **placeholder**: `{Data}`. A value for the placeholder is then provided using the `data` variables in the params array.
+Another feature of the default implementation of `ILogger` is **structured logging**. In the code example you may have noticed logs such as 
+
+``` cs
+_logger.LogTrace("Data received from third-party library: {Data}", data);
+```
+
+Notice that rather than building a string or using **[string interpolation](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/tokens/interpolated)**, a formatted string is provided as the message with a **placeholder**: `{Data}`. A value for the placeholder is then provided using the `data` variables in the params array after the message.
+
+<!-- TODO Demo screenshot data context  -->
 
 ### Using Scopes for Contextual Logging
 

@@ -3,7 +3,7 @@ name: spell check
 on:
   push: 
     branches: 
-      - maiin
+      - main
   pull_request: 
     branches: 
       - main

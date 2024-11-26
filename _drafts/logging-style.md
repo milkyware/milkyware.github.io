@@ -22,7 +22,7 @@ There are many reasons to add logging to your code, 4 key reasons are:
 
 ## Using ILogger
 
-In C#, the `ILogger` interface is a standard feature of modern .NET applications. It enables flexible logging as well as seamless integration with dependency injection and is available in most project templates to start logging **out-of-the-box**. Here’s an example of how to inject `ILogger` and utilize different log levels in a service class:
+In C#, the `ILogger` interface is a standard feature of modern .NET applications. It enables flexible logging as well as seamless integration with dependency injection and is available in most project templates to start logging **out-of-the-box**. Here's an example of how to inject `ILogger` and utilize different log levels in a service class:
 
 ``` cs
 using Microsoft.Extensions.Logging;
@@ -129,25 +129,40 @@ A typical ASP.NET Core application will often have a section in the **appsetting
 
 ### Structured Logging
 
-Another feature of the default implementation of `ILogger` is **structured logging**. In the code example you may have noticed logs such as 
+Another feature of the default implementation of `ILogger` is **structured logging**. In the code example you may have noticed logs such as
 
 ``` cs
-_logger.LogTrace("Data received from third-party library: {Data}", data);
+_logger.LogTrace("Processed data: {ProcessedData}", processedData);
 ```
 
-Notice that rather than building a string or using **[string interpolation](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/tokens/interpolated)**, a formatted string is provided as the message with a **placeholder**: `{Data}`. A value for the placeholder is then provided using the `data` variables in the params array after the message.
+Notice that rather than building a string or using **[string interpolation](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/tokens/interpolated)**, a formatted string is provided as the message with a **placeholder**: `{ProcessedData}`. A value for the placeholder is then provided using the `processedData` variables in the params array after the message.
 
-<!-- TODO Demo screenshot data context  -->
+![image1](/images/logging-style/image1.png)
+
+Above is a screenshot from **[Seq](https://datalust.co/seq)** of the logs from the earlier example. Notice that the message contains the value of the `processedData` variable, but the placeholder **is also** stored separately.
+
+``` sql
+select * 
+from stream 
+where ProcessedData = '13a2bc2e-e4a2-4d32-a331-c806e74b4a13_processed'
+```
+
+This **structure logging** allows us to more easily query based on the values of the placeholders. If multiple log events contain the same context property and value, these would all be returned together further helping to analyse timelines and relationships in the logs.
+
+**N.B.** Seq is a self-hosted structured logging server. However, many but many other services support this including **Azure App Insights** and **AWS CloudWatch**.
 
 ### Using Scopes for Contextual Logging
 
-I've also started to make greater use of logging scopes with `ILogger`. A scope enables logged events within a certain block to inherit shared context, making it easier to follow related events in the logs. This is particularly useful in tracing the flow of data through nested methods.
+One feature I've been make greater use of recently is **logging scopes** with `ILogger`. A scope enables logged events within a block to inherit shared context, making it easier to follow related events in the logs. This is particularly useful in tracing the flow of data through nested methods.
 
 ```csharp
 public void ProcessOrder(int orderId)
 {
     // Create a logging scope with contextual information
-    using (_logger.BeginScope("OrderProcessing {OrderId}", orderId))
+    using (_logger.BeginScope(new Dictionary<string, object>
+    {
+        { "OrderId", orderId }
+    }))
     {
         _logger.LogInformation("Starting order processing.");
 
@@ -172,29 +187,18 @@ public void ProcessOrder(int orderId)
 }
 ```
 
-With `BeginScope`, any log statements within the `ProcessOrder` method (and within methods it calls) will include `{OrderId}` as context, allowing you to trace logs related to this specific order processing session. This is especially beneficial in multi-threaded or high-volume environments where tracking specific workflows is critical.
+With `BeginScope`, any log statements within the `ProcessOrder` method (and within methods it calls) will include **OrderId** in the context, regardless of if the **placeholder is in the message**.
 
-### Structured Logging and Additional Logging Levels
+![image2](/images/logging-style/image2.png)
 
-1. **Structured Logging**: Structured logging allows you to log data in a structured format, making it easier to search, parse, and analyze logs. Using `{PropertyName}` syntax, you can capture variables and metadata in a way that is both human-readable and machine-parsable for log aggregation tools.
+Looking at the logs in Seq again, we can see the **OrderId** value in all of the events. This allows us to trace logs related to this specific order processing session. This is especially useful in multi-threaded or high-volume environments where tracking specific workflows is critical.
 
-2. **Additional Log Levels**:
-   - **Warning** (`LogWarning`): This level is used to flag potentially harmful situations, like deprecated APIs, which don’t cause immediate failure but might need attention.
-   - **Critical** (`LogCritical`): Reserved for severe issues that require immediate attention, such as a system or application failure.
+## Wrapping Up
 
-3. **Logging Standards as Principles**:
-   - The standards outlined here provide guidance for structuring logging but are not rigid rules. While it's beneficial to use consistent logging levels, the main objective is to capture important points in the code where logging adds value.
-   - The use of log levels (e.g., `Debug`, `Error`, `Information`) is a guideline; however, the critical focus should be on ensuring meaningful code points are logged.
+For this post I wanted to share my approach to logging as, by sharing and discussing an approach with other developers over the years, I've found it helps build a consistent logging experience throughout an application which in turn improves monitoring and analytics.
 
-### Conclusion
+For this we've looked at:
 
-To summarize the key points:
-
-- Use **Information** logs at the start and end of significant methods.
-- Use **Debug** logs around third-party calls and helper methods.
-- Use **Error** logs for exceptions, capturing details while rethrowing for higher-level handling.
-- Use **Trace** logs to capture key variable values at critical stages.
-- **Scopes** can enhance context for related log events, improving traceability.
-- **Structured logging** and higher log levels (Warning, Critical) are available to add further detail and control over the logging flow.
-
-The logging levels suggested here serve as a guideline rather than a strict rule; the essential takeaway is that critical points in the code should be logged for clarity, insight, and maintainability.
+- How using a variety of logging levels helps granularly dial up and down logging
+- How structured logging improves our ability to query and analyse logs
+- How logging scopes can create ***correlating sessions*** of logs which can be inherited in nested logic.

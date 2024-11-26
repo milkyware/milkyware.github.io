@@ -22,6 +22,6 @@ jobs:
       - uses: tbroadley/spellchecker-cli-action@v1
         name: Spell Check
         with:
-          files: "**/*.md"
+          files: "_drafts/**/*.md _posts/**/*.md"
           language: en-GB
           quiet: true

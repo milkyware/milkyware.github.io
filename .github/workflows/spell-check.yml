@@ -1,0 +1,22 @@
+name: spell check
+
+on:
+  push: 
+    branches: 
+      - maiin
+  pull_request: 
+    branches: 
+      - main
+    paths: 
+      - _drafts
+      - _posts
+  workflow_dispatch:
+
+jobs:
+  spell-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: igsekor/pyspelling-any@v1
+        name: Spell Check

@@ -4,9 +4,12 @@ category: .NET
 tags:
   - Dotnet
   - .NET
+  - Logs
   - Logging
-  - Structure Logging
+  - Structured Logging
+  - Logging Scopes
   - ILogger
+  - Seq
 ---
 
 Logging is an essential part of software development that provides a record of events and activities within an application. It allows both developers and support teams to track an application's behaviours, diagnose issues, monitor performance, and troubleshoot bugs. Detailed log data can give great visibility into how an application is running, which in turn makes it easier to maintain and improve. For this post, I want to share my personal approach to logging which I've found strikes a balance between having detailed logs without being unnecessarily chatty.

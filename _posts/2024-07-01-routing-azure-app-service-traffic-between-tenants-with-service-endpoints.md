@@ -74,7 +74,7 @@ Once the Private Endpoint has been created, it will go into ***approval***, simi
 
 ![image8](/images/routing-azure-app-service-traffic-between-tenants-with-service-endpoints/image8.png)
 
-In the **target resource** tenant, the Private Link Center will have an entry like below which will need approval. In my case, it was the owner of the external API.
+In the **target resource** tenant, the Private Link Centre will have an entry like below which will need approval. In my case, it was the owner of the external API.
 
 ![image9](/images/routing-azure-app-service-traffic-between-tenants-with-service-endpoints/image9.png)
 

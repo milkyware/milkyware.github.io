@@ -21,11 +21,11 @@ There are many reasons to add logging to your code, 4 key reasons are:
 1. **Debugging and Troubleshooting**: Captures events that can help pinpoint issues and understand what led to them
 2. **Monitoring Application Health**: Offers real-time insight into the state of an application and enables proactive monitoring of errors, crashes, and unusual patterns
 3. **Audit and Compliance**: Provides a history of key activities which can be useful for security, auditing, and compliance purposes
-4. **Performance Optimization**: Logging execution times and performance metrics, bottlenecks can be identified and resolved
+4. **Performance Optimisation**: Logging execution times and performance metrics, bottlenecks can be identified and resolved
 
 ## Using ILogger
 
-In C#, the `ILogger` interface is a standard feature of modern .NET applications. It enables flexible logging as well as seamless integration with dependency injection and is available in most project templates to start logging **out-of-the-box**. Here's an example of how to inject `ILogger` and utilize different log levels in a service class:
+In C#, the `ILogger` interface is a standard feature of modern .NET applications. It enables flexible logging as well as seamless integration with dependency injection and is available in most project templates to start logging **out-of-the-box**. Here's an example of how to inject `ILogger` and utilise different log levels in a service class:
 
 ``` cs
 using Microsoft.Extensions.Logging;

@@ -15,11 +15,11 @@ Source control is the foundation of software development for many reasons includ
 
 Keeping secrets out of source code is important for several key reasons:
 
-1. **Prevent Unauthorized Access:**
+1. **Prevent Unauthorised Access:**
  Exposing credentials in a repository gives attackers an easy path to access private infrastructure, databases, cloud services, or APIs. Once access is gained, they can steal, modify, or even delete valuable data.
 
 2. **Comply with Security Regulations:**
- Many organizations are bound by stringent regulations, like GDPR, PCI DSS, or HIPAA, that require strict data handling and security measures. Exposing secrets can lead to non-compliance and hefty fines.
+ Many organisations are bound by stringent regulations, like GDPR, PCI DSS, or HIPAA, that require strict data handling and security measures. Exposing secrets can lead to non-compliance and hefty fines.
 
 3. **Avoid Long-Term Impact:**
  Even after a secret is removed from a repository, Git's version history retains every commit unless it's purged. This means that secrets can still be retrieved if not properly cleaned up, prolonging the exposure risk.
@@ -33,7 +33,7 @@ As mentioned, there are limits to scanning source code and history manually to e
 
 There are several tools available to automate this process from open-source such as **[GitLeaks](https://github.com/gitleaks/gitleaks)**, to paid services such as **[SpectralOps](https://spectralops.io/features/)** and even built-in to some developer platforms such as **[Azure DevOps](https://learn.microsoft.com/en-us/azure/devops/repos/security/configure-github-advanced-security-features?view=azure-devops&tabs=yaml)**.
 
-For this post, I will demonstrate integrating **GitLeaks with Azure Pipelines** to automate scanning for secrets. GitLeaks is a fantastic open-source tool, actively maintained by many contributors, and is designed to detect hardcoded secrets like API keys and credentials in your Git repositories.
+For this post, I will demonstrate integrating **GitLeaks with Azure Pipelines** to automate scanning for secrets. GitLeaks is a fantastic open-source tool, actively maintained by many contributors, and is designed to detect hard-coded secrets like API keys and credentials in your Git repositories.
 
 ``` bash
 docker run --rm -v /local/path/to/repo:/mnt zricethezav/gitleaks:latest git /mnt

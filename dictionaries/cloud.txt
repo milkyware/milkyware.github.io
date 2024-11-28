@@ -1,0 +1,17 @@
+[Cc][Ii]\\?[Cc][Dd]
+[Kk]udu
+[Ss]ubnet
+[Ss]ubscriptionId
+[Vv][Nn]et\w?
+CloudWatch
+CNAME
+DevOps
+DNS
+IPv\d
+isExternalResource
+manualPrivateLinkServiceConnections
+NIC
+privateLinkServiceConnections
+resourceGroup(\w+)?
+\w{2,4}-(\w+-?)+
+ULA

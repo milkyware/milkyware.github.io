@@ -1,0 +1,6 @@
+[Gg]it[Ll]eaks
+[Mm]ilky[Ww]are
+[Oo]rder[Ii]d
+[Rr]epo\w?
+image\d+
+input\d+

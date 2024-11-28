@@ -1,0 +1,15 @@
+[Bb]iz[Tt]alk
+[Oo]utput[Ee]xpression
+APIs
+BRE
+BREPipelineFramework
+CoreWCF
+JSON(.?\w+)?
+OnFailure
+OnSuccess
+RulesEngine
+SampleAction
+SampleWorkflow
+SuccessEvent
+WCF
+XML

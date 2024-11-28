@@ -1,0 +1,14 @@
+.NET
+ASP\.?NET
+appsettings(\.\w+)?
+[Dd]ot[Nn]et
+HttpClient
+ILogger(<\w+>)?
+nameof
+[Nn]uget
+params
+PowerShell
+[Un]-?handled
+typeof
+[Ww]eb(API|Api|api)
+LINQ

@@ -4,6 +4,7 @@ appsettings(\.\w+)?
 [Dd]ot[Nn]et
 HttpClient
 ILogger(<\w+>)?
+IOptions(<\w+>)?
 nameof
 [Nn]uget
 params

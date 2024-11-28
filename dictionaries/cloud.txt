@@ -1,8 +1,10 @@
+[Aa]z
 [Cc][Ii]\\?[Cc][Dd]
 [Kk]udu
 [Ss]ubnet
 [Ss]ubscriptionId
 [Vv][Nn]et\w?
+\w{2,4}-(\w+-?)+
 CloudWatch
 CNAME
 DevOps
@@ -13,5 +15,5 @@ manualPrivateLinkServiceConnections
 NIC
 privateLinkServiceConnections
 resourceGroup(\w+)?
-\w{2,4}-(\w+-?)+
 ULA
+VM

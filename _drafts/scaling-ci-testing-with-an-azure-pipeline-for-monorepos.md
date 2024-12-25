@@ -16,8 +16,7 @@ Continuous Integration (CI) in monorepos often presents challenges as the codeba
 
 ## The Pipeline Template
 
-For those wanting the template, the complete Azure Pipeline template is below.
-For the remainder of the post I want to breakdown some of the key features.
+Below is the complete Azure Pipeline template. For the remainder of the post, I want to break down some of the pipeline's key features and benefits.
 
 ``` yaml
 parameters:
@@ -160,6 +159,40 @@ steps:
       testResultsFiles: $(Agent.TempDirectory)/**/*.trx
 ```
 
+### Running the Pipeline Template
+
+Defining an Azure Pipeline which consumes the template would look similar to below. Note that the template is being referenced as a file, however, the template could just as easily be referenced from a remote repo as covered in **[this article]({% post_url 2023-02-20-sharing-azure-pipeline-templates%})**.
+
+``` yaml
+name: $(Date:yy.MM.dd)$(Rev:.rr)
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - apps
+
+extends:
+  template: templates/RunAffectedTests.azure-pipelines.yml
+  parameters:
+    dotnetVersions:
+      - 8.0.x
+      - 6.0.x
+    excludedTestProjects:
+      - apps/app2/tests/IntegrationTests/IntegrationTests.csproj
+```
+
+An example of the pipeline running has been included below. The logs of the pipeline detail which test projects have been run.
+
+![image2](/images/scaling-ci-testing-with-an-azure-pipeline-for-monorepos/image2.png)
+
+The test results are then uploaded to the Azure Pipeline for easy reviewing.
+
+![image3](/images/scaling-ci-testing-with-an-azure-pipeline-for-monorepos/image3.png).
+
 ## Key Features of the Pipeline
 
 ### Dynamic Test Discovery
@@ -215,6 +248,6 @@ As touched on already, there are a number of benefits:
 
 ## Conclusion
 
-This Azure Pipeline streamlines CI testing for monorepos by focusing only on what’s impacted, reducing unnecessary overhead, and keeping workflows efficient. It’s flexible, scalable, and integrates easily into existing processes, making it a powerful tool for managing complex repositories.
+This Azure Pipeline streamlines CI testing for monorepos by focusing only on what's impacted, reducing unnecessary overhead, and keeping workflows efficient. It's flexible, scalable, and integrates easily into existing processes, making it a powerful tool for managing complex repositories.
 
 I hope this has been of use and give it a try. Happy coding!

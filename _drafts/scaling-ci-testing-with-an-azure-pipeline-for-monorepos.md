@@ -12,87 +12,12 @@ tags:
   - Monorepos
 ---
 
-Continuous Integration (CI) in monorepos often presents challenges as the codebase scales. Running all tests on every commit is inefficient, particularly for large repositories with multiple solutions and test projects, whereas defining a CI pipeline per solution is repetitive and doesn't scale easily. To address this, I've implemented an Azure Pipeline that dynamically identifies and runs only the test projects affected by code changes. This pipeline simplifies CI operations and scales efficiently as more test projects are added.
+Continuous Integration (CI) in monorepos often presents challenges as the codebase scales. Running all tests on every commit is inefficient, particularly for large repositories with multiple solutions and test projects, whereas defining a CI pipeline per solution is repetitive and doesn't scale easily. To address this, I've implemented an Azure Pipeline that dynamically identifies and runs only the relevant test projects affected by code changes. This pipeline simplifies CI operations and scales efficiently as more test projects are added.
 
-## Key Features of the Pipeline
+## The Pipeline Template
 
-### 1. Dynamic Test Discovery
-
-The pipeline identifies changes in a branch compared to a base branch (e.g., `main`) using the `git diff` command. It uses a configurable depth parameter to map changes to specific directories and locate affected test projects. This approach ensures that only impacted tests are executed, saving time and resources.
-
-### 2. Modular Configuration
-
-The pipeline offers several parameters for customization:
-
-- **comparisonBranch:** The base branch for evaluating changes.
-- **comparisonDepth:** Determines how deeply the directory structure is analyzed for changes.
-- **buildConfiguration:** Specifies the build configuration (e.g., Debug or Release).
-- **dotnetVersions:** Lists .NET versions required to run the tests.
-- **excludedTestProjects:** Allows exclusion of specific test projects.
-
-These parameters provide flexibility to adapt the pipeline to different project structures and team requirements.
-
-### 3. Intelligent Test Identification
-
-The pipeline uses the following heuristics to identify test projects:
-
-- Checks if the `IsTestProject` property is defined in the `.csproj` file.
-- Verifies if testing frameworks like MSTest, NUnit, or xUnit are referenced in the project file.
-
-This logic ensures that only genuine test projects are included in the test run.
-
-### 4. Exclusion Handling
-
-By specifying test projects to exclude, I can skip tests that are either irrelevant to the current changes or temporarily disabled. This feature enhances control and reduces unnecessary processing.
-
-### 5. Multi-Version .NET Support
-
-The pipeline installs multiple .NET versions as specified in the `dotnetVersions` parameter, ensuring compatibility with various test projects.
-
-### 6. Test Result Publishing
-
-Test results are collected and published in the VSTest format, integrating seamlessly with Azure DevOps’ reporting tools.
-
-## Scaling the Pipeline for Growth
-
-### Efficient Handling of New Test Projects
-
-As the monorepo grows:
-
-- **Directory Structure Convention:** Adhering to a well-organized directory structure ensures that new test projects are automatically detected without additional configuration.
-- **Depth Parameter Adjustment:** Increasing the `comparisonDepth` allows the pipeline to accommodate deeper directory hierarchies, ensuring scalability.
-
-### Parameterized Flexibility
-
-The modular design ensures that new requirements—such as additional .NET versions or exclusion of specific projects—can be incorporated without modifying the core logic. Simply update the parameters to adapt the pipeline to evolving needs.
-
-### Reduced Resource Usage
-
-By targeting only impacted tests, the pipeline reduces compute costs and accelerates feedback loops, enabling faster delivery cycles and efficient use of build agent resources.
-
-### Team Collaboration
-
-With clear logging and structured outputs, teams can easily identify which tests ran and why. This transparency fosters better collaboration and understanding across development and QA teams.
-
-## Simplifying CI in Monorepos
-
-Managing multiple solutions and test projects in a monorepo can be daunting. This Azure Pipeline simplifies the process by:
-
-- Automating test selection based on changes.
-- Reducing manual effort required to configure and manage tests.
-- Streamlining integration with Azure DevOps tools for seamless CI workflows.
-
-### Example Use Case
-
-Imagine a monorepo with multiple microservices, each with its own test project. Previously, every commit triggered all tests, wasting time on unrelated areas. With this pipeline:
-
-- I update one microservice.
-- The pipeline detects the change, identifies the associated test project, and runs only those tests.
-- Results are published, providing immediate feedback without redundant processing.
-
-## Conclusion
-
-This Azure Pipeline transforms CI for monorepos, making it scalable, efficient, and easy to manage. As more test projects are added, the pipeline’s dynamic nature ensures it remains performant and adaptable. By focusing on impacted tests, it reduces resource usage and accelerates development cycles, empowering teams to deliver high-quality software faster.
+For those wanting the template, the complete Azure Pipeline template is below.
+For the remainder of the post I want to breakdown some of the key features.
 
 ``` yaml
 parameters:
@@ -234,3 +159,62 @@ steps:
       testResultsFormat: VSTest
       testResultsFiles: $(Agent.TempDirectory)/**/*.trx
 ```
+
+## Key Features of the Pipeline
+
+### Dynamic Test Discovery
+
+The pipeline identifies changes in a branch compared to a base branch (e.g., `main`) using the `git diff` command. It uses a configurable depth parameter to map changes to specific directories and locate affected test projects.
+
+![image1](/images/scaling-ci-testing-with-an-azure-pipeline-for-monorepos/image1.png)
+
+This is intended to work with a folder structure which adheres to convention across the monorepo. For example, with the default `comparisonDepth` parameter of **2** for the above folder structure, updating the file **apps/app1/src/ConsoleApp1/Program.cs** would run test projects under **apps/app1**. This approach ensures that only impacted tests are executed, saving test execution time and pipeline resources.
+
+### Modular Configuration
+
+A number of parameters are available to customise the usage of the pipeline to fit different project structures and team requirements:
+
+- **comparisonBranch:** The base branch for evaluating changes.
+- **comparisonDepth:** Determines how deeply the directory structure is analyzed for changes.
+- **buildConfiguration:** Specifies the build configuration (e.g., Debug or Release).
+- **dotnetVersions:** Lists .NET versions required to run the tests.
+- **excludedTestProjects:** Allows exclusion of specific test projects, such as integration tests.
+
+As the script is written entirely with PowerShell, additional script changes can be easily made.
+
+### Intelligent Test Identification
+
+The pipeline uses the following heuristics to identify test projects:
+
+- Checks if the `IsTestProject` property is defined in the `.csproj` file.
+- Verifies if testing frameworks like MSTest, NUnit, or xUnit are referenced in the project file.
+
+This logic ensures that only genuine test projects are included in the test run.
+
+### Exclusion Handling
+
+By specifying test projects to exclude, tests can be skipped that are irrelevant (such as scripted manual test or integration tests) to the current changes or temporarily disabled. This enhances control of what tests are run and reduces unnecessary processing.
+
+### Multi-Version .NET Support
+
+The pipeline is capable of installing multiple .NET versions as specified in the `dotnetVersions` parameter, ensuring compatibility with various test projects in scenarios where a variety of .NET versions are used (e.g. during a migration to a new .NET version).
+
+### Test Result Publishing
+
+Test results are collected and published in the VSTest format, as is standard practice in CI pipelines, integrating seamlessly with Azure DevOps’ reporting tools.
+
+## What are the Benefits?
+
+As touched on already, there are a number of benefits:
+
+- As the monorepo grows with new apps, providing the folder structured is adhered to, the test projects will automatically be evaluated and run if considered relevant, without the need to define a new CI pipeline.
+- With the pipeline being templated and parametrised, it can easily be included in or referenced from various repos for great reuse.
+- By targeting only impacted tests, the pipeline reduces compute costs and accelerates feedback loops, enabling faster delivery cycles and more efficient use of build agent resources.
+- The pipeline makes use of PowerShell to perform the evaluation of the affected test. This script makes heavy use of standard PowerShell logging practices and integrates with the **[Azure Pipeline debug flag](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#systemdebug)** to toggle enhanced logging output to easily identity what tests have been selected.
+- With the pipeline being entirely written in PowerShell, should some changes or extra logic be needed, this can be easily incorporated into the pipeline.
+
+## Conclusion
+
+This Azure Pipeline streamlines CI testing for monorepos by focusing only on what’s impacted, reducing unnecessary overhead, and keeping workflows efficient. It’s flexible, scalable, and integrates easily into existing processes, making it a powerful tool for managing complex repositories.
+
+I hope this has been of use and give it a try. Happy coding!

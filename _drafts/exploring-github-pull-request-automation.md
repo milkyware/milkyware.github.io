@@ -29,9 +29,64 @@ gh pr view 1 --repo owner/scratchpad --json id,title,body
 
 In addition the `--json` argument can be added to many commands to return a JSON object to allow handling the responses in a programmatic way, such as using `ConvertFrom-Json` **in PowerShell**.
 
-## Assigning Reviewers
+### Assigning Reviewers
 
 The first workflow I wanted to create was to automate assigning a configurable list of reviewers to pull requests.
+
+``` powershell
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory = $true)]
+    [string]$PRNumber,
+    [Parameter(Mandatory = $true)]
+    [string[]]$Reviewers
+)
+begin
+{
+    $InformationPreference = 'Continue'
+    if ($env:RUNNER_DEBUG)
+    {
+        $DebugPreference = 'Continue'
+        $VerbosePreference = 'Continue'
+    }
+}
+process
+{
+    Write-Debug "prNumber=$PRNumber"
+    Write-Debug "reviewers=$($reviewers | ConvertTo-Json -Compress)"
+
+    Write-Debug "Getting PR"
+    $pr = gh pr view $prNumber --json author | ConvertFrom-Json
+    $author = $pr.author.login
+    Write-Verbose "author=$author"
+
+    Write-Debug "Filtering out author"
+    $reviewers = $reviewers | Where-Object { $_ -ine $author }
+
+    $reviewersStr = $reviewers | ConvertTo-Json -Compress
+    Write-Verbose "reviewersStr=$reviewersStr"
+
+    Write-Debug "Getting current repo"
+    $repo = gh repo view --json name,owner | ConvertFrom-Json
+
+    foreach ($r in $reviewers)
+    {
+        Write-Debug "Assigning reviewer $r"
+        gh api --method POST `
+            -H "Accept: application/vnd.github+json" `
+            -H "X-GitHub-Api-Version: 2022-11-28" `
+            /repos/$($repo.owner.login)/$($repo.name)/pulls/$prNumber/requested_reviewers `
+            -f "reviewers[]=$r" `
+            --silent
+    }
+
+    Write-Information "Assigned reviewers"
+}
+```
+
+The scripts takes parameters for a **PR number and GitHub usernames to be assigned as reviewers**. Using the GitHub CLI, the author of the repo is evaluated and removed from the list of reviewers with the remaining reviewers added using the `gh api` command.
+
+**N.B.** The `gh api` command is currently used to add the reviewers due to a **[bug in the handling of workflow permissions](https://github.com/cli/cli/issues/4844)**.
 
 ``` yaml
 name: Assign Reviewers
@@ -59,50 +114,14 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-          REVIEWERS: |
-            [
-              "github-user1",
-              "github-user2"
-            ]
         run: |
-          $InformationPreference = 'Continue'
-          if ($env:ACTIONS_RUNNER_DEBUG)
-          {
-            $DebugPreference = 'Continue'
-            $VerbosePreference = 'Continue'
-          }
-
-          $prNumber = "${{ github.event.number }}"
-          Write-Debug "prNumber=$prNumber"
-
-          Write-Debug "Parsing reviewers"
-          $reviewers = '${{ env.REVIEWERS }}' | ConvertFrom-Json
-
-          Write-Debug "Getting PR"
-          $pr = gh pr view $prNumber --json author | ConvertFrom-Json
-          $author = $pr.author.login
-          Write-Verbose "author=$author"
-
-          Write-Debug "Filtering out author"
-          $reviewers = $reviewers | Where-Object {$_ -ine $author}
-
-          $reviewersStr = $reviewers | ConvertTo-Json -Compress
-          Write-Verbose "reviewersStr=$reviewersStr"
-
-          foreach ($r in $reviewers)
-          {
-            gh api --method POST `
-              -H "Accept: application/vnd.github+json" `
-              -H "X-GitHub-Api-Version: 2022-11-28" `
-              /repos/${{ github.repository }}/pulls/$prNumber/requested_reviewers `
-              -f "reviewers[]=$r"
-          }
-
-          Write-Information "Assigned reviewers"
+          ./scripts/AssignReviewers.ps1 `
+            -PRNumber "${{ github.event.number }}" `
+            -Reviewers "github-user1", "github-user2"
 ```
 
-The above workflow is triggered when a pull request is opened (including re-opened and published after drafting) and used the GitHub CLI in combination with Powershell set set reviewers.
+The above workflow is triggered when a pull request is opened (including re-opened and published after drafting) and executes the script passing in values for **PRNumber and Reviewers**. To authenticate the CLI used in the script, the `GH_TOKEN` environment variable is set using the `${{ github.token }}` workflow variable.
 
-To authenticate the CLI, the `GH_TOKEN` environment variable is set using the `${{ github.token }}` workflow variable. A **JSON array of GitHub usernames** is also provided as an environment variable. The script then deserializes the reviewer array, removes the author and adds reviewers using the GitHub API.
+Adding the reviewers automatically results in greater awareness by triggering notifications as well as ownership of code reviews.
 
-**N.B.** The GitHub API is currently used to add the reviewers due to a **[bug in the handling of workflow permissions](https://github.com/cli/cli/issues/4844)**.
+### Tagging

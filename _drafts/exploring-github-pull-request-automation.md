@@ -88,6 +88,7 @@ The scripts takes parameters for a **PR number and GitHub usernames to be assign
 
 **N.B.** The `gh api` command is currently used to add the reviewers due to a **[bug in the handling of workflow permissions](https://github.com/cli/cli/issues/4844)**.
 
+<!-- {% raw %} -->
 ``` yaml
 name: Assign Reviewers
 
@@ -119,6 +120,7 @@ jobs:
             -PRNumber "${{ github.event.number }}" `
             -Reviewers "github-user1", "github-user2"
 ```
+<!-- {% endraw %} -->
 
 The above workflow is triggered when a pull request is opened (including re-opened and published after drafting) and executes the script passing in values for **PRNumber and Reviewers**. To authenticate the CLI used in the script, the `GH_TOKEN` environment variable is set using the `${{ github.token }}` workflow variable.
 

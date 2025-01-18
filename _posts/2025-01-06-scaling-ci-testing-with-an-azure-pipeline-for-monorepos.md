@@ -18,6 +18,7 @@ Continuous Integration (CI) in monorepos often presents challenges as the codeba
 
 Below is the complete Azure Pipeline template. For the remainder of the post, I want to break down some of the pipeline's key features and benefits.
 
+<!-- {% raw %} -->
 ``` yaml
 parameters:
   - name: comparisonBranch
@@ -158,11 +159,13 @@ steps:
       testResultsFormat: VSTest
       testResultsFiles: $(Agent.TempDirectory)/**/*.trx
 ```
+<!-- {% endraw %} -->
 
 ### Running the Pipeline Template
 
 Defining an Azure Pipeline which consumes the template would look similar to below. Note that the template is being referenced as a file, however, the template could just as easily be referenced from a remote repo as covered in **[this article]({% post_url 2023-02-20-sharing-azure-pipeline-templates%})**.
 
+<!-- {% raw %} -->
 ``` yaml
 name: $(Date:yy.MM.dd)$(Rev:.rr)
 
@@ -184,6 +187,7 @@ extends:
     excludedTestProjects:
       - apps/app2/tests/IntegrationTests/IntegrationTests.csproj
 ```
+<!-- {% endraw %} -->
 
 An example of the pipeline running has been included below. The logs of the pipeline detail which test projects have been run.
 

@@ -127,3 +127,122 @@ The above workflow is triggered when a pull request is opened (including re-open
 Adding the reviewers automatically results in greater awareness by triggering notifications as well as ownership of code reviews.
 
 ### Tagging
+
+``` powershell
+<#
+.SYNOPSIS
+  Tags a GitHub pull request with the release provided in the body
+.PARAMETER PRNumber
+  GitHub pull request number
+#>
+[CmdletBinding()]
+param (
+  [Parameter(Mandatory=$true)]
+  [string]$PRNumber,
+  [Parameter()]
+  [string[]]$SupportedBranchTypes = @("feature","hotfix","release")
+)
+begin {
+  $InformationPreference = 'Continue'
+  if ($env:RUNNER_DEBUG)
+  {
+    $DebugPreference = 'Continue'
+    $VerbosePreference = 'Continue'
+  }
+}
+process {
+  function LabelPR {
+    param (
+      [Parameter(Mandatory=$true)]
+      [string]$PRNumber,
+      [Parameter(Mandatory=$true)]
+      [string]$Label
+    )
+    process {
+      Write-Verbose "label=$Label"
+
+      Write-Debug "Getting labels"
+      $labels = gh label list --json name | ConvertFrom-Json | Select-Object -ExpandProperty name
+
+      Write-Debug "Check label exists"
+      $exists = $labels -contains $Label
+      if (-not $exists)
+      {
+        Write-Debug "Creating label"
+        gh label create $Label
+      }
+
+      Write-Information "Labelling PR with `"$Label`""
+      gh pr edit $PRNumber --add-label $Label | Out-Null
+    }
+  }
+
+  Write-Verbose "prNumber=$prNumber"
+
+  Write-Debug "Getting PR content"
+  $pr = gh pr view $prNumber --json id,body,state,baseRefName,headRefName,createdAt | ConvertFrom-Json
+
+  $regex = "(?<!<!--.*)(?<=\*{2}[Rr]elease:?\*{2}\s?)(v\d(\.\d){2,3})"
+  Write-Verbose "regex=$regex"
+
+  Write-Debug "Matching release number"
+  $match = $pr.body -match $regex
+
+  if ($match)
+  {
+    $releaseNumber = $Matches[0]
+    LabelPR -PRNumber $PRNumber -Label $releaseNumber
+  }
+
+  if ($SupportedBranchTypes)
+  {
+    Write-Debug "Splitting branch name"
+    $branchSplit = $pr.headRefName -split "/"
+    $branchType = $branchSplit[0].ToLower()
+    Write-Verbose "branchType=$branchType"
+
+    if ($branchType -in $SupportedBranchTypes)
+    {
+      LabelPR -PRNumber $PRNumber -Label $branchType
+    }
+    else 
+    {
+      Write-Warning "Invalid branch type $branchType"
+    }
+  }
+}
+```
+
+<!-- {% raw %} -->
+``` yaml
+name: Label PR Release
+
+on: 
+  pull_request: 
+    types:
+      - opened
+      - edited
+      - ready_for_review
+      - reopened
+
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Print Environment Variables
+        shell: pwsh
+        run: |
+          Get-ChildItem Env: | ForEach-Object {Write-Host "$($_.Name)=$($_.Value)"}
+
+      - name: Label PR
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ./scripts/LabelPR.ps1 `
+            -PRNumber "${{ github.event.number }}"
+```
+<!-- {% endraw %} -->

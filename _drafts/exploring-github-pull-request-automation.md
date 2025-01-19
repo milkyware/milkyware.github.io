@@ -10,13 +10,13 @@ tags:
   - Productivity
 ---
 
-As development teams grow and projects become more complex, automating processes becomes critical to maintaining productivity and code quality. I'm a big fan of using Azure Pipelines to automate builds, testing and general code quality, however, recently I've started exploring GitHub Workflows to automate managing pull requests (PR) to make it easier to identify what it relates to.
+As development teams grow and projects become more complex, automating processes becomes critical to maintaining productivity and code quality. I'm a big fan of using Azure Pipelines to automate builds, testing, and general code quality. However, recently, I've started exploring GitHub Workflows to automate managing pull requests (PR) to make it easier to identify what they relate to.
 
-In this post, I want to share my experience setting up some of my initial workflows to handle tagging PRss. Whether you're new to GitHub Actions or looking for ideas to enhance your current CI/CD pipeline, this guide offers practical insights and tips to help you get started.
+In this post, I want to share my experience setting up some initial workflows to handle tagging PRs. Whether you're new to GitHub Actions or looking for ideas to enhance your current CI/CD pipeline, this guide offers practical insights and tips to help you get started.
 
 ## Automating GitHub
 
-The majority of my CI/CD pipeline experience has centred around **Azure DevOps and Azure Pipeline** which I've used for CI/CD pipelines in many projects. However, GitHub has a **[CLI available](https://cli.github.com/)** to easily integrate with the GitHub API which I've wanted to have a play with to automate processes.
+The majority of my CI/CD pipeline experience has centred around **Azure DevOps and Azure Pipeline** which I've used extensively for CI/CD pipelines in many projects. As I've started to use GitHub more, I've wanted to experiment with the **[GitHub CLI](https://cli.github.com/)** to easily integrate with the GitHub API to automate processes.
 
 ``` bash
 gh pr view 1 --repo owner/scratchpad
@@ -28,7 +28,7 @@ As the example the above command will retrieve and display details about **PR #1
 gh pr view 1 --repo owner/scratchpad --json id,title,body
 ```
 
-In addition the `--json` argument can be added to many commands to return a JSON object to allow handling the responses in a programmatic way, such as using `ConvertFrom-Json` **in PowerShell**.
+In addition, the `--json` argument can be added to many commands to return a JSON object, allowing programmatic handling of the responses, such as using `ConvertFrom-Json` **in PowerShell**.
 
 ### Assigning Reviewers
 
@@ -125,11 +125,11 @@ jobs:
 
 The above workflow is triggered when a pull request is opened (including re-opened and published after drafting) and executes the script passing in values for **PRNumber and Reviewers**. To authenticate the CLI used in the script, the `GH_TOKEN` environment variable is set using the `${{ github.token }}` workflow variable.
 
-Adding the reviewers automatically results in greater awareness by triggering notifications as well as ownership of code reviews.
+Adding the reviewers automatically results in greater awareness by triggering notifications and greater ownership of code reviews.
 
 ### Tagging
 
-When dealing with a large number of PRs, it's important to be able to quickly and easily identify what it relates to. To help with this I developed a workflow to star tagging PRs to categorise them.
+When dealing with a large number of PRs, it's important to be able to quickly and easily identify what it relates to. To help with this I developed a workflow to start tagging PRs to categorise them.
 
 ``` markdown
 <!-- Provide the release in the format vx.x.x.x -->
@@ -219,7 +219,7 @@ process {
 }
 ```
 
-I've created a PowerShell script to process the pull request. There's a few key aspects to note:
+I've created a PowerShell script to process the pull request. There are a few key aspects to note:
 
 - A private helper function `LabelPR` has been added to **upsert labels**
 - Regex is used to extract the value provided for the **release** in the pull request body and added as a label
@@ -259,8 +259,12 @@ jobs:
 ```
 <!-- {% endraw %} -->
 
-Like the **[previous automation](#assigning-reviewers)**, the PowerShell script is then attached to a workflow with **pull request triggers**. The resulting tags can then be used to distinguish **features from hot fixes** and which requests belong to **version X or version Y** allowing easier prioritisation of PRs so that more urgent requests are reviewed first.
+Like the **[previous automation](#assigning-reviewers)**, the PowerShell script is attached to a workflow with **pull request triggers**. The resulting tags can then be used to distinguish **features from hotfixes** and which requests belong to **version X or version Y** allowing easier prioritisation of PRs so that more urgent requests are reviewed first. This automation could be expanded further by adding more details to the pull request template and then extracting these as tags.
 
-The example above could also easily be expanded by adding more details to the pull request template and then extracting these as tags.
+## Wrapping Up  
 
-## Wrapping Up
+Automation is a powerful tool for reducing repetitive tasks and improving workflow efficiency, and GitHub Workflows has proven to be a versatile platform for managing pull requests. By automating processes like assigning reviewers and tagging PRs, you can streamline collaboration, enhance visibility, and prioritise tasks more effectively.
+
+The workflows in this post are just the beginning. GitHub Actions and the GitHub CLI offers a wealth of possibilities to extend automation even further and building custom scripts tailored to your team's needs and processes. Whether you're new to GitHub automation or already familiar with it, experimenting with workflows like these can open up new opportunities to enhance your development process.
+
+I've thoroughly enjoyed exploring GitHub Workflows and the CLI and plan to continue experimenting. I hope you've enjoyed this post and if you've tried something similar or have comments, please feel free to share below.

@@ -5,13 +5,14 @@ tags:
   - GitHub
   - GitHub Workflows
   - Pull Requests
+  - PRs
   - Automation
   - Productivity
 ---
 
-As development teams grow and projects become more complex, automating processes becomes critical to maintaining productivity and code quality. I'm a big fan of using Azure Pipelines to automate builds, testing and general code quality, however, recently I've started exploring GitHub Workflows to automate managing pull requests to make it easier to identify what it relates to.
+As development teams grow and projects become more complex, automating processes becomes critical to maintaining productivity and code quality. I'm a big fan of using Azure Pipelines to automate builds, testing and general code quality, however, recently I've started exploring GitHub Workflows to automate managing pull requests (PR) to make it easier to identify what it relates to.
 
-In this post, I want to share my experience setting up some of my initial workflows to handle tagging pull requests. Whether you're new to GitHub Actions or looking for ideas to enhance your current CI/CD pipeline, this guide offers practical insights and tips to help you get started.
+In this post, I want to share my experience setting up some of my initial workflows to handle tagging PRss. Whether you're new to GitHub Actions or looking for ideas to enhance your current CI/CD pipeline, this guide offers practical insights and tips to help you get started.
 
 ## Automating GitHub
 
@@ -31,7 +32,7 @@ In addition the `--json` argument can be added to many commands to return a JSON
 
 ### Assigning Reviewers
 
-The first workflow I wanted to create was to automate assigning a configurable list of reviewers to pull requests.
+The first workflow I wanted to create was to automate assigning a configurable list of reviewers to PRs.
 
 ``` powershell
 [CmdletBinding()]
@@ -128,13 +129,18 @@ Adding the reviewers automatically results in greater awareness by triggering no
 
 ### Tagging
 
+When dealing with a large number of PRs, it's important to be able to quickly and easily identify what it relates to. To help with this I developed a workflow to star tagging PRs to categorise them.
+
+``` markdown
+<!-- Provide the release in the format vx.x.x.x -->
+**Release:**
+
+<!-- Other PR template details ...-->
+```
+
+Firstly I created a **[pull request template](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository)** like above to capture certain details when the pull request is raised. This template is then placed at **.github\pull_request_template.md**.
+
 ``` powershell
-<#
-.SYNOPSIS
-  Tags a GitHub pull request with the release provided in the body
-.PARAMETER PRNumber
-  GitHub pull request number
-#>
 [CmdletBinding()]
 param (
   [Parameter(Mandatory=$true)]
@@ -213,9 +219,15 @@ process {
 }
 ```
 
+I've created a PowerShell script to process the pull request. There's a few key aspects to note:
+
+- A private helper function `LabelPR` has been added to **upsert labels**
+- Regex is used to extract the value provided for the **release** in the pull request body and added as a label
+- Branches conforming to the ***branchType*/name** format have the prefix extracted and added as a tag
+
 <!-- {% raw %} -->
 ``` yaml
-name: Label PR Release
+name: Label PR
 
 on: 
   pull_request: 
@@ -246,3 +258,9 @@ jobs:
             -PRNumber "${{ github.event.number }}"
 ```
 <!-- {% endraw %} -->
+
+Like the **[previous automation](#assigning-reviewers)**, the PowerShell script is then attached to a workflow with **pull request triggers**. The resulting tags can then be used to distinguish **features from hot fixes** and which requests belong to **version X or version Y** allowing easier prioritisation of PRs so that more urgent requests are reviewed first.
+
+The example above could also easily be expanded by adding more details to the pull request template and then extracting these as tags.
+
+## Wrapping Up

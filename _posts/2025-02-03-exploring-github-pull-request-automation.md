@@ -259,7 +259,11 @@ jobs:
 ```
 <!-- {% endraw %} -->
 
-Like the **[previous automation](#assigning-reviewers)**, the PowerShell script is attached to a workflow with **pull request triggers**. The resulting tags can then be used to distinguish **features from hotfixes** and which requests belong to **version X or version Y** allowing easier prioritisation of PRs so that more urgent requests are reviewed first. This automation could be expanded further by adding more details to the pull request template and then extracting these as tags.
+Like the **[previous automation](#assigning-reviewers)**, the PowerShell script is attached to a workflow with **pull request triggers**.
+
+![image1](/images/exploring-github-pull-request-automation/image1.png)
+
+The resulting tags can then be used to distinguish **features from hotfixes** and which requests belong to **version X or version Y** allowing easier prioritisation of PRs so that more urgent requests are reviewed first. This automation could be expanded further by adding more details to the pull request template and then extracting these as tags.
 
 ## Wrapping Up  
 

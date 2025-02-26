@@ -132,3 +132,7 @@ builder.Services.AddHealthChecks()
 The project also offers an extra UI component to visualise a history of health check events.
 
 ## Wrapping Up
+
+The Health Checks framework is a simple yet powerful way to monitor the health of your applications detect failures in dependencies quickly. The health probe endpoint can then integrate with various hosting environments, including cloud and container environments, to automate scaling and self-healing.
+
+The framework can also easily be extended with custom health checks to monitor your own components and dependencies, but there are also community projects such as **Xabaril/AspNetCore.Diagnostics.HealthChecks** to help set up robust monitoring. Whether for a single app or a microservices architecture, health checks are essential for ensuring reliability and resilience.

@@ -100,15 +100,35 @@ public class FakerHealthCheck(ILogger<FakerHealthCheck> logger, IFakerClient cli
 }
 ```
 
-The interface requires the `CheckHealthAsync()` method to be implemented, returning a `HealthCheckResult`. The result can be `Healthy`, `Degraded` or `Unhealthy`. The component above checks that an API client can retrieve data, noticed that the client and logger are injected used typical Dependency Injection.
+The interface requires the `CheckHealthAsync()` method to be implemented, returning a `HealthCheckResult`. The result can be `Healthy`, `Degraded` or `Unhealthy`. The component above checks that an API client can retrieve data, notice that the client and logger are injected used typical Dependency Injection practices meaning we can inject any of our services into health check components.
 
 ``` cs
 builder.Services.AddHealthChecks()
-    .AddFakerHealthCheck();
+    .AddCheck<FakerHealthCheck>("faker");
 ```
 
-### Special Mention
+The registration of the custom health check can be done like above. The `AddHealthChecks()` extension uses the **fluent builder pattern** to register health checks with DI and the health checks middleware.
 
 ### Sample Project
+
+All of the samples in this post are included in the below sample project.
+
+[![milkyware/blog-aspnet-core-health-checks - GitHub](https://gh-card.dev/repos/milkyware/blog-aspnet-core-health-checks.svg)](https://github.com/milkyware/blog-aspnet-core-health-checks)
+
+## Special Mention
+
+By default the Health Checks framework is a bit of a blank canvas. However, a special mention is needed for the **Xabaril/AspNetCore.Diagnostics.HealthChecks** project.
+
+[![Xabaril/AspNetCore.Diagnostics.HealthChecks - GitHub](https://gh-card.dev/repos/Xabaril/AspNetCore.Diagnostics.HealthChecks.svg)](https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks)
+
+The project contains a **huge collection of ready-made community health check components!** I've used these components in numerous projects as it makes configuring a robust health check incredibly easy.
+
+``` cs
+builder.Services.AddHealthChecks()
+    .AddSqlServer(Configuration["Data:ConnectionStrings:Sql"])
+    .AddRedis(Configuration["Data:ConnectionStrings:Redis"]);
+```
+
+The project also offers an extra UI component to visualise a history of health check events.
 
 ## Wrapping Up

@@ -42,12 +42,55 @@ Lastly, the App Insights connection string needs to be configured by configuring
 
 ![image1](/images/migrating-aspnet-core-to-opentelemetry/image1.png)
 
-Logging events using `ILogger` will then create events in App Insights similar to above. The key thing to note is the inclusion of various values under **customDimensions** such as **RequestPath and CategoryName** which can help group related logs together.
+Logging events using `ILogger` will then create logs in App Insights similar to above. The key thing to note is the inclusion of various values under **customDimensions** such as **RequestPath and CategoryName** which can help filter and group logs without needing to deconstruct a log message.
 
 ## What is OpenTelemetry?
 
-## Integrating OpenTelemetry with App Insights
+OpenTelemetry is an **open-source observability framework** which has been widely adopted by the industry. The framework is intended to function as a middleware in generating, collecting and exporting telemetry from solution components (including software and platform components) to observability tools.
 
-## Enriching the Logs
+![image2](/images/migrating-aspnet-core-to-opentelemetry/image2.png)
+
+So why use OpenTelemetry? Just as cloud computing has resulted in more decoupled and microservice-style solutions, OpenTelemetry addresses these needs through its open standard. This open standard therefore allows decoupling the generation and collection of telemetry from exporting that telemetry. The **[OpenTelemetry docs](https://opentelemetry.io/docs/what-is-opentelemetry/)** are incredibly detailed if you want to dig deeper.
+
+### Migrating to OpenTelemetry with App Insights
+
+So how can we migrate to using OpenTelemetry to integrate with App Insights? Microsoft do offer a **[guide for migration](https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-dotnet-migrate)** but lets start by summarising the removal steps:
+
+1. Remove the `Microsoft.ApplicationInsights.AspNetCore` package needs removing projects.
+2. Remove the `builder.Services.AddApplicationInsightsTelemetry()` integration
+3. Remove references to App Insights components and clean the solution
+
+With the legacy App Insights integration removed, we can now start to **add the OpenTelemetry integration**. Firstly, the ASP.NET Core OpenTelemetry packages needs to be installed:
+
+``` bash
+dotnet add package Azure.Monitor.OpenTelemetry.AspNetCore
+```
+
+The basic OpenTelemetry and App Insights can then be enabled by adding `builder.Services.AddOpenTelemetry().UseAzureMonitor()`
+
+``` cs
+var builder = WebApplication.CreateBuilder(args);
+
+var otelBuilder = builder.Services.AddOpenTelemetry();
+if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+    otelBuilder.UseAzureMonitor();
+
+// Add other services
+
+var app = builder.Build();
+await app.RunAsync();
+```
+
+Above is a basic example of enabling the OpenTelemetry integration. However, the first difference with the legacy App Insights integration is that the connection string **is now mandatory** either by reusing the `APPLICATIONINSIGHTS_CONNECTION_STRING` environment variable or configuring in an options delegate in `.UseAzureMonitor()`. To maintain the previous optional configuration (for scenarios such as running locally where App Insights isn't needed) we can check the environment variable is set before configuring the builder returned by `.AddOpenTelemetry()`.
+
+Let's have a look at the logs this integration produces:
+
+![image3](/images/migrating-aspnet-core-to-opentelemetry/image3.png)
+
+### Including Scopes
+
+### Enriching the Logs
+
+### Sample Project
 
 ## Wrapping Up

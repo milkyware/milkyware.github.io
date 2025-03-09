@@ -87,7 +87,25 @@ Let's have a look at the logs this integration produces:
 
 ![image3](/images/migrating-aspnet-core-to-opentelemetry/image3.png)
 
+So, we can see the basic logged message and the values of the formatted message, however, the **customDimensions** contains a lot less detail. So how can we get this details back?
+
 ### Including Scopes
+
+One of the great features of the .NET Core `ILogger` is its **[scoping capability]({% post_url 2024-12-02-my-approach-to-logging%})** allowing contextual values to be attached to all logged events in a scope. However, after **[digging around in the Azure.Monitor.OpenTelemetry.AspNetCore packge](https://github.com/Azure/azure-sdk-for-net/blob/b04b7e05f7a7002f8dec9d897d0400777874c3b4/sdk/monitor/Azure.Monitor.OpenTelemetry.AspNetCore/src/OpenTelemetryBuilderExtensions.cs#L155)** I found that including the scoped values wasn't enabled by default:
+
+``` cs
+var otelBuilder = services.AddOpenTelemetry()
+    .WithLogging(o => { }, configureOptions =>
+    {
+        configureOptions.IncludeScopes = true;
+        configureOptions.IncludeFormattedMessage = true;
+        configureOptions.ParseStateValues = true;
+    })
+```
+
+There is a few ways to configure enabling including scopes, I've opted for the approach above of using the `.WithLogging()` extension on the `OpenTelemetryBuilder` to keep the configuration all under the `IServiceCollection` extension. Below, we can now see **more customDimensions data included**.
+
+![image4](/images/migrating-aspnet-core-to-opentelemetry/image4.png)
 
 ### Enriching the Logs
 

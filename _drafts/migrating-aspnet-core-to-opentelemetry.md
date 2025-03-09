@@ -1,5 +1,5 @@
 ---
-title: Migrate ASP.NET Core App Insights to OpenTelemetry
+title: Migrating ASP.NET Core to OpenTelemetry
 category: .NET
 tags:
   - .NET

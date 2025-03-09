@@ -165,6 +165,14 @@ The processor can then be registered with our existing `.WithLogging()` setup.
 
 The logs created in Azure Monitor should now look similar to above with the **LogLevel, CategoryName and OriginalFormat** included.
 
-### Sample Project
+## Sample Project
+
+As always, the samples in this post are taken from the sample project I've prepared.
+
+[![milkyware/blog-migrate-aspnetcore-appinsights-to-otel - GitHub](https://gh-card.dev/repos/milkyware/blog-migrate-aspnetcore-appinsights-to-otel.svg)](https://github.com/milkyware/blog-migrate-aspnetcore-appinsights-to-otel)
 
 ## Wrapping Up
+
+With the direction of travel from Microsoft being to adopt OpenTelemetry I've wanted to shared how I've migrated my projects to use OpenTelemetry. As a framework, OpenTelemetry is a fantastic tool that offers decoupling and flexibility such as swapping out exporters and, although not covered in this post, supports distributed tracing for developing observability in solutions using microservice components.
+
+I've also highlighted some of the differences in functionality between the legacy App Insights integration and the default OpenTelemetry setup, but that this can be configured to a similar level and retain support for any existing Azure Monitor KQL queries we may be using. I hope you find this useful and please feel free to try it out.

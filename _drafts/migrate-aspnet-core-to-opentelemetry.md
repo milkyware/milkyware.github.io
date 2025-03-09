@@ -109,6 +109,39 @@ There is a few ways to configure enabling including scopes, I've opted for the a
 
 ### Enriching the Logs
 
+One value still missing is **CategoryName** which I find can be useful for filtering logs specific to the namespace of your application. 
+
+``` cs
+public class LogEnrichmentProcessor : BaseProcessor<LogRecord>
+{
+    private const string CategoryNameKey = nameof(LogRecord.CategoryName);
+    private const string LogLevelKey = nameof(LogRecord.LogLevel);
+    private const string OriginalFormatKey = "OriginalFormat";
+
+    public override void OnEnd(LogRecord data)
+    {
+        var attributes = data.Attributes is not null
+            ? new List<KeyValuePair<string, object?>>(data.Attributes)
+            : [];
+
+        if (data.Attributes is not null && data.Attributes.Any())
+            attributes.AddRange(data.Attributes);
+
+        if (!attributes.Any(a => a.Key == LogLevelKey))
+            attributes.Add(new(LogLevelKey, data.LogLevel.ToString()));
+
+        if (!attributes.Any(a => a.Key == CategoryNameKey) && !string.IsNullOrWhiteSpace(data.CategoryName))
+            attributes.Add(new(CategoryNameKey, data.CategoryName));
+
+        if (!attributes.Any(a => a.Key == OriginalFormatKey) && !string.IsNullOrWhiteSpace(data.Body))
+            attributes.Add(new(OriginalFormatKey, data.Body));
+
+        data.Attributes = attributes;
+        base.OnEnd(data);
+    }
+}
+```
+
 ### Sample Project
 
 ## Wrapping Up

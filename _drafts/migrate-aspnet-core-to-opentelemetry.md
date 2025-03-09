@@ -95,7 +95,7 @@ One of the great features of the .NET Core `ILogger` is its **[scoping capabilit
 
 ``` cs
 var otelBuilder = services.AddOpenTelemetry()
-    .WithLogging(o => { }, configureOptions =>
+    .WithLogging(configureBuilder => { }, configureOptions =>
     {
         configureOptions.IncludeScopes = true;
         configureOptions.IncludeFormattedMessage = true;
@@ -109,7 +109,9 @@ There is a few ways to configure enabling including scopes, I've opted for the a
 
 ### Enriching the Logs
 
-One value still missing is **CategoryName** which I find can be useful for filtering logs specific to the namespace of your application. 
+Two values that are still missing are **CategoryName and OriginalFormat** which I find can be useful for filtering logs specific to the namespace of your application and looking for logs using the message straight out of your code.
+
+These values are available as properties on the OpenTelemetry `LogRecord` model, however, the **Azure Monitor exporter** populates the customDimensions using the `LogRecord.Attributes` property.
 
 ``` cs
 public class LogEnrichmentProcessor : BaseProcessor<LogRecord>
@@ -141,6 +143,27 @@ public class LogEnrichmentProcessor : BaseProcessor<LogRecord>
     }
 }
 ```
+
+OpenTelemetry offer the ability to **[enrich telemetry through processors](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/extending-the-sdk/README.md#enriching-processor)**. The documentation and samples for creating processors for `LogRecord` can be **[found here](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/logs/extending-the-sdk/README.md#processor)**. Above is the processor I put together to enrich logs with **LogLevel, CategoryName and OriginalFormat**.
+
+``` cs
+var otelBuilder = services.AddOpenTelemetry()
+    .WithLogging(configureBuilder =>
+    {
+        configureBuilder.AddProcessor<LogEnrichmentProcessor>();
+    }, configureOptions =>
+    {
+        configureOptions.IncludeScopes = true;
+        configureOptions.IncludeFormattedMessage = true;
+        configureOptions.ParseStateValues = true;
+    });
+```
+
+The processor can then be registered with our existing `.WithLogging()` setup.
+
+![image5](/images/migrating-aspnet-core-to-opentelemetry/image5.png)
+
+The logs created in Azure Monitor should now look similar to above with the **LogLevel, CategoryName and OriginalFormat** included.
 
 ### Sample Project
 

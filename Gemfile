@@ -25,6 +25,7 @@ group :jekyll_plugins do
   gem "jemoji"
   # https://github.com/jekyll/jekyll/issues/8523
   gem "webrick"
+  gem "nokogiri", "1.18.4"
 end
 
 # Windows and JRuby does not include zoneinfo files, so bundle the tzinfo-data gem

@@ -11,5 +11,8 @@
         "tailscale",
         "Tailscale's",
         "userspace"
-    ]
+    ],
+    "editor.codeActionsOnSave": {
+        "source.fixAll.markdownlint": "always"
+    }
 }

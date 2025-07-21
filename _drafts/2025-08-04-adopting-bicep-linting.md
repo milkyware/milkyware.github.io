@@ -70,11 +70,17 @@ The default console shows the same violation as before, but the format doesn't h
 }
 ```
 
-SARIF is a widely used, standardised format for sharing static code analysis results. Let's now have a look at how we can integrate that with a pipeline.
+SARIF is a widely used, standardised format for sharing static code analysis results. Let's have a look at how we can integrate that with a pipeline.
 
 ## Replacing ARM-TTK in my Pipelines
 
+Previously, I've been using the **Sam-Cogan.ARMTTKExtensionXPlatform** DevOps Extension, which is a wrapper around **ARM-TTK**. This extension performs the code analysis and then outputs the results as **NUnit 2** which can then be published to DevOps. When the results are published, if they include any failures, this fails the pipeline which raises awareness of violations.
+
+However, currently, the `PublishTestResults@2` task doesn't support publishing SARIF results, so the next step is to reformat the results.
+
 ### Developing a SARIF Converter
+
+In a few blog posts, I'd seen suggestions of using the **[sarif-junit npm package](https://www.npmjs.com/package/sarif-junit)**, however, I found that the resulting format wasn't quite
 
 ### Integrating the Tool into the Pipelines
 

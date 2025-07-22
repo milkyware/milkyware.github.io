@@ -243,10 +243,58 @@ This makes the **.NET CLI** available, including the `dotnet tool install` comma
 ```
 <!-- {% endraw %} -->
 
-`AzureCLI@2`
+With the converter tool installed, I can now use it alongside `az bicep lint` in an `AzureCLI@2` task to lint a bicep file in a pipeline and output **JUnit results** to be published as test results.
+
+Below is an abbreviated version of the `AzureCLI@2` task linting and then converting to JUnit:
+
+<!-- {% raw %} -->
+```yaml
+- task: AzureCLI@2
+  displayName: Scan Bicep
+  inputs:
+    azureSubscription: ${{parameters.azureSubscription}}
+    visibleAzLogin: false
+    useGlobalConfig: true
+    scriptType: pscore
+    scriptLocation: inlineScript
+    inlineScript: |
+      $InformationPreference = 'Continue'
+      if ($env:SYSTEM_DEBUG)
+      {
+          $DebugPreference = 'Continue'
+          $VerbosePreference = 'Continue'
+      }
+
+      # Workaround to fix AzureCLI task installing Bicep in wrong location
+      Write-Debug "Installing Bicep CLI"
+      az config set bicep.use_binary_from_path=false
+      az bicep install
+
+      $resultsDir = "${{variables.resultsDir}}"
+
+      $tempPath = $null
+      try {
+        $tempPath = [System.IO.Path]::GetTempFileName()
+        az bicep lint --file "${{parameters.bicepPath}}" --diagnostics-format sarif | Out-File -Path $tempPath -Encoding utf8
+
+        $resultsFile = "$($bicepFile.BaseName).junit.xml"
+        $resultsPath = Join-Path -Path $resultsDir -ChildPath $resultsFile
+        Write-Verbose "resultsPath=$resultsPath"
+
+        Write-Debug "Converting to JUnit"
+        milkyware-sarif-converter -i $tempPath -o $resultsPath
+        Write-Verbose (Get-Content -Path $resultsPath -Raw)
+      }
+      finally {
+        Remove-Item -Path $tempPath -ErrorAction Ignore
+      }
+```
+<!-- {% endraw %} -->
 
 #### Complete Pipeline Template Sample
 
+<details markdown="1">
+<summary markdown="span">Test</summary>
 <!-- {% raw %} -->
 ```yaml
 parameters:
@@ -266,34 +314,35 @@ parameters:
     default: []
 
 stages:
-  - stage: ScanBicep
+
+- stage: ScanBicep
     displayName: Scan Bicep
     dependsOn: ${{parameters.dependsOn}}
     jobs:
-      - job: 
+  - job:
         pool:
           vmImage: ubuntu-latest
         variables:
           resultsDir: $(Agent.TempDirectory)/results
           sarifPath: ${{variables.resultsDir}}/bicep.sarif.json
-        steps: 
-          - checkout: self
+        steps:
+    - checkout: self
             fetchDepth: 0
 
-          - template: PrintEnvironmentVariables.azure-pipelines.yml
+    - template: PrintEnvironmentVariables.azure-pipelines.yml
 
-          - task: UseDotNet@2
+    - task: UseDotNet@2
             displayName: Install .Net Core
 
-          - task: PowerShell@2
+    - task: PowerShell@2
             displayName: Install SARIF Converter
             inputs:
               pwsh: true
               targetType: inline
               script: |
                 dotnet tool install -g milkyware-sarif-converter
-          
-          - task: AzureCLI@2
+
+    - task: AzureCLI@2
             displayName: Scan Bicep
             inputs:
               azureSubscription: ${{parameters.azureSubscription}}
@@ -380,8 +429,8 @@ stages:
                   }
                 }
               powerShellErrorActionPreference: Stop
-            
-          - task: PublishTestResults@2
+
+    - task: PublishTestResults@2
             displayName: Publish Scan Results
             condition: succeededOrFailed()
             inputs:
@@ -391,5 +440,6 @@ stages:
 
 ```
 <!-- {% endraw %} -->
+</details>
 
 ## Wrapping Up

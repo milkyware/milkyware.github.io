@@ -229,7 +229,7 @@ To start getting access to the tool in my DevOps pipeline, I need to setup the .
 ```
 <!-- {% endraw %} -->
 
-I can then use the same `dotnet tool install` command that we demonstrated earlier.
+This makes the **.NET CLI** available, including the `dotnet tool install` command that we demonstrated earlier, to install the **milkyware-sarif-converter** tool.
 
 <!-- {% raw %} -->
 ```yaml

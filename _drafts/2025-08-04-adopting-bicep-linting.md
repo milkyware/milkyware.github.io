@@ -16,11 +16,11 @@ In **[one of my earlier posts]({% post_url 2023-03-13-sharing-bicep-templates %}
 
 Since then, Microsoft now offers a 1st party solution for **[Bicep linting](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/linter)** which aligns more directly with Bicep and opens the possibility for the linting to be easily adapted to other CI/CD platforms.
 
-My goal was to replace using the DevOps Extension with the Bicep linter. For this post, I want to share my approach to this. As a sneak peak, this project turned out to be an opportunity to use library I've wanted to use for a while....**[Spectre.Console](https://spectreconsole.net/)**!
+My goal was to replace using the DevOps Extension with the Bicep linter. For this post, I want to share my approach. As a sneak peek, this project turned out to be an opportunity to use a library I've wanted to try for a while—**[Spectre.Console](https://spectreconsole.net/)**!
 
 ## What Does Linting Look Like?
 
-The **[VS Code Bicep extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-bicep)** offers great intellisense for developing Bicep templates, giving clear warning in the code.
+The **[VS Code Bicep extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-bicep)** offers great IntelliSense for developing Bicep templates, giving clear warnings in the code.
 
 ![image1](/images/adopting-bicep-linting/image1.png)
 
@@ -72,19 +72,19 @@ The default console shows the same violation as before, but the format doesn't h
 }
 ```
 
-SARIF is a widely used, standardised format for sharing static code analysis results. Let's have a look at how we can integrate that with a pipeline.
+SARIF is a widely used, standardized format for sharing static code analysis results. Let's take a look at how we can integrate that with a pipeline.
 
 ## Replacing ARM-TTK in my Pipelines
 
-Previously, I've been using the **Sam-Cogan.ARMTTKExtensionXPlatform** DevOps Extension, which is a wrapper around **ARM-TTK**. This extension performs the code analysis and then outputs the results as **NUnit 2** which can then be published to DevOps. When the results are published, if they include any failures, this fails the pipeline which raises awareness of violations.
+Previously, I've been using the **Sam-Cogan.ARMTTKExtensionXPlatform** DevOps Extension, which is a wrapper around **ARM-TTK**. This extension performs the code analysis and then outputs the results as **NUnit 2**, which can then be published to DevOps. When the results are published, any failures will cause the pipeline to fail, raising awareness of violations.
 
 However, currently, the `PublishTestResults@2` task doesn't support publishing SARIF results, so the next step is to reformat the results.
 
 ### Developing a SARIF Converter
 
-In a few blog posts, I'd seen suggestions of using the **[sarif-junit npm package](https://www.npmjs.com/package/sarif-junit)** to convert the SARIF to **[JUnit](https://junit.org/)** which is supported by the `PublishTestResults@2` task. However, I found that the resulting format wasn't quite what I wanted, so I decided to develop my own converter.
+In a few blog posts, I'd seen suggestions of using the **[sarif-junit npm package](https://www.npmjs.com/package/sarif-junit)** to convert the SARIF to **[JUnit](https://junit.org/)**, which is supported by the `PublishTestResults@2` task. However, I found that the resulting format wasn't quite what I wanted, so I decided to develop my own converter.
 
-To do that, I decided this was a good opportunity to try out **[Spectre.Console](https://spectreconsole.net/)**. As a brief introduction, **Spectre.Console** is a library for building rich, command-line apps (it also supports ANSI widgets for displaying data).
+To do that, I decided this was a good opportunity to try out **[Spectre.Console](https://spectreconsole.net/)**. As a brief introduction, **Spectre.Console** is a library for building rich command-line apps with support for rendering ANSI widgets for displaying data.
 
 ```cs
 var sarif = SarifLog.Load(@"path\to\file.sarif")
@@ -115,7 +115,7 @@ public class JUnitConverter(ILogger<JUnitConverter> logger) : ISarifConverter
 }
 ```
 
-I started by creating a simple converter interface and service which would use the `SarifLog` object to build up the JUnit XML.
+I started by creating a simple converter interface and service that would use the `SarifLog` object to build the JUnit XML.
 
 ```cs
 public enum FormatType
@@ -206,7 +206,7 @@ app.Configure(configure =>
 app.Run(args);
 ```
 
-Lastly, I setup the `CommandApp` to bring all of these components together. The `CommandApp` is similar to the `HostBuilder` of ASP.NET Core in terms of registering services services and dependencies followed by configuring the app. Spectre.Console provides some **[fantastic documentation](https://spectreconsole.net/cli/commandapp)** for setting this up rather than me repeating it here.
+Lastly, I set up the `CommandApp` to bring all of these components together. The `CommandApp` is similar to the `HostBuilder` in ASP.NET Core, allowing you to register services and dependencies before configuring the app. Spectre.Console provides some **[fantastic documentation](https://spectreconsole.net/cli/commandapp)** for setting this up, so I won't repeat it here.
 
 To make this tool available to use in my pipelines, I've published it to **[NuGet](https://www.nuget.org/packages/milkyware-sarif-converter)** as a dotnet tool.
 
@@ -231,7 +231,7 @@ To start getting access to the tool in my DevOps pipeline, I need to setup the .
 ```
 <!-- {% endraw %} -->
 
-This makes the **.NET CLI** available, including the `dotnet tool install` command that we demonstrated earlier, to install the **milkyware-sarif-converter** tool.
+This makes the **.NET CLI** available, including the `dotnet tool install` command demonstrated earlier, which installs the **milkyware-sarif-converter** tool.
 
 <!-- {% raw %} -->
 ```yaml
@@ -309,7 +309,7 @@ With the dotnet tool in place and the pipeline template update, we can now test 
 </testsuites>
 ```
 
-How these results appear in the **Azure Pipeline Tests** tab remains familiar as shown below.
+These results appear in the **Azure Pipeline Tests** tab in a familiar format, as shown below.
 
 ![image2](/images/adopting-bicep-linting/image2.png)
 

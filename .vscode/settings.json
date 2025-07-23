@@ -2,14 +2,19 @@
     "cSpell.enabled": true,
     "cSpell.language": "en-GB",
     "cSpell.words": [
+        "ARMTTK",
         "Buildx",
         "dockerhub",
         "endraw",
         "filemask",
         "filemasks",
         "OIDC",
+        "SARIF",
         "tailscale",
         "Tailscale's",
         "userspace"
-    ]
+    ],
+    "editor.codeActionsOnSave": {
+        "source.fixAll.markdownlint": "always"
+    }
 }

@@ -1,0 +1,320 @@
+---
+title: Adopting Bicep Linting
+category: Azure
+tags:
+    - Bicep
+    - Bicep Modules
+    - ARM
+    - Azure
+    - IaC
+    - Linting
+    - Dotnet Too
+    - Spectre Console
+---
+
+In **[one of my earlier posts]({% post_url 2023-03-13-sharing-bicep-templates %})**, I covered using **[ARM-TTK](https://github.com/Azure/arm-ttk)** via an **[Azure DevOps extension](https://marketplace.visualstudio.com/items?itemName=Sam-Cogan.ARMTTKExtensionXPlatform)** to analyse and test my Bicep modules automatically as part of my pipelines.
+
+Since then, Microsoft now offers a 1st party solution for **[Bicep linting](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/linter)** which aligns more directly with Bicep and opens the possibility for the linting to be easily adapted to other CI/CD platforms.
+
+My goal was to replace using the DevOps Extension with the Bicep linter. For this post, I want to share my approach. As a sneak peek, this project turned out to be an opportunity to use a library I've wanted to try for a while—**[Spectre.Console](https://spectreconsole.net/)**!
+
+## What Does Linting Look Like?
+
+The **[VS Code Bicep extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-bicep)** offers great IntelliSense for developing Bicep templates, giving clear warnings in the code.
+
+![image1](/images/adopting-bicep-linting/image1.png)
+
+However, the addition of the **[`az bicep lint`](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/bicep-cli#lint)** command, allows verifying Bicep templates against the same rules used in the IDE. Running the command against the Bicep in the earlier screenshot produces the results below:
+
+```bash
+> az bicep lint --file main.bicep
+WARNING: D:\Git\milkyware\azure-bicep\.tmp\storageaccount.bicep(22,35) : Warning outputs-should-not-contain-secrets: Outputs should not contain secrets. Found possible secret: function 'listKeys' [https://aka.ms/bicep/linter-diagnostics#outputs-should-not-contain-secrets]
+```
+
+The default console shows the same violation as before, but the format doesn't help from an automation perspective. To deal with that, there is the `--diagnostics-format` which currently supports **Static Analysis Results Interchange Format (SARIF)**.
+
+```json
+> az bicep lint --file main.bicep --diagnostics-format sarif
+{
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.6.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "bicep"
+        }
+      },
+      "results": [
+        {
+          "ruleId": "outputs-should-not-contain-secrets",
+          "message": {
+            "text": "Outputs should not contain secrets. Found possible secret: function 'listKeys' [https://aka.ms/bicep/linter-diagnostics#outputs-should-not-contain-secrets]"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/Git/.tmp/main.bicep"
+                },
+                "region": {
+                  "startLine": 22,
+                  "charOffset": 35
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "columnKind": "utf16CodeUnits"
+    }
+  ]
+}
+```
+
+SARIF is a widely used, standardized format for sharing static code analysis results. Let's take a look at how we can integrate that with a pipeline.
+
+## Replacing ARM-TTK in my Pipelines
+
+Previously, I've been using the **Sam-Cogan.ARMTTKExtensionXPlatform** DevOps Extension, which is a wrapper around **ARM-TTK**. This extension performs the code analysis and then outputs the results as **NUnit 2**, which can then be published to DevOps. When the results are published, any failures will cause the pipeline to fail, raising awareness of violations.
+
+However, currently, the `PublishTestResults@2` task doesn't support publishing SARIF results, so the next step is to reformat the results.
+
+### Developing a SARIF Converter
+
+In a few blog posts, I'd seen suggestions of using the **[sarif-junit npm package](https://www.npmjs.com/package/sarif-junit)** to convert the SARIF to **[JUnit](https://junit.org/)**, which is supported by the `PublishTestResults@2` task. However, I found that the resulting format wasn't quite what I wanted, so I decided to develop my own converter.
+
+To do that, I decided this was a good opportunity to try out **[Spectre.Console](https://spectreconsole.net/)**. As a brief introduction, **Spectre.Console** is a library for building rich command-line apps with support for rendering ANSI widgets for displaying data.
+
+```cs
+var sarif = SarifLog.Load(@"path\to\file.sarif")
+```
+
+Microsoft provide a **[`SARIF Nuget package`](https://www.nuget.org/packages/Sarif.Sdk/)** for parsing and interacting with results data.
+
+```cs
+public interface ISarifConverter
+{
+    public FormatType FormatType { get; }
+
+    Task<string> ConvertAsync(SarifLog sarif);
+}
+
+public class JUnitConverter(ILogger<JUnitConverter> logger) : ISarifConverter
+{
+    private readonly ILogger<JUnitConverter> _logger = logger;
+
+    public FormatType FormatType => FormatType.JUnit;
+
+    public async Task<string> ConvertAsync(SarifLog sarif)
+    {
+        _logger.LogInformation("Converting SARIF to JUnit");
+        // Building JUnit XML according to schema
+        return xml;
+    }
+}
+```
+
+I started by creating a simple converter interface and service that would use the `SarifLog` object to build the JUnit XML.
+
+```cs
+public enum FormatType
+{
+    JUnit,
+    NUnit
+}
+
+public class ConvertSarifSettings : LoggingSettings
+{
+    [CommandOption("-f|--format")]
+    [Description("Format to convert SARIF to. Allowed values: JUnit, NUnit")]
+    public FormatType FormatType { get; set; } = FormatType.JUnit;
+
+    [CommandOption("-i|--input-file")]
+    [Description("Path to the input SARIF file")]
+    public string? InputFile { get; set; }
+
+    [CommandOption("-o|--output-file")]
+    [Description("Path to output the converted file to. Outputs to stdout if not specified")]
+    public string? OutputFile { get; set; }
+}
+```
+
+I then created a **[settings class](https://spectreconsole.net/cli/settings)** to provide arguments which could be passed into my tool. Spectre.Console offers support for using attributes to indicate the corresponding command argument and documentation.
+
+```cs
+public class ConvertSarifCommand(ILogger<ConvertSarifCommand> logger, IAnsiConsole ansiConsole, IEnumerable<ISarifConverter> converters) : AsyncCommand<ConvertSarifSettings>
+{
+    private readonly IAnsiConsole _ansiConsole = ansiConsole;
+    private readonly IEnumerable<ISarifConverter> _converters = converters;
+    private readonly ILogger<ConvertSarifCommand> _logger = logger;
+
+    public override async Task<int> ExecuteAsync(CommandContext context, ConvertSarifSettings settings)
+    {
+        var sarif = SarifLog.Load(settings.InputFile);
+
+        var converter = _converters.FirstOrDefault(c => c.FormatType == settings.FormatType);
+        if (converter == null)
+        {
+            _logger.LogError("Unsupported output type");
+            return 1;
+        }
+
+        var xml = await converter.ConvertAsync(sarif);
+
+        if (string.IsNullOrEmpty(settings.OutputFile))
+        {
+            _ansiConsole.Write(xml);
+            return 0;
+        }
+
+        var directory = Path.GetDirectoryName(settings.OutputFile);
+        if (!string.IsNullOrEmpty(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        await File.WriteAllTextAsync(settings.OutputFile, xml);
+        return 0;
+    }
+}
+```
+
+I then implemented an **[`AsyncCommand<T>`](https://spectreconsole.net/cli/commands)** in my `ConvertSarifCommand`, using the values from the `settings` argument to control where to read and write files.
+
+**N.B.** Notice that dependencies are **injected into the command**, ready for Dependency Injection (DI)
+
+```cs
+var services = new ServiceCollection();
+// Register DI services
+
+var registrar = new TypeRegistrar(services);
+var app = new CommandApp<ConvertSarifCommand>(registrar);
+app.Configure(configure =>
+{
+    configure.SetApplicationName("milkyware-sarif-converter");
+    configure.UseAssemblyInformationalVersion();
+    configure.AddExample("-i", @"./test.sarif.json", "-f", "JUnit")
+        .AddExample("-i", @"./test.sarif.json", "-o", "./test.xml", "-f", "JUnit");
+
+#if DEBUG
+    configure.PropagateExceptions();
+    configure.ValidateExamples();
+#endif
+});
+
+app.Run(args);
+```
+
+Lastly, I set up the `CommandApp` to bring all of these components together. The `CommandApp` is similar to the `HostBuilder` in ASP.NET Core, allowing you to register services and dependencies before configuring the app. Spectre.Console provides some **[fantastic documentation](https://spectreconsole.net/cli/commandapp)** for setting this up, so I won't repeat it here.
+
+To make this tool available to use in my pipelines, I've published it to **[NuGet](https://www.nuget.org/packages/milkyware-sarif-converter)** as a dotnet tool.
+
+```sh
+dotnet tool install milkyware-sarif-converter -g
+```
+
+For more details on the tool, please refer to my repo.
+
+[![milkyware/sarif-converter - GitHub](https://gh-card.dev/repos/milkyware/sarif-converter.svg)](https://github.com/milkyware/sarif-converter)
+
+Next, let's integrate my new tool with my existing pipeline template.
+
+### Integrating the Tool into the Pipelines
+
+To start getting access to the tool in my DevOps pipeline, I need to setup the .NET SDK in my job.
+
+<!-- {% raw %} -->
+```yaml
+- task: UseDotNet@2
+  displayName: Install .Net Core
+```
+<!-- {% endraw %} -->
+
+This makes the **.NET CLI** available, including the `dotnet tool install` command demonstrated earlier, which installs the **milkyware-sarif-converter** tool.
+
+<!-- {% raw %} -->
+```yaml
+- task: PowerShell@2
+  displayName: Install SARIF Converter
+  inputs:
+    pwsh: true
+    targetType: inline
+    script: |
+    dotnet tool install -g milkyware-sarif-converter
+```
+<!-- {% endraw %} -->
+
+With the converter tool installed, we can now use it alongside `az bicep lint` in an `AzureCLI@2` task to lint a bicep file in a pipeline and output **JUnit results** to be published as test results.
+
+Below is an abbreviated version of the `AzureCLI@2` task linting and then converting to JUnit for publishing:
+
+<!-- {% raw %} -->
+```yaml
+- task: AzureCLI@2
+  displayName: Scan Bicep
+  inputs:
+    azureSubscription: ${{parameters.azureSubscription}}
+    visibleAzLogin: false
+    useGlobalConfig: true
+    scriptType: pscore
+    scriptLocation: inlineScript
+    inlineScript: |
+      $InformationPreference = 'Continue'
+      if ($env:SYSTEM_DEBUG)
+      {
+          $DebugPreference = 'Continue'
+          $VerbosePreference = 'Continue'
+      }
+
+      # Workaround to fix AzureCLI task installing Bicep in wrong location
+      Write-Debug "Installing Bicep CLI"
+      az config set bicep.use_binary_from_path=false
+      az bicep install
+
+      $resultsDir = "${{variables.resultsDir}}"
+
+      $tempPath = $null
+      try {
+        $tempPath = [System.IO.Path]::GetTempFileName()
+        az bicep lint --file "${{parameters.bicepPath}}" --diagnostics-format sarif | Out-File -Path $tempPath -Encoding utf8
+
+        $resultsFile = "$($bicepFile.BaseName).junit.xml"
+        $resultsPath = Join-Path -Path $resultsDir -ChildPath $resultsFile
+        Write-Verbose "resultsPath=$resultsPath"
+
+        Write-Debug "Converting to JUnit"
+        milkyware-sarif-converter -i $tempPath -o $resultsPath
+        Write-Verbose (Get-Content -Path $resultsPath -Raw)
+      }
+      finally {
+        Remove-Item -Path $tempPath -ErrorAction Ignore
+      }
+```
+<!-- {% endraw %} -->
+
+The PowerShell can be expanded to add support for linting multiple Bicep files in a directory to make the pipeline more flexible.
+
+### The End Result
+
+With the dotnet tool in place and the pipeline template update, we can now test a pipeline run. An example of the resulting **JUnit result** is below.
+
+```xml
+<testsuites tests="1" failures="1">
+  <testsuite>
+    <testcase name="Resource type &quot;Microsoft.Storage/storageAccounts/tableServices/tables@2025-01-01&quot; does not have types available. Bicep is unable to validate resource properties prior to deployment, but this will not block the resource from being deployed. [https://aka.ms/bicep/core-diagnostics#BCP081] - storageaccount.bicep:129:31" classname="BCP081">
+      <failure type="AssertionError" />
+    </testcase>
+  </testsuite>
+</testsuites>
+```
+
+These results appear in the **Azure Pipeline Tests** tab in a familiar format, as shown below.
+
+![image2](/images/adopting-bicep-linting/image2.png)
+
+## Wrapping Up
+
+Adopting the az bicep lint command and integrating SARIF-based analysis into your CI/CD pipelines provides a modern, automated approach to validating Bicep templates. By converting SARIF output to JUnit format, you can leverage familiar Azure DevOps test reporting and ensure that issues are surfaced early in your deployment process.
+
+This workflow not only streamlines template validation but also makes it easier to maintain code quality and compliance across teams. The use of Spectre.Console and a custom converter offers flexibility and extensibility for future enhancements.

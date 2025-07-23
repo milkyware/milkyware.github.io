@@ -12,7 +12,9 @@ tags:
     - Spectre Console
 ---
 
-In **[one of my earlier posts]({% post_url 2023-03-13-sharing-bicep-templates %})**, I covered using **[ARM-TTK](https://github.com/Azure/arm-ttk)** via an **[Azure DevOps extension](https://marketplace.visualstudio.com/items?itemName=Sam-Cogan.ARMTTKExtensionXPlatform)** to analyse and test my Bicep modules automatically as part of my pipelines. Since then, Microsoft now offers a 1st party solution for **[Bicep linting](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/linter)** which aligns more directly with Bicep and opens the possibility for the linting to be easily adapted to other CI/CD platforms.
+In **[one of my earlier posts]({% post_url 2023-03-13-sharing-bicep-templates %})**, I covered using **[ARM-TTK](https://github.com/Azure/arm-ttk)** via an **[Azure DevOps extension](https://marketplace.visualstudio.com/items?itemName=Sam-Cogan.ARMTTKExtensionXPlatform)** to analyse and test my Bicep modules automatically as part of my pipelines.
+
+Since then, Microsoft now offers a 1st party solution for **[Bicep linting](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/linter)** which aligns more directly with Bicep and opens the possibility for the linting to be easily adapted to other CI/CD platforms.
 
 My goal was to replace using the DevOps Extension with the Bicep linter. For this post, I want to share my approach to this. As a sneak peak, this project turned out to be an opportunity to use library I've wanted to use for a while....**[Spectre.Console](https://spectreconsole.net/)**!
 
@@ -243,9 +245,9 @@ This makes the **.NET CLI** available, including the `dotnet tool install` comma
 ```
 <!-- {% endraw %} -->
 
-With the converter tool installed, I can now use it alongside `az bicep lint` in an `AzureCLI@2` task to lint a bicep file in a pipeline and output **JUnit results** to be published as test results.
+With the converter tool installed, we can now use it alongside `az bicep lint` in an `AzureCLI@2` task to lint a bicep file in a pipeline and output **JUnit results** to be published as test results.
 
-Below is an abbreviated version of the `AzureCLI@2` task linting and then converting to JUnit:
+Below is an abbreviated version of the `AzureCLI@2` task linting and then converting to JUnit for publishing:
 
 <!-- {% raw %} -->
 ```yaml
@@ -291,155 +293,28 @@ Below is an abbreviated version of the `AzureCLI@2` task linting and then conver
 ```
 <!-- {% endraw %} -->
 
-#### Complete Pipeline Template Sample
+The PowerShell can be expanded to add support for linting multiple Bicep files in a directory to make the pipeline more flexible.
 
-<details markdown="1">
-<summary markdown="span">Test</summary>
-<!-- {% raw %} -->
-```yaml
-parameters:
-  - name: azureSubscription
-    displayName: Azure Subscription to restore private bicep modules
-    type: string
-  - name: bicepPath
-    displayName: Path to the Bicep file to build
-    type: string
-  - name: comparisonBranch
-    displayName: Comparison Branch. The branch to compare against to evaluate changes. Defaults to main
-    type: string
-    default: main
-  - name: dependsOn
-    displayName: Array of stages to depend on, defaults to no dependencies
-    type: object
-    default: []
+### The End Result
 
-stages:
+With the dotnet tool in place and the pipeline template update, we can now test a pipeline run. An example of the resulting **JUnit result** is below.
 
-- stage: ScanBicep
-    displayName: Scan Bicep
-    dependsOn: ${{parameters.dependsOn}}
-    jobs:
-  - job:
-        pool:
-          vmImage: ubuntu-latest
-        variables:
-          resultsDir: $(Agent.TempDirectory)/results
-          sarifPath: ${{variables.resultsDir}}/bicep.sarif.json
-        steps:
-    - checkout: self
-            fetchDepth: 0
-
-    - template: PrintEnvironmentVariables.azure-pipelines.yml
-
-    - task: UseDotNet@2
-            displayName: Install .Net Core
-
-    - task: PowerShell@2
-            displayName: Install SARIF Converter
-            inputs:
-              pwsh: true
-              targetType: inline
-              script: |
-                dotnet tool install -g milkyware-sarif-converter
-
-    - task: AzureCLI@2
-            displayName: Scan Bicep
-            inputs:
-              azureSubscription: ${{parameters.azureSubscription}}
-              visibleAzLogin: false
-              useGlobalConfig: true
-              scriptType: pscore
-              scriptLocation: inlineScript
-              inlineScript: |
-                $InformationPreference = 'Continue'
-                if ($env:SYSTEM_DEBUG)
-                {
-                    $DebugPreference = 'Continue'
-                    $VerbosePreference = 'Continue'
-                }
-
-                # Workaround to fix AzureCLI task installing Bicep in wrong location
-                Write-Debug "Installing Bicep CLI"
-                az config set bicep.use_binary_from_path=false
-                az bicep install
-
-                Write-Debug "Creating results directory"
-                $resultsDir = "${{variables.resultsDir}}"
-                New-Item -Path $resultsDir -ItemType Directory | Out-Null
-                
-                $bicepPath = "${{parameters.bicepPath}}"
-                Write-Verbose "bicepPath=$bicepPath"
-
-                Write-Debug "Gathering Bicep files"
-                $bicepFiles = Get-ChildItem -Path $bicepPath -Filter *.bicep -Recurse
-                Write-Verbose "Found $($bicepFiles.Count) Bicep files"
-
-                if (Test-Path -Path $bicepPath -PathType Container) {
-                  Write-Debug "Filtering out unchanged files"
-                  
-                  $remoteName = "origin"
-
-                  $comparisonBranch = "${{parameters.comparisonBranch}}"
-                  Write-Verbose "comparisonBranch=$comparisonBranch"
-
-                  Write-Debug "Getting current commit"
-                  $currentCommit = git rev-parse HEAD
-                  Write-Verbose "currentCommit=$currentCommit"
-                  
-                  Write-Debug "Getting comparison branch commit"
-                  $comparisonCommit = git rev-parse "$remoteName/$comparisonBranch"
-                  Write-Verbose "comparisonCommit=$comparisonCommit"
-
-                  $repoPath = git rev-parse --show-toplevel
-                  Write-Verbose "repoPath=$repoPath"
-
-                  $fileChanges = git diff --name-only "$remoteName/$comparisonBranch..." |
-                    ForEach-Object {[System.IO.FileInfo](Join-Path -Path $repoPath -ChildPath $_)}
-
-                  Write-Debug "Comparing Bicep files with changes"
-                  $comparedFiles = Compare-Object -ReferenceObject $bicepFiles -DifferenceObject $fileChanges `
-                    -IncludeEqual `
-                    -ExcludeDifferent
-
-                  Write-Debug "Updating files to scan"
-                  $bicepFiles = $comparedFiles | Select-Object -ExpandProperty InputObject
-                }
-
-                foreach ($bicepFile in $bicepFiles) {
-                  Write-Information "Processing Bicep file: $($bicepFile.FullName)"
-
-                  $tempPath = $null
-                  try {
-                    $tempPath = [System.IO.Path]::GetTempFileName()
-                    Write-Verbose "tempPath=$tempPath"
-
-                    Write-Debug "Linting Bicep"
-                    az bicep lint --file $bicepFile.FullName --diagnostics-format sarif | Out-File -Path $tempPath -Encoding utf8
-
-                    $resultsFile = "$($bicepFile.BaseName).junit.xml"
-                    $resultsPath = Join-Path -Path $resultsDir -ChildPath $resultsFile
-                    Write-Verbose "resultsPath=$resultsPath"
-
-                    Write-Debug "Converting to JUnit"
-                    milkyware-sarif-converter -i $tempPath -o $resultsPath
-                    Write-Verbose (Get-Content -Path $resultsPath -Raw)
-                  }
-                  finally {
-                    Remove-Item -Path $tempPath -ErrorAction Ignore
-                  }
-                }
-              powerShellErrorActionPreference: Stop
-
-    - task: PublishTestResults@2
-            displayName: Publish Scan Results
-            condition: succeededOrFailed()
-            inputs:
-              testResultsFormat: JUnit
-              testResultsFiles: ${{variables.resultsDir}}/*.xml
-              failTaskOnFailedTests: true
-
+```xml
+<testsuites tests="1" failures="1">
+  <testsuite>
+    <testcase name="Resource type &quot;Microsoft.Storage/storageAccounts/tableServices/tables@2025-01-01&quot; does not have types available. Bicep is unable to validate resource properties prior to deployment, but this will not block the resource from being deployed. [https://aka.ms/bicep/core-diagnostics#BCP081] - storageaccount.bicep:129:31" classname="BCP081">
+      <failure type="AssertionError" />
+    </testcase>
+  </testsuite>
+</testsuites>
 ```
-<!-- {% endraw %} -->
-</details>
+
+How these results appear in the **Azure Pipeline Tests** tab remains familiar as shown below.
+
+![image2](/images/adopting-bicep-linting/image2.png)
 
 ## Wrapping Up
+
+Adopting the az bicep lint command and integrating SARIF-based analysis into your CI/CD pipelines provides a modern, automated approach to validating Bicep templates. By converting SARIF output to JUnit format, you can leverage familiar Azure DevOps test reporting and ensure that issues are surfaced early in your deployment process.
+
+This workflow not only streamlines template validation but also makes it easier to maintain code quality and compliance across teams. The use of Spectre.Console and a custom converter offers flexibility and extensibility for future enhancements.

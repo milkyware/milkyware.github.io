@@ -17,4 +17,24 @@ Automating dependency updates is therefore key to ensuring bug fixes, improvemen
 
 ## Getting Started with Dependabot
 
+GitHub is one of the largest and most popular source code platforms and comes with built-in support for automated dependency updates via
+**[Dependabot](https://docs.github.com/en/code-security/getting-started/dependabot-quickstart-guide)**. Dependabot has support for **[numerous package ecosystems](https://docs.github.com/en/code-security/dependabot/ecosystems-supported-by-dependabot/supported-ecosystems-and-repositories)** and works by scanning repositories for dependency updates, raising pull requests (PR) when updates are found.
+
+Dependabot has 2 main features:
+
+1. Security Updates - Scanning and proposing updates for vulnerable dependencies
+2. Version Updates - General purpose dependency updates
+
+Let's start by look at security updates.
+
+### Dependabot Security Updates
+
+As mentioned, the **[security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates)** feature
+
+### Configuring Dependabot
+
+Dependabot
+
+### Auto-Merging Update PRs
+
 ## Introducing Renovate

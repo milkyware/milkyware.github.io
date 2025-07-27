@@ -47,6 +47,12 @@ Notice that on the far right of these alerts is a reference to the same PR, #1. 
 
 These PRs would be subject to the same checks the repo has configured such as peer reviews and automated CI builds to ensure code continues to work.
 
+#### Enabling by Default
+
+GitHub also offers the ability for this feature to be enabled by default and configured en masse for all repos **for a user or an organisation**. This can be found in **Settings > Code Security > Dependabot** under the same 2 settings as in the repo, **Dependabot security updates** and **Grouped security updates**.
+
+![image4](/images/automating-dependency-updates/image4.png)
+
 ### Configuring Version Updates
 
 Dependabot

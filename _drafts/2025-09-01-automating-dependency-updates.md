@@ -29,9 +29,25 @@ Let's start by look at security updates.
 
 ### Dependabot Security Updates
 
-As mentioned, the **[security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates)** feature
+As mentioned, the **[security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates)** feature scans for vulnerable dependencies and raises PRs updating dependencies to a secure version.
 
-### Configuring Dependabot
+Enabling the security updates feature can be found in the **Settings** of a repo. In **Security > Advanced Security** can be found the **Dependabot** section.
+
+![image1](/images/automating-dependency-updates/image1.png)
+
+Enabling either **Dependabot security updates** or **Grouped security updates** will enable scanning the repo.
+
+Any vulnerabilities that are found will start to be listed in **Security > Dependeabot** area of the repo, complete severity details and a brief description.
+
+![image2](/images/automating-dependency-updates/image2.png)
+
+Notice that on the far right of these alerts is a reference to the same PR, #1. This is due to, in this case, all of the alerts being addressed by the same PR. We can then review the details of the PR and merge it.
+
+![image3](/images/automating-dependency-updates/image3.png)
+
+These PRs would be subject to the same checks the repo has configured such as peer reviews and automated CI builds to ensure code continues to work.
+
+### Configuring Version Updates
 
 Dependabot
 

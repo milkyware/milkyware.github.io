@@ -57,6 +57,41 @@ Enabling this feature by default will help ensure that all your future project r
 
 ### Configuring Version Updates
 
+Whereas the security updates are triggered when vulnerabilities are found, with version updates configured, PRs are raised as soon as a new version of a dependency becomes available.
+
+<!-- {% raw %} -->
+```yaml
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directories:
+      - /apps/app1
+      - /apps/app2
+    schedule:
+      interval: daily
+    labels:
+      - nuget
+    ignore:
+      - dependency-name: FluentAssertions
+        versions:
+          - ">=8.0.0"
+
+  - package-ecosystem: terraform
+    directory: /terraform
+    schedule:
+      interval: daily
+    labels:
+      - terraform
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+    labels:
+      - github-actions
+```
+<!-- {% endraw %} -->
+
 ### Bonus: Auto-Merge Dependabot PRs
 
 So far, all of the PRs we've discussed for updating dependencies have required a manual review and merge. Whilst doing some research on some GitHub repos, I stumbled across a **[GitHub Workflow](https://github.com/microsoftgraph/msgraph-sdk-dotnet/blob/main/.github/workflows/auto-merge-dependabot.yml)** which automatically marks **non-major** Dependabot update PRs as **auto-merged**.

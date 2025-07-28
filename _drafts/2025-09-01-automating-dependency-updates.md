@@ -57,7 +57,9 @@ Enabling this feature by default will help ensure that all your future project r
 
 ### Configuring Version Updates
 
-Whereas the security updates are triggered when vulnerabilities are found, with version updates configured, PRs are raised as soon as a new version of a dependency becomes available.
+While security updates are triggered by the discovery of vulnerabilities, version updates allow you to keep all your dependencies up-to-date as soon as new versions are released. With version updates enabled, Dependabot will automatically raise pull requests whenever it detects a new version of a dependency in your configured package ecosystems.
+
+To enable this, you add a `dependabot.yml` file to your repository (typically under `.github/dependabot.yml`). Below is a sample configuration and a breakdown of its options:
 
 <!-- {% raw %} -->
 ```yaml
@@ -91,6 +93,24 @@ updates:
       - github-actions
 ```
 <!-- {% endraw %} -->
+
+**Key options explained:**
+
+- `package-ecosystem`: Specifies the type of dependencies to monitor (e.g., `nuget`, `npm`, `terraform`, `github-actions`).
+- `directory` or `directories`: The path(s) in your repo where the manifest or lock files are located. For some ecosystems, you can specify multiple directories.
+- `schedule`: Controls how often Dependabot checks for updates. Common intervals are `daily`, `weekly`, or `monthly`.
+- `labels`: Adds custom labels to PRs for easier filtering and triage.
+- `ignore`: Lets you exclude specific dependencies or versions from automatic updates. In the example above, updates for `FluentAssertions` version 8.0.0 and above are ignored.
+
+This configuration allows you to tailor Dependabot to your team's workflow. For example, you might want daily updates for critical dependencies, but only weekly updates for less critical ones. You can also combine security and version updates for comprehensive coverage.
+
+**Tips:**
+
+- Start with a small set of dependencies or a single ecosystem to get a feel for the PR volume.
+- Use labels and ignore rules to reduce noise and focus on the most important updates.
+- Review the [Dependabot documentation](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-dependency-updates) for advanced options like grouping updates or customizing commit messages.
+
+With version updates configured, you can ensure your applications are always running with the latest, most secure, and best-supported dependencies—without the manual effort.
 
 ### Bonus: Auto-Merge Dependabot PRs
 

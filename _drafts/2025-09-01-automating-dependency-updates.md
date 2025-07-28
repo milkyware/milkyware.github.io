@@ -53,9 +53,50 @@ GitHub also offers the ability for this feature to be enabled by default and con
 
 ![image4](/images/automating-dependency-updates/image4.png)
 
+Enabling this feature by default will help ensure that all your future project remain secure with no additional setup effort required.
+
 ### Configuring Version Updates
 
-Dependabot
+### Bonus: Auto-Merge Dependabot PRs
+
+So far, all of the PRs we've discussed for updating dependencies have required a manual review and merge. Whilst doing some research on some GitHub repos, I stumbled across a **[GitHub Workflow](https://github.com/microsoftgraph/msgraph-sdk-dotnet/blob/main/.github/workflows/auto-merge-dependabot.yml)** which automatically marks **non-major** Dependabot update PRs as **auto-merged**.
+
+<!-- {% raw %} -->
+```yaml
+name: Auto-merge dependabot updates
+
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  dependabot-merge:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2.4.0
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Enable auto-merge for Dependabot PRs
+        # Only if version bump is not a major version change
+        if: ${{steps.metadata.outputs.update-type != 'version-update:semver-major'}}
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+```
+<!-- {% endraw %} -->
+
+The workflow is triggered by new PRs to main, checking that the PR has been raised by Dependabot. If raised by Dependabot, the metadata is retrieved to determine whether the package is a major change. Lastly, if not a major update, the **GitHub CLI** is used to set the PR to auto-merge (once all checks have passed) as well as to **squash merge**.
+
+**[GitHub sample](https://github.com/dependabot/demo)**
 
 ### Auto-Merging Update PRs
 

@@ -145,6 +145,4 @@ jobs:
 
 The workflow is triggered by new PRs to main, checking that the PR has been raised by Dependabot. If raised by Dependabot, the metadata is retrieved to determine whether the package is a major change. Lastly, if not a major update, the **GitHub CLI** is used to set the PR to auto-merge (once all checks have passed) as well as to **squash merge**.
 
-### Auto-Merging Update PRs
-
 ## Introducing Renovate

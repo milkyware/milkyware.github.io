@@ -94,7 +94,7 @@ updates:
 ```
 <!-- {% endraw %} -->
 
-**Key options explained:**
+Let's review the key aspects:
 
 - `package-ecosystem`: Specifies the type of dependencies to monitor (e.g., `nuget`, `npm`, `terraform`, `github-actions`).
 - `directory` or `directories`: The path(s) in your repo where the manifest or lock files are located. For some ecosystems, you can specify multiple directories.
@@ -104,13 +104,7 @@ updates:
 
 This configuration allows you to tailor Dependabot to your team's workflow. For example, you might want daily updates for critical dependencies, but only weekly updates for less critical ones. You can also combine security and version updates for comprehensive coverage.
 
-**Tips:**
-
-- Start with a small set of dependencies or a single ecosystem to get a feel for the PR volume.
-- Use labels and ignore rules to reduce noise and focus on the most important updates.
-- Review the [Dependabot documentation](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-dependency-updates) for advanced options like grouping updates or customizing commit messages.
-
-With version updates configured, you can ensure your applications are always running with the latest, most secure, and best-supported dependencies—without the manual effort.
+For further reading, GitHub provide a **[sample repo](https://github.com/dependabot/demo)** for setting up both security updates and version updates.
 
 ### Bonus: Auto-Merge Dependabot PRs
 
@@ -150,8 +144,6 @@ jobs:
 <!-- {% endraw %} -->
 
 The workflow is triggered by new PRs to main, checking that the PR has been raised by Dependabot. If raised by Dependabot, the metadata is retrieved to determine whether the package is a major change. Lastly, if not a major update, the **GitHub CLI** is used to set the PR to auto-merge (once all checks have passed) as well as to **squash merge**.
-
-**[GitHub sample](https://github.com/dependabot/demo)**
 
 ### Auto-Merging Update PRs
 

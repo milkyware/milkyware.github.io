@@ -221,7 +221,7 @@ In this configuration:
 - **Security updates** are labelled with `security`
 - The `FluentAssertions` v8 packages have been ignored
 
-Once again, with very little additional configuration, we've been able to add significant value to the dependency updates raised.
+Once again, with minimal additional configuration, we've been able to add significant value to the dependency updates raised.
 
 ### Automating Merging Updates
 

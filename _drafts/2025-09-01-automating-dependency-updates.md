@@ -1,10 +1,12 @@
 ---
 title: Automating Dependency Updates
 tags:
+  - Automated
   - Automation
   - Dependency
   - Dependencies
   - Packages
+  - Updates
   - Dependabot
   - Renovate
 ---

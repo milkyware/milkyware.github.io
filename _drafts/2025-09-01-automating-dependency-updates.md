@@ -147,6 +147,126 @@ The workflow is triggered by new PRs to main, checking that the PR has been rais
 
 ## Introducing Renovate
 
-During a recent conversation with a colleague, I was introduced to **[Renovate](https://github.com/renovatebot/renovate)** as an alternative to Dependabot. Renovate is an open-source, multi-platform automated dependency update tool
+During a recent conversation with a colleague, I was introduced to **[Renovate](https://github.com/renovatebot/renovate)** as an alternative to Dependabot. Renovate is an open-source and highly-customisable automated dependency update tool.
+
+For the purposes of this post, I'm going to focus on configuring and running Renovate **in GitHub, hosted by Mend.io**. However, Renovate is **[multi-platform](https://docs.renovatebot.com/#supported-platforms)**, including the ability to self-host.
+
+### Recreating Dependabot in Renovate
+
+Like GitHub's Dependabot, Renovate also provide a great **[demo repo](https://github.com/renovatebot/tutorial)** detailing:
+
+1. Installing the GitHub app
+2. Onboarding a repository
+3. Customising Renovate
+4. Reviewing PRs
+5. Interacting with the dashboard
+
+Once you've gone through the tutorial, you should end up with a `renovate.json` file which looks similar to below:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base"
+  ],
+  "prHourlyLimit": 3,
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
+```
+
+The `renovate.json` file is the equivalent of `dependabot.yml` and we can see that with very minimal configuration we can automate dependency updates.
+
+![image5](/images/automating-dependency-updates/image5.png)
+
+In fact, in a sample repo with the basic config supplied by the initial Renovate onboarding PR, we can see update PRs raised for my out-of-date **Bicep, Terraform, GitHub Actions and NuGet** dependencies.
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "labels": [
+    "dependencies",
+    "{{manager}}",
+    "{{updateType}}"
+  ],
+  "vulnerabilityAlerts": {
+    "addLabels": ["security"]
+  },
+  "packageRules": [
+    {
+      "groupName": "FluentAssertions Ignore",
+      "matchManagers": ["nuget"],
+      "matchPackageNames": ["FluentAssertions"],
+      "allowedVersions": "<8.0.0"
+    }
+  ]
+}
+```
+
+To replicate the Dependabot configuration we **[discussed earlier](#configuring-version-updates)**, I expanded the default configuration to look like above.
+
+In this configuration:
+
+- The `config:base` presets have been replaced with **[`config:recommended`](https://docs.renovatebot.com/presets-config/#configrecommended)**
+- Custom labels have been added using **[template values](https://docs.renovatebot.com/templates/#other-available-fields)** to categorise PRs
+- **Security updates** are labelled with `security`
+- The `FluentAssertions` v8 packages have been ignored
+
+Once again, with very little additional config we've been able to add a lot of additional value to dependency updates raised.
+
+### Automating Merging Updates
+
+I covered the **[auto-merging of Dependabot updates](#bonus-auto-merge-dependabot-prs)** as a *bonus* as it's currently not natively supported. However, with Renovate, this functionality is natively available.
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":automergeMinor",
+    "security:openssf-scorecard"
+  ],
+  "labels": [
+    "dependencies",
+    "{{manager}}",
+    "{{updateType}}"
+  ],
+  "automergeStrategy": "squash",
+  "minimumReleaseAge": "14 days",
+  "separateMajorMinor": true,
+  "vulnerabilityAlerts": {
+    "addLabels": ["security"]
+  },
+  "packageRules": [
+    {
+      "groupName": "Alternate Release Age",
+      "matchPackageNames": ["some-fast-package"],
+      "minimumReleaseAge": "2 days"
+    }
+  ]
+}
+```
+
+Expanding on the Renovate config covered in the **[previous section](#recreating-dependabot-in-renovate)**, I've added a few extra settings:
+
+- **[`:automergeMinor`](https://docs.renovatebot.com/presets-default/#automergeminor)** has been enabled to allow **minor and patch** updates to be auto-merged (once all checks pass)
+- **[`automergeStrategy`](https://docs.renovatebot.com/configuration-options/#automergestrategy)** has been set to squash as this is my preferred merge style
+- **[`minimumReleaseAge`](https://docs.renovatebot.com/configuration-options/#minimumreleaseage)** adds a check that an update is at least 14 days old as **[recommended by Renovate](https://docs.renovatebot.com/upgrade-best-practices/#wait-two-weeks-before-automerging-third-party-dependencies)**
+- **[`separateMajorMinor`](https://docs.renovatebot.com/configuration-options/#separatemajorminor)** has been enabled to ensure separate PRs are raised for **major and minor** updates
+- A custom **`packageRule`** has been added to override the default `minimumReleaseAge` for fast updating packages
+- Lastly, the **`security:openssf-scorecard`** preset has been added to include the **[OpenSSF scoring](https://github.com/ossf/scorecard)** for a package to indicate the security posture of the updated package.
+
+Let's have a look at a sample PR with this revised config.
+
+![image6](/images/automating-dependency-updates/image6.png)
+
+Using the same **Azure.Identity** dependency as an example, we can see a lot of the details Dependabot included, with the addition of the OpenSSF score, a list of CVEs being addressed (in the case of security updates) and labels categorising the PR. In the **Configuration** section, we can also see that **Automerge** is enabled as the update is classed as **minor**.
 
 ## Wrapping Up

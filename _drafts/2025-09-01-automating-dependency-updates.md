@@ -1,12 +1,12 @@
 ---
 title: Automating Dependency Updates
 tags:
-    - Automation
-    - Dependency
-    - Dependencies
-    - Packages
-    - Dependabot
-    - Renovate
+  - Automation
+  - Dependency
+  - Dependencies
+  - Packages
+  - Dependabot
+  - Renovate
 ---
 
 Over the years, I've been involved with various software development projects. Once an application shifts into a production, maintenance becomes essential - not just fixing bugs or shipping features, but ensuring the software remains secure, performant, and compatible with its evolving ecosystem.

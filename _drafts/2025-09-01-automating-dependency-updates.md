@@ -11,51 +11,51 @@ tags:
   - Renovate
 ---
 
-Over the years, I've been involved with various software development projects. Once an application shifts into a production, maintenance becomes essential - not just fixing bugs or shipping features, but ensuring the software remains secure, performant, and compatible with its evolving ecosystem.
+Over the years, I've been involved with various software development projects. Once an application shifts into production, maintenance becomes essential—not just fixing bugs or shipping features, but ensuring the software remains secure, performant, and compatible with its evolving ecosystem.
 
-One key aspect of maintenance is ensuring dependencies remain up-to-date. Outdated dependencies can **miss bug fixes, improvements and introduce security vulnerabilities**. However, as applications grow or additional applications need support, the task of manually tracking and updating dependencies can become increasingly error-prone and time-consuming.
+One key aspect of maintenance is ensuring dependencies remain up-to-date. Outdated dependencies can **miss bug fixes and improvements, and introduce security vulnerabilities**. However, as applications grow or additional applications need support, the task of manually tracking and updating dependencies can become increasingly error-prone and time-consuming.
 
-Automating dependency updates is therefore key to ensuring bug fixes, improvements and security fixes are applied swiftly whilst limiting the growth of manual involvement from developers. In this post I'll share how I setup **Dependabot** initially before later adopting **Renovate** to handle my automation of updates.
+Automating dependency updates is therefore key to ensuring bug fixes, improvements, and security fixes are applied swiftly, while limiting the growth of manual involvement from developers. In this post, I'll share how I set up **Dependabot** initially, before later adopting **Renovate** to handle my automation of updates.
 
 ## Getting Started with Dependabot
 
 GitHub is one of the largest and most popular source code platforms and comes with built-in support for automated dependency updates via
 **[Dependabot](https://docs.github.com/en/code-security/getting-started/dependabot-quickstart-guide)**. Dependabot has support for **[numerous package ecosystems](https://docs.github.com/en/code-security/dependabot/ecosystems-supported-by-dependabot/supported-ecosystems-and-repositories)** and works by scanning repositories for dependency updates, raising pull requests (PR) when updates are found.
 
-Dependabot has 2 main features:
+Dependabot has two main features:
 
-1. Security Updates - Scanning and proposing updates for vulnerable dependencies
-2. Version Updates - General purpose dependency updates
+1. Security Updates – Scanning and proposing updates for vulnerable dependencies
+2. Version Updates – General purpose dependency updates
 
-Let's start by look at security updates.
+Let's start by looking at security updates.
 
 ### Dependabot Security Updates
 
 As mentioned, the **[security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates)** feature scans for vulnerable dependencies and raises PRs updating dependencies to a secure version.
 
-Enabling the security updates feature can be found in the **Settings** of a repo. In **Security > Advanced Security** can be found the **Dependabot** section.
+You can enable the security updates feature in the **Settings** of a repository. In **Security > Advanced Security**, you'll find the **Dependabot** section.
 
 ![image1](/images/automating-dependency-updates/image1.png)
 
 Enabling either **Dependabot security updates** or **Grouped security updates** will enable scanning the repo.
 
-Any vulnerabilities that are found will start to be listed in **Security > Dependeabot** area of the repo, complete severity details and a brief description.
+Any vulnerabilities that are found will be listed in the **Security > Dependabot** area of the repository, along with severity details and a brief description.
 
 ![image2](/images/automating-dependency-updates/image2.png)
 
-Notice that on the far right of these alerts is a reference to the same PR, #1. This is due to, in this case, all of the alerts being addressed by the same PR. We can then review the details of the PR and merge it.
+Notice that on the far right of these alerts is a reference to the same PR, #1. In this case, all of the alerts are addressed by the same PR. We can then review the details of the PR and merge it.
 
 ![image3](/images/automating-dependency-updates/image3.png)
 
-These PRs would be subject to the same checks the repo has configured such as peer reviews and automated CI builds to ensure code continues to work.
+These PRs are subject to the same checks the repository has configured, such as peer reviews and automated CI builds, to ensure the code continues to work.
 
 #### Enabling by Default
 
-GitHub also offers the ability for this feature to be enabled by default and configured en masse for all repos **for a user or an organisation**. This can be found in **Settings > Code Security > Dependabot** under the same 2 settings as in the repo, **Dependabot security updates** and **Grouped security updates**.
+GitHub also offers the ability to enable this feature by default and configure it en masse for all repositories, either for a user or an organisation. This can be found in **Settings > Code Security > Dependabot** under the same two settings as in the repository: **Dependabot security updates** and **Grouped security updates**.
 
 ![image4](/images/automating-dependency-updates/image4.png)
 
-Enabling this feature by default will help ensure that all your future project remain secure with no additional setup effort required.
+Enabling this feature by default will help ensure that all your future projects remain secure with no additional setup effort required.
 
 ### Configuring Version Updates
 
@@ -106,11 +106,11 @@ Let's review the key aspects:
 
 This configuration allows you to tailor Dependabot to your team's workflow. For example, you might want daily updates for critical dependencies, but only weekly updates for less critical ones. You can also combine security and version updates for comprehensive coverage.
 
-For further reading, GitHub provide a **[sample repo](https://github.com/dependabot/demo)** for setting up both security updates and version updates.
+For further reading, GitHub provides a **[sample repo](https://github.com/dependabot/demo)** for setting up both security and version updates.
 
 ### Bonus: Auto-Merge Dependabot PRs
 
-So far, all of the PRs we've discussed for updating dependencies have required a manual review and merge. Whilst doing some research on some GitHub repos, I stumbled across a **[GitHub Workflow](https://github.com/microsoftgraph/msgraph-sdk-dotnet/blob/main/.github/workflows/auto-merge-dependabot.yml)** which automatically marks **non-major** Dependabot update PRs as **auto-merged**.
+So far, all of the PRs we've discussed for updating dependencies have required manual review and merging. While researching some GitHub repositories, I came across a **[GitHub Workflow](https://github.com/microsoftgraph/msgraph-sdk-dotnet/blob/main/.github/workflows/auto-merge-dependabot.yml)** that automatically marks **non-major** Dependabot update PRs as **auto-merged**.
 
 <!-- {% raw %} -->
 ```yaml
@@ -149,7 +149,7 @@ The workflow is triggered by new PRs to main, checking that the PR has been rais
 
 ## Introducing Renovate
 
-During a recent conversation with a colleague, I was introduced to **[Renovate](https://github.com/renovatebot/renovate)** as an alternative to Dependabot. Renovate is an open-source and highly-customisable automated dependency update tool.
+During a recent conversation with a colleague, I was introduced to **[Renovate](https://github.com/renovatebot/renovate)** as an alternative to Dependabot. Renovate is an open-source and highly customisable automated dependency update tool.
 
 For the purposes of this post, I'm going to focus on configuring and running Renovate **in GitHub, hosted by Mend.io**. However, Renovate is **[multi-platform](https://docs.renovatebot.com/#supported-platforms)**, including the ability to self-host.
 
@@ -163,7 +163,7 @@ Like GitHub's Dependabot, Renovate also provide a great **[demo repo](https://gi
 4. Reviewing PRs
 5. Interacting with the dashboard
 
-Once you've gone through the tutorial, you should end up with a `renovate.json` file which looks similar to below:
+By the end of the tutorial, you should end up with a `renovate.json` file similar to the one below:
 
 ```json
 {
@@ -212,7 +212,7 @@ In fact, in a sample repo with the basic config supplied by the initial Renovate
 }
 ```
 
-To replicate the Dependabot configuration we **[discussed earlier](#configuring-version-updates)**, I expanded the default configuration to look like above.
+To replicate the Dependabot configuration we **[discussed earlier](#configuring-version-updates)**, I expanded the default configuration as shown above.
 
 In this configuration:
 
@@ -221,11 +221,11 @@ In this configuration:
 - **Security updates** are labelled with `security`
 - The `FluentAssertions` v8 packages have been ignored
 
-Once again, with very little additional config we've been able to add a lot of additional value to dependency updates raised.
+Once again, with very little additional configuration, we've been able to add significant value to the dependency updates raised.
 
 ### Automating Merging Updates
 
-I covered the **[auto-merging of Dependabot updates](#bonus-auto-merge-dependabot-prs)** as a *bonus* as it's currently not natively supported. However, with Renovate, this functionality is natively available.
+I covered the **[auto-merging of Dependabot updates](#bonus-auto-merge-dependabot-prs)** as a *bonus*, since it's currently not natively supported. However, with Renovate, this functionality is natively available.
 
 ```json
 {
@@ -256,7 +256,7 @@ I covered the **[auto-merging of Dependabot updates](#bonus-auto-merge-dependabo
 }
 ```
 
-Expanding on the Renovate config covered in the **[previous section](#recreating-dependabot-in-renovate)**, I've added a few extra settings:
+Expanding on the Renovate configuration covered in the **[previous section](#recreating-dependabot-in-renovate)**, I've added a few extra settings:
 
 - **[`:automergeMinor`](https://docs.renovatebot.com/presets-default/#automergeminor)** has been enabled to allow **minor and patch** updates to be auto-merged (once all checks pass)
 - **[`automergeStrategy`](https://docs.renovatebot.com/configuration-options/#automergestrategy)** has been set to squash as this is my preferred merge style
@@ -265,7 +265,7 @@ Expanding on the Renovate config covered in the **[previous section](#recreating
 - A custom **`packageRule`** has been added to override the default `minimumReleaseAge` for fast updating packages
 - Lastly, the **`security:openssf-scorecard`** preset has been added to include the **[OpenSSF scoring](https://github.com/ossf/scorecard)** for a package to indicate the security posture of the updated package.
 
-Let's have a look at a sample PR with this revised config.
+Let's look at a sample PR using this revised configuration.
 
 ![image6](/images/automating-dependency-updates/image6.png)
 

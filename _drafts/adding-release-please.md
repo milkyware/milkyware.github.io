@@ -37,7 +37,19 @@ Conventional Commits will then trigger Release Please to create a ***release Pul
 
 ![image2](/images/adding-release-please/image2.png)
 
-Merging this PR then triggers a GitHub release to be created along with the associated Git tag. So let's have a look at how how to set it up.
+Merging this PR then triggers a GitHub release to be created along with the associated Git tag. So let's have a look at how to set it up.
+
+### Preparing the Repo
+
+Before setting up Release Please, there are some pre-requisites. Firstly, it is recommended to use **squash merges** when merging PRs to make a linear Git history.
+
+![image3](/images/adding-release-please/image3.png)
+
+To ensure squash merges are enables, go to `General -> Pull Requests` of the **repo settings**. Also, ensure that the default commit message is set to at least `Pull request title` so that the Conventional Commit can be set as the PR title, which we can validate later on.
+
+![image4](/images/adding-release-please/image4.png)
+
+Secondly, to allow Release Please to create and manage **Release PRs**, GitHub Actions need permission to create PRs. Enabling this can be found in the **repo settings** as `Actions -> General -> Workflow permissions`.
 
 ### Setting Up Release Please
 

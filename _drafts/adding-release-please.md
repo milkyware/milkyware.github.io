@@ -53,6 +53,73 @@ Secondly, to allow Release Please to create and manage **Release PRs**, GitHub A
 
 ### Setting Up Release Please
 
+With the repo prepared, we can now setup Release Please. To do this, we start with creating the configuration. This comprises of `release-please-config.json` and `.release-please-manifest.json` which are use to configure Release Please and track versions respectively.
+
+```bash
+npm i release-please -g
+```
+
+Although these can be created manually using samples such as from MS Graph, the **[release-please CLI](https://github.com/googleapis/release-please/blob/main/docs/cli.md)** has been provided to help with this. Let's install the package.
+
+```powershell
+$ghToken = "contents-pr-read-write-pat-token"
+release-please bootstrap --token $ghToken `
+  --repo-url=username/repo-name `
+  --bump-minor-pre-major=true `
+  --bump-patch-for-minor-pre-major=true
+```
+
+Once installed, we can then run the CLI. You'll need a PAT token, which can be created under your **[GitHub account settings](https://github.com/settings/personal-access-tokens)**, which has **read/write access to `Contents` and `Pull requests`**.
+
+```bash
+> Fetching .release-please-manifest.json from branch main
+> Fetching release-please-config.json from branch main
+√ Starting GitHub PR workflow...
+√ Successfully found branch HEAD sha "6bf1cb2d415637b225b54cfb73a1f1bbb7a22567".
+√ Successfully created branch at https://api.github.com/repos/milkyware/blog-release-please/git/refs/heads/release-please/bootstrap/default
+√ Got the latest commit tree
+√ Successfully created a tree with the desired changes with SHA 95f20137c7cdc3c31510182e16230a692180d94a
+√ Successfully created commit. See commit at https://api.github.com/repos/milkyware/blog-release-please/git/commits/b1af4e0fbebd80fd67b0492beaec0f67518dd9b4
+√ Updating reference heads/release-please/bootstrap/default to b1af4e0fbebd80fd67b0492beaec0f67518dd9b4
+√ Successfully updated reference release-please/bootstrap/default to b1af4e0fbebd80fd67b0492beaec0f67518dd9b4
+√ Successfully opened pull request available at url: https://api.github.com/repos/milkyware/blog-release-please/pulls/1.
+√ Successfully opened pull request: 1.
+{
+  headBranchName: 'release-please/bootstrap/default',
+  baseBranchName: 'main',
+  number: 1,
+  title: 'chore: bootstrap releases for path: .',
+  body: 'Configuring release-please for path: .',
+  files: [],
+  labels: []
+}
+```
+
+The output of the command should look similar to above with a pull request being created which initialises.
+
+```json
+{
+  "packages": {
+    ".": {
+      "changelog-path": "CHANGELOG.md",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true,
+      "draft": false,
+      "prerelease": false
+    }
+  },
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}
+```
+
+```json
+{
+  ".": "0.0.0"
+}
+```
+
+To monitor the commits on a repo, Release Please is made available as a **[GitHub Action](https://github.com/googleapis/release-please-action)**. However, before creating the GitHub Workflow, there are some pre-requisites.
+
 ## Validating PR Titles
 
 ```bash

@@ -155,6 +155,7 @@ jobs:
 ```
 
 This workflow is very similar to the one documented by the GitHub Action, with the additional inclusion of the `actions/checkout@v6` step. This ensures that the config and manifest are available to the Release Please action.
+
 ![image1](/images/adding-release-please/image1.png)
 
 As **Conventional Commits** are added to main via PRs, Release Please will automatically prepare the release PR like the one shown earlier. Once you're happy with the release, you can merge it to trigger the actual GitHub release. However, how can you ensure that PRs do follow the **Conventional Commits** syntax?

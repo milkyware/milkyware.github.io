@@ -224,13 +224,13 @@ The basic setup for the action is really simple, but it has plenty of customisat
 
     $labels = gh label list --repo ${{ github.repository }} --json name | ConvertFrom-Json | Select-Object -ExpandProperty name
 
-    $exists = $labels -contains $Label
+    $exists = $labels -contains $label
     if (-not $exists)
     {
-        gh label create $Label --repo ${{ github.repository }} | Out-Null
+        gh label create $label --repo ${{ github.repository }} | Out-Null
     }
 
-    gh pr edit $prNumber --add-label $Label --repo ${{ github.repository }} | Out-Null
+    gh pr edit $prNumber --add-label $label --repo ${{ github.repository }} | Out-Null
     Write-Information "PR title is invalid. Applied label '$label'."
 ```
 

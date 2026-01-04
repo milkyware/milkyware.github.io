@@ -9,7 +9,7 @@ tags:
 
 I've been using the **[Microsoft Graph SDK](https://github.com/microsoftgraph/msgraph-sdk-dotnet)** in various projects for a while now and stumbled across **[Release Please](https://github.com/googleapis/release-please)** being used to release the library. Preparing releases and ensuring they're accurate for what is included takes time and is often made difficult due to different styles of commit messages, so automating my release process and ensuring consistency is something I've wanted to look into for a while.
 
-For this post, I'll introduce Release Please and how i've implemented it in my projects as well as how I've added validation to ensure pull request commits remain consistent and conform to Release Please conventions.
+For this post, I'll introduce Release Please and how I've implemented it in my projects as well as how I've added validation to ensure pull request commits remain consistent and conform to Release Please conventions.
 
 ## Introducing Release Please
 
@@ -51,9 +51,9 @@ To ensure squash merges are enables, go to `General -> Pull Requests` of the **r
 
 Secondly, to allow Release Please to create and manage **Release PRs**, GitHub Actions need permission to create PRs. Enabling this can be found in the **repo settings** as `Actions -> General -> Workflow permissions`.
 
-### Setting Up Release Please
+### Configuring Release Please
 
-With the repo prepared, we can now setup Release Please. To do this, we start with creating the configuration. This comprises of `release-please-config.json` and `.release-please-manifest.json` which are use to configure Release Please and track versions respectively.
+With the repo prepared, we can now configure Release Please. To do this, we start with creating the configuration. This comprises of `release-please-config.json` and `.release-please-manifest.json` which are use to configure Release Please and track versions respectively.
 
 ```bash
 npm i release-please -g
@@ -95,7 +95,7 @@ Once installed, we can then run the CLI. You'll need a PAT token, which can be c
 }
 ```
 
-The output of the command should look similar to above with a pull request being created which initialises.
+The output of the command should look similar to above with a pull request being created which initialises the config and manifest files.
 
 ```json
 {
@@ -112,20 +112,136 @@ The output of the command should look similar to above with a pull request being
 }
 ```
 
+The config file in the PR should look similar to above. Notice that the arguments specified in the command come under the `.` object under `packages`, this is due to Release Please supporting both the **monorepo and polyrepo architectures** where `.` indicates that the component being versioned is the entire repo. In a monorepo setup, the `--path` argument can be used on the CLI to configure additional components in the same repo, by specifying the path of the component within the repo such as `--path=lib/my-versioned-component`. The JSON schema is also referenced to support intellisense when editing the config.
+
 ```json
 {
   ".": "0.0.0"
 }
 ```
 
-To monitor the commits on a repo, Release Please is made available as a **[GitHub Action](https://github.com/googleapis/release-please-action)**. However, before creating the GitHub Workflow, there are some pre-requisites.
+The manifest file should look similar to above. The **key(s)** should match those under `packages` in the config file (in our case this is `.`). The version on the right tracks the **current version** for that component, typically this should match the Git tags.
+
+> **N.B.** If the current version doesn't have a corresponding tag, Release Please will fallback to **1.0.0**. This is particularly of note when working with **0.x.x** versions as, without a tag matching the manifest, Release Please will jump to **1.0.0**. If onboarding a repo without any tags, create the initial tag (e.g. 0.0.0) and update the manifest or use the `--initial-version` argument.
+
+### Automating Releases
+
+With the repo prepared and Release Please configured, we can now setup the automation. Release Please is made available as a **[GitHub Action](https://github.com/googleapis/release-please-action)** and so the automation just involves setting up a Github Workflow.
+
+```yaml
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+This workflow is very similar to the one documented by the GitHub Action, with the additional inclusion of the `actions/checkout@6` step. This is so that the config and manifest are available to the Release Please action.
+
+![image1](/images/adding-release-please/image1.png)
+
+As **Conventional Commits** are added to main, via PRs, Release Please will automatically prepare the release PR like the one shown earlier. Once you're happy with the release, it can be merged in to trigger the actual GitHub release. However, how can you ensure that PRs do follow the **Conventional Commits** syntax?
 
 ## Validating PR Titles
 
-```bash
-npm i release-please -g
+As we **[setup the repo earlier](#preparing-the-repo)** to use squash merges and for PR commits to default to the PR title, we can validate that.
+
+```yaml
+name: Validate PR Title
+
+on:
+  pull_request_target:
+    types: 
+      - opened
+      - edited
+      - reopened
+      - synchronize
+
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Semantic PR Title Check
+        uses: amannn/action-semantic-pull-request@v6
+        id: semantic-pr
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+There are a few GitHub Actions available which can validate a PR title against the Conventional Commit, however, the one I've opted for is **[action-semantic-pull-request](https://github.com/marketplace/actions/semantic-pull-request)**.
+
+![image5](/images/adding-release-please/image5.png)
+
+The basic setup for the action is really simple, but has plenty of customisation available if needed. When it the step runs it will either run successfully, indicating valid, or throw an error similar to above.
+
+```yaml
+- name: Label PR
+  if: always()
+  shell: pwsh
+  env:
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  run: |
+    $InformationPreference = 'Continue'
+    if ($env:RUNNER_DEBUG)
+    {
+        $DebugPreference = 'Continue'
+        $VerbosePreference = 'Continue'
+    }
+
+    $label = "invalid-pr-title"
+    $prNumber = ${{ github.event.pull_request.number }}
+
+    $errorMessage = @"
+    ${{ steps.semantic-pr.outputs.error_message }}
+    "@
+    Write-Verbose "errorMessage: $errorMessage"
+
+    if ([string]::IsNullOrEmpty($errorMessage))
+    {
+        gh pr edit $prNumber --remove-label $label --repo ${{ github.repository }} | Out-Null
+        Write-Information "PR title is valid. No label applied."
+        return
+    }
+
+    $labels = gh label list --repo ${{ github.repository }} --json name | ConvertFrom-Json | Select-Object -ExpandProperty name
+
+    $exists = $labels -contains $Label
+    if (-not $exists)
+    {
+        gh label create $Label --repo ${{ github.repository }} | Out-Null
+    }
+
+    gh pr edit $prNumber --add-label $Label --repo ${{ github.repository }} | Out-Null
+    Write-Information "PR title is invalid. Applied label '$label'."
+```
+
+In addition, I've also added a custom script which will check the out of the title check step and add/clear a `invalid-pr-title` label to/from the PR depending on whether the PR title is valid or invalid. This is to make it clear from the PR overview screen if any PRs need addressing.
+
+## Sample Repo
+
+I've prepared a small, sample repo with my setup of Release Please.
 
 [![milkyware/blog-release-please - GitHub](https://gh-card.dev/repos/milkyware/blog-release-please.svg)](https://github.com/milkyware/blog-release-please)
 
- My preferred release strategy has long been using Git tagging (particularly GitHub releases), however, preparing releases and ensuring they're accurate for what is included takes time and is often made difficult due to different styles of commit titles.
+## Wrapping Up
+
+In this post, we've explored how to automate releases using Release Please and integrate it into your workflow with GitHub Actions. By setting up Release Please, you can streamline the release process, reduce manual effort, and ensure consistency across your projects. We've looked at configuring the tool, preparing your repository, and automating releases with a simple workflow. I hope this guide has been helpful and encourages you to try out Release Please in your own projects. As always, feel free to share your experiences or questions in the comments below.

@@ -66,6 +66,7 @@ Although these files can be created manually using samples (such as those from M
 $ghToken = "contents-pr-read-write-pat-token"
 release-please bootstrap --token $ghToken `
   --repo-url=username/repo-name `
+  --release-type=simple `
   --bump-minor-pre-major=true `
   --bump-patch-for-minor-pre-major=true
 ```
@@ -103,6 +104,7 @@ The output of the command should look similar to above, with a pull request bein
   "packages": {
     ".": {
       "changelog-path": "CHANGELOG.md",
+      "release-type": "simple",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
       "draft": false,

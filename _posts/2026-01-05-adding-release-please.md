@@ -71,7 +71,7 @@ release-please bootstrap --token $ghToken `
   --bump-patch-for-minor-pre-major=true
 ```
 
-Once installed, we can then run the CLI. You'll need a PAT token, which can be created under your **[GitHub account settings](https://github.com/settings/personal-access-tokens)**, with **read/write access to `Contents` and `Pull requests`**.
+Once installed, we can then run the CLI. You'll need a token to authorise the creation of the bootstrap PR. This could be from the GitHub CLI using `gh auth token` or a PAT token, which can be created under your **[GitHub account settings](https://github.com/settings/personal-access-tokens)**, with **read/write access to `Contents` and `Pull requests`**.
 
 ```bash
 > Fetching .release-please-manifest.json from branch main

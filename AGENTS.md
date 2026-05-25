@@ -30,10 +30,11 @@ This is a GitHub Pages blog using Jekyll with the Minimal Mistakes theme.
 
 ### Writing New Posts
 
-1. Create new file in `_posts/` with date-prefixed name
+1. Create new file in `_drafts/` with date-prefixed name
 2. Include required frontmatter (title, optional category/tags)
 3. Write content in markdown format
 4. Use standard markdown syntax for formatting
+5. Once complete, move from `_drafts/` to `_posts/`
 
 ## Repository Structure
 

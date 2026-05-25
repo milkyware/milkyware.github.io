@@ -167,7 +167,7 @@ This tells Release Please to update the `$.version` field in `plugin.json` whene
 flowchart LR
     A[Merge to main] --> B[Release Please<br>creates release PR]
     B --> C[Merge release PR]
-    C --> D["`Release Please bumps<br>$.version in plugin.json`"]
+    C --> D[Release Please bumps<br/>$.version in plugin.json]
     D --> E[Generate Marketplace<br>workflow triggered]
     E --> F[marketplace.json<br>regenerated with<br>latest versions]
 ```

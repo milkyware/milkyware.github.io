@@ -10,7 +10,7 @@ tags:
   - Automation
 ---
 
-I've been using the **[GitHub Copilot CLI](https://github.com/github/gh-copilot)** for a while now and had been building up a small collection of markdown prompt files for generating architectural documentation — prompts for creating Architecture Decision Records (ADRs) and High-Level Design (HLD) documents. I was sharing these with others through a basic git repo, but the workflow involved copying and pasting prompts with no clear versioning or discoverability. When I discovered the **[plugin system](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/about-cli-plugins)** , it was clear this was a much better approach — packaging prompts as installable skills that anyone on the Copilot CLI can invoke directly.
+I've been using the **[GitHub Copilot CLI](https://github.com/github/gh-copilot)** for a while now and had been building up a small collection of markdown prompt files for generating architectural documentation — prompts for creating Architecture Decision Records (ADRs) and High-Level Design (HLD) documents. I was sharing these with others through a basic git repo, but the workflow involved copying and pasting prompts with no clear versioning or discoverability. When I discovered the **[plugin system](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/about-cli-plugins)**, it was clear this was a much better approach — packaging prompts as installable skills that anyone on the Copilot CLI can invoke directly.
 
 In this post, I'll walk through what Copilot CLI plugins are, the anatomy of a plugin, the approach I use to develop skills through conversational prompting, and how I've automated the marketplace.
 
@@ -139,38 +139,38 @@ copilot /plugin marketplace add https://github.com/milkyware/awesome-ai
 
 With multiple plugins (and potentially more in the future), keeping `marketplace.json` versions in sync with each `plugin.json` manually would be error-prone. I've automated this with two pieces of CI/CD:
 
-1. **Release Please** handles version bumps. I covered this in detail in **[my previous post]({% post_url 2026-01-05-adding-release-please %})** , but the key detail here is the `extra-files` configuration in `release-please-config.json`:
+1. **Release Please** handles version bumps. I covered this in detail in **[my previous post]({% post_url 2026-01-05-adding-release-please %})**, but the key detail here is the `extra-files` configuration in `release-please-config.json`:
 
-```json
-{
-  "packages": {
-    "plugins/architecture-docs": {
-      "component": "architecture-docs",
-      "changelog-path": "CHANGELOG.md",
-      "extra-files": [
-        {
-          "type": "json",
-          "path": "plugin.json",
-          "jsonpath": "$.version"
+    ```json
+    {
+      "packages": {
+        "plugins/architecture-docs": {
+          "component": "architecture-docs",
+          "changelog-path": "CHANGELOG.md",
+          "extra-files": [
+            {
+              "type": "json",
+              "path": "plugin.json",
+              "jsonpath": "$.version"
+            }
+          ]
         }
-      ]
+      }
     }
-  }
-}
-```
+    ```
 
-This tells Release Please to update the `$.version` field in `plugin.json` whenever it calculates a new version — no manual editing needed.
+    This tells Release Please to update the `$.version` field in `plugin.json` whenever it calculates a new version — no manual editing needed.
 
-1. A **custom GitHub Action** (`generate-marketplace`) scans all `plugins/*/plugin.json` files and regenerates `marketplace.json` with the current version from each plugin's manifest. This runs as a workflow triggered whenever `.release-please-manifest.json` changes (i.e. after a release PR is merged), ensuring the marketplace always reflects the latest published versions.
+2. A **custom GitHub Action** (`generate-marketplace`) scans all `plugins/*/plugin.json` files and regenerates `marketplace.json` with the current version from each plugin's manifest. This runs as a workflow triggered whenever `.release-please-manifest.json` changes (i.e. after a release PR is merged), ensuring the marketplace always reflects the latest published versions.
 
-```mermaid
-flowchart LR
-    A[Merge to main] --> B[Release Please<br>creates release PR]
-    B --> C[Merge release PR]
-    C --> D[Release Please bumps<br/>$.version in plugin.json]
-    D --> E[Generate Marketplace<br>workflow triggered]
-    E --> F[marketplace.json<br>regenerated with<br>latest versions]
-```
+    ```mermaid
+    flowchart LR 
+        A[Merge to main] --> B[Release Please<br>creates release PR]
+        B --> C[Merge release PR]
+        C --> D[Release Please bumps<br/>$.version in plugin.json]
+        D --> E[Generate Marketplace<br>workflow triggered]
+        E --> F[marketplace.json<br>regenerated with<br>latest versions]
+    ```
 
 ## Quick Start
 

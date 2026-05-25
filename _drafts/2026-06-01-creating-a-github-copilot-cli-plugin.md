@@ -77,7 +77,20 @@ The **YAML frontmatter** gives the skill its name and description (visible in th
 
 For my documentation prompts, I've designed them to function as **smart document templates** — they use a gated question sequence where the AI asks questions section-by-section, waits for the user's response before proceeding, and only generates the final output once all required information has been gathered. This prevents hallucination and ensures the output is grounded in real context, but that's a design choice specific to these prompts rather than a constraint of the skill format itself.
 
-![image1](/images/creating-a-github-copilot-cli-plugin/image1.png)
+```
+plugins/architecture-docs/
+├── plugin.json
+├── README.md
+├── version.txt
+├── CHANGELOG.md
+└── skills/
+    ├── generate-adr/
+    │   └── SKILL.md
+    ├── generate-hld/
+    │   └── SKILL.md
+    └── generate-architecture-md/
+        └── SKILL.md
+```
 
 ## My Approach: Conversational Prompting
 
@@ -122,8 +135,6 @@ copilot /plugin marketplace add https://github.com/milkyware/awesome-ai
 
 ...the Copilot CLI reads `marketplace.json` to discover available plugins and their versions. The `version` field is particularly important — it determines whether a user has the latest version installed.
 
-![image2](/images/creating-a-github-copilot-cli-plugin/image2.png)
-
 ## Keeping Versions in Sync
 
 With multiple plugins (and potentially more in the future), keeping `marketplace.json` versions in sync with each `plugin.json` manually would be error-prone. I've automated this with two pieces of CI/CD:
@@ -150,9 +161,16 @@ With multiple plugins (and potentially more in the future), keeping `marketplace
 
 This tells Release Please to update the `$.version` field in `plugin.json` whenever it calculates a new version — no manual editing needed.
 
-2. A **custom GitHub Action** (`generate-marketplace`) scans all `plugins/*/plugin.json` files and regenerates `marketplace.json` with the current version from each plugin's manifest. This runs as a workflow triggered whenever `.release-please-manifest.json` changes (i.e. after a release PR is merged), ensuring the marketplace always reflects the latest published versions.
+1. A **custom GitHub Action** (`generate-marketplace`) scans all `plugins/*/plugin.json` files and regenerates `marketplace.json` with the current version from each plugin's manifest. This runs as a workflow triggered whenever `.release-please-manifest.json` changes (i.e. after a release PR is merged), ensuring the marketplace always reflects the latest published versions.
 
-![image3](/images/creating-a-github-copilot-cli-plugin/image3.png)
+```mermaid
+flowchart LR
+    A[Merge to main] --> B[Release Please<br>creates release PR]
+    B --> C[Merge release PR]
+    C --> D["`Release Please bumps<br>$.version in plugin.json`"]
+    D --> E[Generate Marketplace<br>workflow triggered]
+    E --> F[marketplace.json<br>regenerated with<br>latest versions]
+```
 
 ## Quick Start
 

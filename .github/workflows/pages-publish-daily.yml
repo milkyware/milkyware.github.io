@@ -2,21 +2,26 @@ name: pages publish daily
 
 on:
   schedule:
-    - cron: '0 0 * * *'
-
+    - cron: "0 0 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+
+concurrency:
+  group: pages-publish
+  cancel-in-progress: false
 
 jobs:
   queue-build:
     runs-on: ubuntu-latest
     steps:
-      - name: Queue Pages Build
-        uses: fjogeleit/http-request-action@v1
-        with:
-          url: https://api.github.com/repos/milkyware/milkyware.github.io/pages/builds
-          method: POST
-          customHeaders: |
-            {
-              "Accept": "application/vnd.github.ant-man-preview+json", 
-              "Authorization": "token ${{secrets.PAGES_BUILD_TOKEN}}"
-            }
+      - name: Queue Pages build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "/repos/${GITHUB_REPOSITORY}/pages/builds"

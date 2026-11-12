@@ -1,0 +1,63 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommits", "schedule:weekly"],
+  "timezone": "Europe/London",
+  "osvVulnerabilityAlerts": true,
+  "dependencyDashboard": true,
+  "lockFileMaintenance": { "enabled": true },
+  "packageRules": [
+    {
+      "description": "github-pages pins the whole Jekyll toolchain, so bump it as one unit",
+      "matchManagers": ["bundler"],
+      "matchPackageNames": ["github-pages"],
+      "groupName": "github-pages / Jekyll toolchain"
+    },
+    {
+      "description": "These versions are dictated by the github-pages gem; only bump github-pages",
+      "matchManagers": ["bundler"],
+      "matchPackageNames": [
+        "jekyll",
+        "jekyll-feed",
+        "jekyll-gist",
+        "jekyll-include-cache",
+        "jekyll-paginate",
+        "jekyll-seo-tag",
+        "jekyll-sitemap",
+        "jemoji",
+        "kramdown",
+        "kramdown-parser-gfm",
+        "liquid",
+        "rouge"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "GitHub Pages builds with Jekyll 3.10, never move to Jekyll 4",
+      "matchManagers": ["bundler"],
+      "matchPackageNames": ["jekyll"],
+      "allowedVersions": "<4"
+    },
+    {
+      "description": "Stay on the Ruby 3.3 image variant until GitHub Pages upgrades Ruby",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["mcr.microsoft.com/devcontainers/jekyll"],
+      "allowedVersions": "/-3\\.3-bookworm$/"
+    },
+    {
+      "description": "Dev container image and features move together",
+      "matchManagers": ["devcontainer"],
+      "groupName": "devcontainer"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^_config\\.yml$/"],
+      "matchStrings": [
+        "remote_theme:\\s*[\"']?mmistakes/minimal-mistakes@(?<currentValue>[^\\s\"']+)[\"']?"
+      ],
+      "depNameTemplate": "mmistakes/minimal-mistakes",
+      "datasourceTemplate": "github-tags"
+    }
+  ]
+}

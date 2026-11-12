@@ -1,4 +1,4 @@
 #!/bin/sh
 
-# Trust repo
-git config --global --add safe.directory /workspaces/milkyware.github.io
+# Trust the mounted workspace regardless of repository name.
+git config --global --add safe.directory "$(pwd)"

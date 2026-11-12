@@ -1,0 +1,16 @@
+---
+# Trivy configuration. Super-linter reads this via LINTER_RULES_PATH and
+# TRIVY_CONFIG_FILE.
+exit-code: 1
+exit-on-eol: 2
+scan:
+  disable-telemetry: true
+  scanners:
+    - vuln
+    - misconfig
+    - secret
+  # Local tool caches and Jekyll's build output are not part of the repository,
+  # so they are absent from a CI checkout and must not be scanned locally.
+  skip-dirs:
+    - .ruby-lsp
+    - _site

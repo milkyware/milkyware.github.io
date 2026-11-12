@@ -1,0 +1,60 @@
+name: super linter
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
+jobs:
+  lint:
+    if: ${{ !startsWith(github.head_ref, 'renovate/') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Run Super Linter
+        uses: super-linter/super-linter@2da136927bd4a73596db63044b504547c62cb854  # v9.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINTER_RULES_PATH: .
+          MARKDOWN_CONFIG_FILE: .markdownlint.yml
+          TRIVY_CONFIG_FILE: trivy.yaml
+          # Lint the whole codebase on push and dispatch, only the diff on PRs.
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name != 'pull_request' }}
+          # No Biome toolchain here, so skip its formatter.
+          VALIDATE_BIOME_FORMAT: false
+          # No JavaScript project to lint, and it would parse vendored assets.
+          VALIDATE_BIOME_LINT: false
+          # No CSS source: the theme supplies its own stylesheet.
+          VALIDATE_CSS_PRETTIER: false
+          # No standalone HTML; index.html is Jekyll front matter only.
+          VALIDATE_HTML: false
+          # No Prettier toolchain here.
+          VALIDATE_HTML_PRETTIER: false
+          # No Prettier toolchain; assets/js is Liquid-templated, not plain JS.
+          VALIDATE_JAVASCRIPT_PRETTIER: false
+          # Copy/paste detection adds noise to a prose repository.
+          VALIDATE_JSCPD: false
+          # No Prettier toolchain here.
+          VALIDATE_JSON_PRETTIER: false
+          # Prettier would reflow the prose of every published post.
+          VALIDATE_MARKDOWN_PRETTIER: false
+          # Terminology rules prefer "repository" over "repo" and "Markdown"
+          # over "markdown" across 34 published posts: an editorial choice.
+          VALIDATE_NATURAL_LANGUAGE: false
+          # Formatting only; shellcheck (VALIDATE_BASH) still runs.
+          VALIDATE_SHELL_SHFMT: false
+          # Prettier would rewrite Jekyll configuration and data files.
+          VALIDATE_YAML_PRETTIER: false
+          # devcontainer.json and .vscode/*.json are JSONC (comments are valid
+          # there) and mermaid.js carries Liquid front matter, so none of them
+          # parse as plain JSON/JavaScript. .ruby-lsp is an untracked cache.
+          FILTER_REGEX_EXCLUDE: 'devcontainer\.json$|mermaid\.js$|\.vscode/|\.ruby-lsp/'

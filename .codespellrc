@@ -1,0 +1,12 @@
+[codespell]
+# Image assets are skipped: drawio and SVG files embed compressed or encoded
+# payloads that codespell reads as words. The leading */ is required because
+# codespell prefixes paths with ./ (and super-linter uses absolute paths).
+skip = */images/*
+
+# Identifiers and package names, not misspellings:
+#   rouge     - the Jekyll syntax highlighter gem
+#   techer    - the VS Code extension publisher `techer.open-in-browser`
+#   externaly - an identifier in a C# sample
+#   elease    - matches inside the "[Rr]elease" regular expression in a post
+ignore-words-list = rouge,techer,externaly,elease

@@ -8,9 +8,13 @@
     "helpers:pinGitHubActionDigestsToSemver",
     "security:openssf-scorecard"
   ],
+  "automergeStrategy": "squash",
+  "minimumReleaseAge": "14 days",
   "osvVulnerabilityAlerts": true,
-  "dependencyDashboard": true,
   "lockFileMaintenance": { "enabled": true },
+  "vulnerabilityAlerts": {
+    "addLabels": ["security"]
+  },
   "packageRules": [
     {
       "description": "github-pages pins the whole Jekyll toolchain, so bump it as one unit",

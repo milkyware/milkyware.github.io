@@ -1,0 +1,12 @@
+extends: default
+
+rules:
+  # Workflows, Jekyll config and data files conventionally start without a
+  # document marker, and adding one would churn every YAML file.
+  document-start: disable
+  # `on:` is a GitHub Actions keyword; YAML 1.1 reads the bare key as a boolean.
+  truthy:
+    check-keys: false
+  # Long URLs and shell one-liners in workflows exceed the default 80 columns.
+  line-length:
+    max: 120

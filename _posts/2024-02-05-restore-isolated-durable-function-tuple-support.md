@@ -24,7 +24,7 @@ In the above example, the two strings of **"Hello" and "World"** are used to cre
 
 ## Sample Project
 
-Below going any further, **[here](https://github.com/milkyware/blog-refresh-devops-service-connections)** is a sample project of a .NET 8 isolated durable function using Tuples.
+Before going any further, **[this sample project](https://github.com/milkyware/blog-refresh-devops-service-connections)** is a .NET 8 isolated durable function using Tuples.
 
 ## Using Tuples in Durable Functions
 

@@ -1,0 +1,4 @@
+# rubyzip cannot be updated while jekyll-remote-theme requires rubyzip < 3.0.
+# Exposure is limited to theme archives fetched from GitHub over HTTPS at build
+# time. Remove this entry when jekyll-remote-theme allows rubyzip 3.x.
+CVE-2026-85396

@@ -141,7 +141,7 @@ public class WcfService : IWcfService
   }
 ```
 
-To register the generated **ServiceContract** and implemented service, the simplest way is to follow the **[walkthrough provided by CoreWCF](#what-is-core-wcf)** and replace the sample ServiceContract and implementation.
+To register the generated **ServiceContract** and implemented service, the simplest way is to follow the **[walkthrough provided by CoreWCF](#what-is-corewcf)** and replace the sample ServiceContract and implementation.
 
 ![image2](/images/recreating-wcf-service-in-dotnet-core-from-wsdl/image2.png)
 

@@ -77,7 +77,7 @@ The **YAML frontmatter** gives the skill its name and description (visible in th
 
 For my documentation prompts, I've designed them to function as **smart document templates** — they use a gated question sequence where the AI asks questions section-by-section, waits for the user's response before proceeding, and only generates the final output once all required information has been gathered. This prevents hallucination and ensures the output is grounded in real context, but that's a design choice specific to these prompts rather than a constraint of the skill format itself.
 
-```
+```text
 plugins/architecture-docs/
 ├── plugin.json
 ├── README.md

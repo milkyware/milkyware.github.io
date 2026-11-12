@@ -1,0 +1,10 @@
+# markdownlint configuration. Super-linter reads this via LINTER_RULES_PATH=.
+default: true
+
+# Posts are prose with long links, code samples and tables. Wrapping them to
+# 80 columns would churn published articles for no reader benefit.
+MD013: false
+
+# Inline HTML is used deliberately in posts: sized images, callouts and
+# <details> blocks that Markdown cannot express.
+MD033: false

@@ -145,6 +145,19 @@ Keep a running count as you draft and report it at Gate 3.
   copied.
 - Evidence-heavy: complete runnable `yaml/json/cs/powershell/bash` blocks, real
   command output, links to official docs and sample repos.
+- Repo cards: where the post is built on a repository, show it once as a GitHub
+  card rather than a bare link, introduced by one short sentence and normally
+  placed just before `## Wrapping Up`:
+
+  ```markdown
+  I've prepared a small sample repo with my setup.
+
+  [![owner/repo - GitHub](https://gh-card.dev/repos/owner/repo.svg)](https://github.com/owner/repo)
+  ```
+
+  Use the plain `.svg` form; do not add `?fullname=` (an inconsistency in older
+  posts). One card per repository, not one per section. Only for public repos,
+  and confirm the repository exists before you render its card.
 - Jekyll safety: wrap Liquid-sensitive YAML with `<!-- {% raw %} -->` /
   `<!-- {% endraw %} -->`.
 - Cross-post links must use the `{% post_url YYYY-MM-DD-slug %}` tag, for example

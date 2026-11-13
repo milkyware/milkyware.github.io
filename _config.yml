@@ -130,6 +130,7 @@ exclude:
   - .sass-cache
   - /.vscode
   - /images/diagrams.drawio
+  - AGENTS.md
   - assets/js/_main.js
   - assets/js/plugins
   - assets/js/vendor

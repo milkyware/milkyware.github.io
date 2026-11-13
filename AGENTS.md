@@ -8,8 +8,9 @@ This is a GitHub Pages blog using Jekyll with the Minimal Mistakes theme.
 - In progress posts should be created in the `_drafts/` folder
 - Each post uses Jekyll frontmatter with:
   - `title`: Post title
-  - `category`: Optional category (e.g., .NET, Automation)
-  - `tags`: List of relevant tags (preferred over category)
+  - `tags`: List of relevant tags
+- Do not add a `category` to new posts; tags are used for classification instead
+- Link between posts with the `{% post_url YYYY-MM-DD-slug %}` tag, never a hard-coded path
 - Writing style is technical and instructional with code samples
 - Posts often include personal experience and lessons learned
 - Structure typically: problem statement → solution approach → code examples → conclusion
@@ -34,7 +35,21 @@ This is a GitHub Pages blog using Jekyll with the Minimal Mistakes theme.
 2. Include required frontmatter (title, optional category/tags)
 3. Write content in markdown format
 4. Use standard markdown syntax for formatting
-5. Once complete, move from `_drafts/` to `_posts/`
+5. Once the draft is reviewed and approved by the author, move from `_drafts/` to `_posts/`
+
+Drafts are never published straight to `_posts/`. Promotion happens only after the
+author has read the draft and approved it.
+
+## Agents
+
+Two OpenCode agents support this workflow, defined under `.opencode/agents/`:
+
+- `blogger` (primary) - researches, outlines and drafts posts in `_drafts/` only. It
+  cannot write to `_posts/` or run shell commands.
+- `proofreader` (subagent) - read-only adversarial review of a draft against sources,
+  house style, Jekyll validity and lint rules.
+
+Promotion to `_posts/` is a deliberate manual step performed by the author.
 
 ## Repository Structure
 

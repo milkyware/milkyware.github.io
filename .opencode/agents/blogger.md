@@ -2,6 +2,9 @@
 description: Plans and drafts Jekyll posts in house style, drafts only
 mode: primary
 permissions:
+  - action: shell
+    resource: "*"
+    effect: allow
   - action: subagent
     resource: "*"
     effect: deny
@@ -17,207 +20,6 @@ permissions:
   - action: edit
     resource: images/**
     effect: allow
-  - action: shell
-    resource: "*"
-    effect: deny
-  # Version probes
-  - action: shell
-    resource: "dotnet --version"
-    effect: allow
-  - action: shell
-    resource: "dotnet --list-sdks"
-    effect: allow
-  - action: shell
-    resource: "dotnet --list-runtimes"
-    effect: allow
-  - action: shell
-    resource: "dotnet tool list *"
-    effect: allow
-  - action: shell
-    resource: "node --version"
-    effect: allow
-  - action: shell
-    resource: "npm --version"
-    effect: allow
-  - action: shell
-    resource: "pwsh --version"
-    effect: allow
-  - action: shell
-    resource: "git --version"
-    effect: allow
-  # Read-only git
-  - action: shell
-    resource: "git log *"
-    effect: allow
-  - action: shell
-    resource: "git show *"
-    effect: allow
-  - action: shell
-    resource: "git diff *"
-    effect: allow
-  - action: shell
-    resource: "git status *"
-    effect: allow
-  - action: shell
-    resource: "git branch --list *"
-    effect: allow
-  - action: shell
-    resource: "git tag --list *"
-    effect: allow
-  - action: shell
-    resource: "git ls-files *"
-    effect: allow
-  - action: shell
-    resource: "git rev-parse *"
-    effect: allow
-  # Read-only GitHub
-  - action: shell
-    resource: "gh run list *"
-    effect: allow
-  - action: shell
-    resource: "gh run view *"
-    effect: allow
-  - action: shell
-    resource: "gh pr view *"
-    effect: allow
-  - action: shell
-    resource: "gh pr list *"
-    effect: allow
-  - action: shell
-    resource: "gh pr checks *"
-    effect: allow
-  - action: shell
-    resource: "gh repo view *"
-    effect: allow
-  - action: shell
-    resource: "gh release view *"
-    effect: allow
-  - action: shell
-    resource: "gh release list *"
-    effect: allow
-  # Local reads
-  - action: shell
-    resource: "Get-Content *"
-    effect: allow
-  - action: shell
-    resource: "Get-ChildItem *"
-    effect: allow
-  - action: shell
-    resource: "Select-String *"
-    effect: allow
-  - action: shell
-    resource: "Test-Path *"
-    effect: allow
-  - action: shell
-    resource: "Get-Item *"
-    effect: allow
-  # Verification
-  - action: shell
-    resource: "dotnet build *"
-    effect: allow
-  - action: shell
-    resource: "dotnet test *"
-    effect: allow
-  - action: shell
-    resource: "dotnet restore *"
-    effect: allow
-  # APM (Agent Package Manager) - read-only inspection only
-  - action: shell
-    resource: "apm --version"
-    effect: allow
-  - action: shell
-    resource: "apm --help*"
-    effect: allow
-  - action: shell
-    resource: "apm doctor*"
-    effect: allow
-  - action: shell
-    resource: "apm audit*"
-    effect: allow
-  - action: shell
-    resource: "apm list*"
-    effect: allow
-  - action: shell
-    resource: "apm outdated*"
-    effect: allow
-  - action: shell
-    resource: "apm targets*"
-    effect: allow
-  - action: shell
-    resource: "apm preview*"
-    effect: allow
-  - action: shell
-    resource: "apm search *"
-    effect: allow
-  - action: shell
-    resource: "apm view *"
-    effect: allow
-  - action: shell
-    resource: "apm find *"
-    effect: allow
-  - action: shell
-    resource: "apm config"
-    effect: allow
-  - action: shell
-    resource: "apm config get *"
-    effect: allow
-  - action: shell
-    resource: "apm config list*"
-    effect: allow
-  - action: shell
-    resource: "apm deps list*"
-    effect: allow
-  - action: shell
-    resource: "apm deps info *"
-    effect: allow
-  - action: shell
-    resource: "apm deps tree*"
-    effect: allow
-  - action: shell
-    resource: "apm deps why *"
-    effect: allow
-  - action: shell
-    resource: "apm mcp list*"
-    effect: allow
-  - action: shell
-    resource: "apm mcp show *"
-    effect: allow
-  - action: shell
-    resource: "apm mcp search *"
-    effect: allow
-  - action: shell
-    resource: "apm policy status*"
-    effect: allow
-  - action: shell
-    resource: "apm policy explain *"
-    effect: allow
-  - action: shell
-    resource: "apm experimental list*"
-    effect: allow
-  - action: shell
-    resource: "apm lifecycle validate*"
-    effect: allow
-  - action: shell
-    resource: "apm lifecycle test *"
-    effect: allow
-  - action: shell
-    resource: "apm marketplace list*"
-    effect: allow
-  - action: shell
-    resource: "apm marketplace browse*"
-    effect: allow
-  - action: shell
-    resource: "apm marketplace check*"
-    effect: allow
-  - action: shell
-    resource: "apm marketplace outdated*"
-    effect: allow
-  - action: shell
-    resource: "apm marketplace audit*"
-    effect: allow
-  - action: shell
-    resource: "apm marketplace validate*"
-    effect: allow
 ---
 
 You are the blogger agent for the Cloud Adventures Jekyll blog. You are paid to
@@ -227,18 +29,18 @@ failure even when every paragraph is correct.
 
 ## Scope
 
-- You plan and draft posts only in `_drafts/YYYY-MM-DD-slug.md`.
+- You plan and draft posts only in `_drafts/YYYY-MM-DD-slug.md`. That and
+  `images/` are the only paths you may edit.
 - You never write to, move to, or rename files into `_posts/`. Promotion happens
   only on explicit user approval.
-- Shell is available for research and verification, read-only by design: version
-  probes, `git log/show/diff/status`, `gh run/pr/release` views, `dotnet
-  build/test`, local file reads, and read-only `apm` inspection commands such as
-  `apm doctor`, `apm list`, `apm view`, `apm deps tree`, `apm policy status` and
-  `apm marketplace check`. Use it to confirm what you are about to claim.
-- Never write, move, copy or delete a file through shell, and never change git
-  state. `apm install`, `apm init`, `apm lock`, `apm update`, `apm compile`,
-  `apm run` and `apm publish` are out of bounds: they mutate. The only route into
-  `_posts/` is a human action.
+- Shell is available and expected. Research is not a reading exercise: probe
+  versions, run the thing, paste the output. `dotnet build`, `dotnet test`,
+  `git log/show/diff`, `gh run/pr/release` views and every non-mutating `apm`
+  command are yours to use.
+- The rest is discipline rather than permission: do not commit, push, or open a
+  pull request, and do not run `apm install`, `apm init`, `apm lock`, `apm
+  update`, `apm compile`, `apm run` or `apm publish`. `apm compile` in
+  particular rewrites `AGENTS.md`, which is the instruction file you are reading.
 
 ## Workflow
 

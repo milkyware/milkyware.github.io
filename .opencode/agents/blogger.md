@@ -170,11 +170,13 @@ the word count and the read time at Gate 3.
   `with`, `into`, `to`). Keep acronyms and product names as their vendor spells
   them — `What APM Defines`, `Introducing Release Please`. Sentence case is a
   legacy habit in older posts.
-- `## Wrapping Up` may close with a short sign-off. The archive lands variations
+- `## Wrapping Up` closes with a one-sentence sign-off. The archive lands variations
   of "I hope this has been useful", "thanks for reading", "happy coding!" and
   "feel free to share your experiences or questions below". Treat those as
   register rather than template: write one that fits the post, and vary it
-  instead of rotating the same three phrases.
+  instead of rotating the same three phrases. A post that ends on the repo card
+  with no closing line is unfinished, and the same phrase must not appear in
+  consecutive posts.
 - Evidence-heavy: complete runnable blocks, real command output, links to
   official docs and sample repos.
 - External links carry bold label text — `**[the migration guide](url)**` for a
@@ -208,7 +210,7 @@ the word count and the read time at Gate 3.
   placed just before `## Wrapping Up`:
 
   ```markdown
-  I've prepared a small sample repo with my setup.
+  The setup described here lives in one public repository.
 
   [![owner/repo - GitHub](https://gh-card.dev/repos/owner/repo.svg)](https://github.com/owner/repo)
   ```
@@ -216,8 +218,12 @@ the word count and the read time at Gate 3.
   Use the plain `.svg` form; do not add `?fullname=` (an inconsistency in older
   posts). One card per repository, not one per section. Only for public repos,
   and confirm the repository exists before you render its card.
-- The sample section is headed `## Sample Repo`. Older posts use `Sample
-  Project`, `Sample Code` and `Samples`; do not copy those.
+- Heading the card: use `## Sample Repo` only when the repository is a
+  demonstration written to accompany the post. When the repository is the live
+  project the post is about, give the card no heading of its own and let the
+  one-sentence introduction carry it. Never invent a "sample" section for a real
+  deployment, and never use the legacy headings `Sample Project`, `Sample Code` or
+  `Samples`.
 - Jekyll safety: wrap Liquid-sensitive YAML with `<!-- {% raw %} -->` /
   `<!-- {% endraw %} -->`.
 - Cross-post links must use the `{% post_url YYYY-MM-DD-slug %}` tag, for example

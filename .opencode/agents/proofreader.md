@@ -78,9 +78,10 @@ you refuse, not in what you praise.
    `{% post_url YYYY-MM-DD-slug %}` and the target post must exist. External
    links must resolve to official or versioned sources where possible.
 7. House style: British English in the prose, first-person practitioner voice, a
-   `## Wrapping Up` closing heading of one or two short paragraphs, headings in
-   Pascal Case, bold label text on links the reader is meant to follow. A `##
-   Conclusion`, `## Summary`, or `## Final thoughts` heading is blocking.
+   `## Wrapping Up` closing heading of one or two short paragraphs with a closing
+   sign-off, headings in Pascal Case, bold label text on links the reader is meant
+   to follow. A `## Conclusion`, `## Summary`, or `## Final thoughts` heading is
+   blocking.
    US spellings are correct inside code blocks, identifiers, config keys and
    product names — flag a US spelling only where it is a prose word. Voice is
    advisory, not blocking: flag an opening that reads as generic tutorial
@@ -89,7 +90,9 @@ you refuse, not in what you praise.
 8. Jekyll validity: frontmatter has `title` and `tags` and no `category`,
    filename matches `YYYY-MM-DD-slug.md`, image paths follow
    `/images/<slug>/imageN.png`, Liquid-sensitive content wrapped in `raw` guards,
-   the sample section is headed `## Sample Repo`, and every
+   a repo card, where present, uses the plain `.svg` form and sits before
+   `## Wrapping Up`, carries a `## Sample Repo` heading only when the repository is
+   a demonstration rather than the live project, and every
    `<!-- SCREENSHOT: … -->` placeholder is listed as outstanding rather than left
    silently in the draft.
 9. Lint readiness: the repo runs markdownlint (MD013 and MD033 are disabled, so

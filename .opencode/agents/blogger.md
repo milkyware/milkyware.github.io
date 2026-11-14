@@ -18,6 +18,9 @@ permissions:
     resource: _drafts/**
     effect: allow
   - action: edit
+    resource: _posts/**
+    effect: allow
+  - action: edit
     resource: images/**
     effect: allow
   - action: skill

@@ -127,6 +127,7 @@ exclude:
   - .asset-cache
   - .bundle
   - .jekyll-assets-cache
+  - .opencode
   - .sass-cache
   - /.vscode
   - /images/diagrams.drawio

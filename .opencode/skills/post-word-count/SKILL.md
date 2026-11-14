@@ -1,7 +1,9 @@
 ---
-name: Post Word Count
+name: post-word-count
 description: Measure a Jekyll post's word count and read time the way the Minimal Mistakes theme does, and judge the result against the house length budget
 ---
+
+# Post Word Count Skill
 
 Count length the way the published site will, not the way an editor reports it.
 The two disagree by enough to matter at the ceiling.
